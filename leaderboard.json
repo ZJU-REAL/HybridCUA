@@ -115,6 +115,45 @@
     ]
   },
 
+  "cases": [
+    {
+      "dir": "vim_linenumber",
+      "title": "Web search to persistent Vim configuration",
+      "pattern": "Context handoff",
+      "flow": "GUI information gathering → CLI configuration",
+      "task": "Search the Internet for a tutorial on absolute line numbers in Vim and make them the default for the local editor.",
+      "task_id": "b337d106-053f-4d37-8da0-7f9c4043a66b",
+      "gui_note": "Steps 1–5 search the web and inspect the displayed instructions, which identify <code>set number</code> and the <code>.vimrc</code> configuration file.",
+      "cli_note": "Steps 6–7 append the setting to <code>~/.vimrc</code> and read back its contents.",
+      "analysis": "The handoff connects an instruction observed in the browser to a concrete local configuration change. GUI browsing supplies the requested online guidance, while direct file editing makes the setting persistent rather than enabling it only for one Vim session. The recorded read-back confirms <code>set number</code>.",
+      "steps": ["GUI", "GUI", "GUI", "GUI", "GUI", "CLI", "CLI", "Control"]
+    },
+    {
+      "dir": "vlc_maxvolume",
+      "title": "Adaptive fallback from a preferences dialog to its config file",
+      "pattern": "Adaptive interface fallback",
+      "flow": "GUI exploration → CLI configuration repair",
+      "task": "Raise VLC's maximum volume from 125% to 200%.",
+      "task_id": "VLC maximum volume",
+      "gui_note": "Steps 1–6 navigate VLC's preferences and audio settings, including a wait; this sequence does not establish the requested maximum.",
+      "cli_note": "Step 7 locates <code>vlcrc</code> and finds <code>#qt-max-volume=125</code>; step 8 replaces it with <code>qt-max-volume=200</code> and checks the saved value.",
+      "analysis": "Instead of continuing the same GUI search, the agent changes the level of interaction from a preferences dialog to its backing configuration file. This is a fallback from an unproductive route, not evidence that VLC's GUI cannot support the setting. The CLI completes the change and exposes an explicit value for verification.",
+      "steps": ["GUI", "GUI", "GUI", "GUI", "Control", "GUI", "CLI", "CLI", "Control"]
+    },
+    {
+      "dir": "terminal_screenshot",
+      "title": "CLI setup, GUI interaction, and screenshot verification",
+      "pattern": "Execution–verification loop",
+      "flow": "CLI setup → GUI execution → CLI capture and checks",
+      "task": "Run ls in /home/user for a Linux tutorial and save a screenshot of the terminal as ls.png on the Desktop.",
+      "task_id": "02ce9a50-7af2-47ed-8596-af0c230501f8",
+      "gui_note": "Step 3 focuses the opened terminal, types <code>ls /home/user</code>, and presses Enter so the output appears in the window to be captured.",
+      "cli_note": "Steps 1–2 inspect the environment and open the terminal; steps 4–7 save its screenshot, inspect the PNG, and open it in an image viewer.",
+      "analysis": "A command result in the execution channel alone would not provide the requested terminal image. CLI setup creates the window, GUI input produces the visible content, and CLI capture turns that state into a saved artifact — the final observation displays the image opened by step 7, closing the loop from file checks back to visual inspection. Capture itself is a CLI action, not a GUI action.",
+      "steps": ["CLI", "CLI", "GUI", "CLI", "CLI", "CLI", "CLI", "Control"]
+    }
+  ],
+
   "corpus": {
     "caption": "HybridCUA-8K: 5,023 supervised trajectories across 11 application domains, plus 3,000 verified RLVR tasks.",
     "modality": [
