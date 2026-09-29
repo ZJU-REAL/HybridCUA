@@ -4,366 +4,705 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HybridCUA: Online RL for Hybrid Computer-Use Agents</title>
-    <meta name="description" content="HybridCUA: Online RL for Hybrid Computer-Use Agents">
-    <meta name="keywords" content="Computer Use Agent, GUI Agent, Online RL, GRPO, RLVR">
+    <title>HybridCUA: Learning to Orchestrate GUI and CLI for Computer-Use Agents</title>
+    <meta name="description"
+        content="HybridCUA teaches computer-use agents when and how to combine GUI actions with the command line. HybridCUA-9B reaches 53.6% on OSWorld, +14.8 points over its base model.">
+    <meta name="keywords"
+        content="Computer Use Agent, GUI Agent, CLI, Shell, OSWorld, WindowsAgentArena, Online RL, GRPO, RLVR">
 
-    <!-- Bulma CSS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Academicons (arXiv / HuggingFace badges) -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Noto+Serif:ital,wght@0,400;0,600;0,700;1,400&display=swap"
-        rel="stylesheet">
-    <!-- Highlight.js -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-    <!-- Custom CSS -->
+    <meta property="og:title" content="HybridCUA: Learning to Orchestrate GUI and CLI for Computer-Use Agents">
+    <meta property="og:description"
+        content="A data and training framework for reliable GUI–CLI orchestration. HybridCUA-9B: 53.6% on OSWorld (+14.8).">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="assets/teaser.png">
+    <meta name="twitter:card" content="summary_large_image">
+
     <link rel="stylesheet" href="style.css">
 </head>
 
-<body>
+<body data-palette="#2a78d6,#eb6834,#1baf7a">
+
     <!-- ==================== NAV ==================== -->
-    <nav class="navbar is-fixed-top" role="navigation" aria-label="main navigation">
-        <div class="navbar-brand">
-            <a class="navbar-item navbar-title" href="#">
-                <strong>HybridCUA</strong>
-            </a>
-            <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" id="navbar-burger">
-                <span aria-hidden="true"></span>
-                <span aria-hidden="true"></span>
-                <span aria-hidden="true"></span>
-            </a>
-        </div>
-        <div class="navbar-menu" id="navbar-menu">
-            <div class="navbar-end">
-                <a class="navbar-item" href="#overview">Overview</a>
-                <a class="navbar-item" href="#method">Method</a>
-                <a class="navbar-item" href="#leaderboard">Leaderboard</a>
-                <a class="navbar-item" href="#getting-started">Getting Started</a>
-                <a class="navbar-item" href="#citation">Citation</a>
+    <nav class="nav" aria-label="Section navigation">
+        <div class="nav-inner">
+            <a class="nav-brand" href="#top">HybridCUA</a>
+            <button class="nav-toggle" id="nav-toggle" aria-expanded="false" aria-controls="nav-links"
+                aria-label="Toggle navigation">
+                <span></span><span></span><span></span>
+            </button>
+            <div class="nav-links" id="nav-links">
+                <a href="#abstract">Abstract</a>
+                <a href="#problem">Problem</a>
+                <a href="#method">Method</a>
+                <a href="#data">Data</a>
+                <a href="#results">Results</a>
+                <a href="#analysis">Analysis</a>
+                <a href="#cases">Cases</a>
+                <a href="#code">Code</a>
+                <a href="#citation">BibTeX</a>
             </div>
+            <button class="theme-toggle" id="theme-toggle" aria-label="Switch colour theme" title="Switch theme">
+                <svg class="icon-sun" viewBox="0 0 24 24" aria-hidden="true">
+                    <circle cx="12" cy="12" r="4.2" />
+                    <g stroke-linecap="round">
+                        <path d="M12 2.6v2.2M12 19.2v2.2M2.6 12h2.2M19.2 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M18.7 5.3l-1.6 1.6M6.9 17.1l-1.6 1.6" />
+                    </g>
+                </svg>
+                <svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M20 14.2A8.4 8.4 0 1 1 9.8 4a6.9 6.9 0 0 0 10.2 10.2z" />
+                </svg>
+            </button>
         </div>
     </nav>
 
     <!-- ==================== HERO ==================== -->
-    <section class="section hero-section">
-        <div class="container is-max-desktop">
-            <h1 class="title is-2 has-text-centered publication-title">
-                HybridCUA: Online RL for Hybrid Computer-Use Agents
+    <header class="hero" id="top">
+        <div class="wrap">
+            <p class="venue">Preprint · 2026</p>
+            <h1 class="hero-title">
+                HybridCUA: Learning to Orchestrate <span class="nowrap">GUI and CLI</span>
+                for Computer-Use Agents
             </h1>
 
-            <!-- TODO: authors + affiliations -->
-            <p class="has-text-centered authors">
-                <span class="author-block">Author One<sup>1</sup>,</span>
-                <span class="author-block">Author Two<sup>1,2</sup>,</span>
-                <span class="author-block">Author Three<sup>2</sup></span>
+            <p class="authors">
+                <span class="author">Tongbo Chen<sup>1&#42;</sup></span><span class="sep">,</span>
+                <span class="author">Junbo Niu<sup>2&#42;</sup></span><span class="sep">,</span>
+                <span class="author">Zhengxi Lu<sup>1</sup></span><span class="sep">,</span>
+                <span class="author">Niu Lian<sup>3</sup></span><span class="sep">,</span>
+                <span class="author">Fei Tang<sup>1</sup></span><span class="sep">,</span>
+                <span class="author">Yuchen Yan<sup>1</sup></span><span class="sep">,</span>
+                <span class="author">Yike Hong<sup>1</sup></span><span class="sep">,</span>
+                <span class="author">Yong Du<sup>1</sup></span><span class="sep">,</span>
+                <span class="author">Yizhou Liu<sup>1</sup></span><span class="sep">,</span>
+                <span class="author">Bofan Chen<sup>1</sup></span><span class="sep">,</span>
+                <span class="author">Yongliang Shen<sup>1&dagger;</sup></span>
             </p>
-            <p class="has-text-centered affiliations">
-                <sup>1</sup>Affiliation One &nbsp;&nbsp; <sup>2</sup>Affiliation Two
+            <p class="affil">
+                <sup>1</sup>Zhejiang University &nbsp;·&nbsp;
+                <sup>2</sup>Peking University &nbsp;·&nbsp;
+                <sup>3</sup>Tsinghua University
             </p>
+            <p class="affil-note"><sup>&#42;</sup>Equal contribution &nbsp;·&nbsp; <sup>&dagger;</sup>Corresponding author</p>
 
-            <!-- Link badges -->
-            <div class="has-text-centered link-buttons">
-                <a class="button is-dark is-rounded" href="https://arxiv.org/abs/TODO">
-                    <span class="icon"><i class="ai ai-arxiv"></i></span>
+            <div class="links">
+                <a class="btn btn-primary" href="https://arxiv.org/abs/2604.00000" rel="noopener">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3h9l5 5v13H5z" /><path d="M14 3v5h5" /><path d="M8.5 13h7M8.5 16.5h5" /></svg>
                     <span>arXiv</span>
                 </a>
-                <a class="button is-dark is-rounded" href="TODO">
-                    <span class="icon"><i class="fas fa-file-pdf"></i></span>
-                    <span>Paper</span>
-                </a>
-                <a class="button is-dark is-rounded" href="https://github.com/TODO/HybridCUA">
-                    <span class="icon"><i class="fab fa-github"></i></span>
+                <a class="btn" href="https://github.com/ZJU-REAL/HybridCUA" rel="noopener">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.2a9.8 9.8 0 0 0-3.1 19.1c.5.1.7-.2.7-.5v-1.9c-2.7.6-3.3-1.3-3.3-1.3-.4-1.1-1.1-1.4-1.1-1.4-.9-.6.1-.6.1-.6 1 .1 1.5 1 1.5 1 .9 1.5 2.3 1.1 2.9.8.1-.6.3-1.1.6-1.4-2.2-.2-4.5-1.1-4.5-4.9 0-1.1.4-2 1-2.7-.1-.3-.4-1.3.1-2.7 0 0 .8-.3 2.7 1a9.3 9.3 0 0 1 5 0c1.9-1.3 2.7-1 2.7-1 .5 1.4.2 2.4.1 2.7.6.7 1 1.6 1 2.7 0 3.8-2.3 4.7-4.5 4.9.4.4.7 1 .7 2v3c0 .3.2.6.7.5A9.8 9.8 0 0 0 12 2.2z" /></svg>
                     <span>Code</span>
                 </a>
-                <a class="button is-dark is-rounded" href="https://huggingface.co/TODO">
-                    <span class="icon"><i class="fas fa-database"></i></span>
+                <a class="btn" href="https://huggingface.co/collections/077lukamagic/hybridcua" rel="noopener">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M8.6 10.3h.01M15.4 10.3h.01" stroke-width="2.4" /><path d="M8.4 14.6a4.4 4.4 0 0 0 7.2 0" /></svg>
                     <span>Data &amp; Models</span>
+                </a>
+                <a class="btn" href="https://zjureal.com/HybridCUA/" rel="noopener">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M3.2 9.2h17.6M3.2 14.8h17.6" /><path d="M12 3.1c-2.6 2.4-4 5.5-4 8.9s1.4 6.5 4 8.9c2.6-2.4 4-5.5 4-8.9s-1.4-6.5-4-8.9z" /></svg>
+                    <span>Homepage</span>
                 </a>
             </div>
 
-            <!-- Teaser figure -->
-            <figure class="image teaser">
-                <img src="assets/teaser.png" alt="HybridCUA overview">
+            <!-- Headline numbers -->
+            <div class="kpis" id="kpis" aria-label="Headline results"></div>
+
+            <figure class="fig fig-teaser">
+                <img src="assets/teaser.png" width="1800" height="985"
+                    alt="Three panels contrasting GUI-only actions (17 steps, wrong result), GUI–tool interleaved actions (app-specific, costly to build), and GUI–CLI interleaved actions, which click once and then use two bash commands to compute a profit column correctly.">
                 <figcaption>
-                    <b>Figure 1.</b> TODO: one-sentence teaser caption.
+                    <b>Figure 1.</b> GUI-only agents spend long click-and-type sequences on work a command can do in one
+                    step; GUI–tool agents are fast but need a per-application integration. The GUI–CLI hybrid keeps the
+                    generality of the screen and borrows the efficiency of code.
                 </figcaption>
             </figure>
         </div>
-    </section>
+    </header>
 
-    <!-- ==================== ABSTRACT / OVERVIEW ==================== -->
-    <section class="section" id="overview">
-        <div class="container is-max-desktop">
-            <h2 class="title is-3 has-text-centered">Abstract</h2>
-            <div class="content abstract">
-                <p>
-                    TODO: abstract. We train multimodal computer-use agents with online RL (GRPO)
-                    against live desktop environments, combining GUI actions with CLI tool use.
+    <main>
+        <!-- ==================== ABSTRACT ==================== -->
+        <section class="section" id="abstract">
+            <div class="wrap wrap-narrow">
+                <h2>Abstract</h2>
+                <div class="prose abstract">
+                    <p>
+                        Computer use agents (CUAs) have demonstrated strong capabilities in completing digital tasks.
+                        However, existing CUAs either rely solely on graphical user interface (GUI) interactions, which
+                        are often inefficient and error prone, or augment GUI interactions with application specific
+                        APIs or tools, which require substantial engineering effort and are difficult to scale across
+                        applications. We argue that the next generation of CUAs should combine GUI interactions with the
+                        command line interface (CLI), leveraging the generality of the GUI and the efficiency of shell
+                        commands. A critical challenge, however, is that current models do not know when or how to use
+                        the CLI during task execution. To address this challenge, we develop a data construction
+                        pipeline that produces three types of trajectories: GUI only, CLI only, and interleaved GUI and
+                        CLI trajectories. This pipeline results in <b>HybridCUA-8K</b>, containing 5K hybrid
+                        trajectories and 3K verified RLVR tasks. Building on these data, we propose a training framework
+                        with two stages: supervised fine tuning on the constructed trajectories, followed by
+                        reinforcement learning with our CLI aware rewards that encourages agents to use the CLI
+                        selectively and reliably. Experiments show that <b>HybridCUA-9B</b> achieves <b>53.6%</b>
+                        accuracy on OSWorld, improving over the base model by <b>14.8</b> percentage points, and improves
+                        performance on WindowsAgentArena by <b>4.0</b> percentage points. These results demonstrate the
+                        effectiveness and cross platform generalizability of the hybrid GUI and CLI paradigm for
+                        computer use agents.
+                    </p>
+                </div>
+
+                <h3 class="sub">Contributions</h3>
+                <ol class="contrib">
+                    <li>
+                        <h4>A scalable hybrid data pipeline</h4>
+                        <p>
+                            <b>HybridCUA-8K</b>: 5,000 GUI-only, CLI-only, and interleaved trajectories plus 3,000
+                            verified RLVR tasks, each labelled by whether CLI use offers a clear execution advantage.
+                        </p>
+                    </li>
+                    <li>
+                        <h4>Interface choice as a training signal</h4>
+                        <p>
+                            SFT on the trajectories, then RLVR with two CLI-aware rewards that separately target
+                            <i>routing</i> errors (choosing the wrong interface) and <i>execution</i> errors (issuing a
+                            command that fails).
+                        </p>
+                    </li>
+                    <li>
+                        <h4>A 9B model that gains from the shell</h4>
+                        <p>
+                            <b>HybridCUA-9B</b> reaches 53.6% on OSWorld, +14.8 points over its base model, and
+                            transfers to an MCP environment and to Windows. Trajectories, tasks, pipelines, and the
+                            model will be released.
+                        </p>
+                    </li>
+                </ol>
+            </div>
+        </section>
+
+        <!-- ==================== PROBLEM ==================== -->
+        <section class="section section-alt" id="problem">
+            <div class="wrap">
+                <h2>Access to a shell is not the bottleneck</h2>
+                <p class="lede wrap-narrow-inner">
+                    Handing a capable MLLM a shell does not help — it hurts. Every one of four representative agents
+                    <i>loses</i> accuracy on OSWorld once the CLI is exposed, by 2.5 to 11.5 points, and their CLI usage
+                    scatters from 0.15% of steps to 67%. Some grind through GUI sequences a single command would
+                    replace; others reach for the shell too eagerly. HybridCUA-9B uses the CLI about as much as the most
+                    CLI-heavy baseline, yet <i>gains</i> 14.8 points where that baseline loses 6.6.
                 </p>
-            </div>
 
-            <h2 class="title is-3 has-text-centered">Highlights</h2>
-            <div class="columns is-multiline highlights">
-                <div class="column is-one-third">
-                    <div class="box highlight-box">
-                        <span class="icon is-large has-text-link"><i class="fas fa-bolt fa-2x"></i></span>
-                        <h3 class="title is-5">Fully-async rollout</h3>
-                        <p>TODO: a fixed in-flight trajectory pool spans rollout boundaries, so a
-                            training step never waits on the slowest episode.</p>
+                <div class="chart-grid">
+                    <figure class="card chart-card">
+                        <figcaption class="chart-head">
+                            <h3>Accuracy on OSWorld, before and after exposing the CLI</h3>
+                            <p>Each pair is one agent evaluated with a GUI-only action space and with GUI+CLI.</p>
+                        </figcaption>
+                        <div class="legend" id="legend-exposure"></div>
+                        <div class="chart" id="chart-exposure"></div>
+                    </figure>
+
+                    <figure class="card chart-card">
+                        <figcaption class="chart-head">
+                            <h3>CLI step share</h3>
+                            <p>Share of executable steps issued as direct shell commands, pooled over all rollouts.</p>
+                        </figcaption>
+                        <div class="chart" id="chart-share"></div>
+                    </figure>
+                </div>
+
+                <details class="table-toggle">
+                    <summary>View as table</summary>
+                    <div class="table-scroll" id="table-exposure"></div>
+                </details>
+
+                <div class="two-col">
+                    <div class="prose">
+                        <h3 class="sub">Two gaps in how CUAs are trained</h3>
+                        <p>
+                            <b>The data never shows what hybrid behaviour looks like.</b> GUI, shell, and code corpora
+                            are each abundant but siloed: CUA datasets contain almost exclusively GUI actions, while
+                            terminal and code datasets omit the GUI context in which commands are issued.
+                        </p>
+                        <p>
+                            <b>The supervision is blind to interface choice.</b> Step-level imitation favours locally
+                            plausible actions and outcome rewards merely check task completion; neither can tell a
+                            well-chosen interface from a successful but inefficient path.
+                        </p>
+                    </div>
+                    <figure class="fig fig-flush">
+                        <img src="assets/problem.png" width="1280" height="538" loading="lazy"
+                            alt="Paired bar chart: Qwen3.5-27B 51.4 to 48.9, EvoCUA-32B 56.7 to 53.0, Kimi-K3 84.8 to 73.3, Claude-Opus5 83.4 to 76.8, all dropping when CLI is added, while HybridCUA-9B rises from 38.8 to 53.6. Second panel shows CLI step shares of 15.0%, 0.15%, 59.0%, 67.0% and 64.0%.">
+                        <figcaption><b>Figure 2.</b> The GUI–CLI orchestration problem, as reported in the paper.</figcaption>
+                    </figure>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== METHOD ==================== -->
+        <section class="section" id="method">
+            <div class="wrap">
+                <h2>Method</h2>
+                <p class="lede wrap-narrow-inner">
+                    Hybrid supervision need not be collected from scratch: many GUI action sequences admit an
+                    equivalent shell command. HybridCUA exploits this to build data across three execution schemas,
+                    then makes interface choice explicit in the reward.
+                </p>
+
+                <figure class="fig">
+                    <img src="assets/pipeline.png" width="1280" height="744" loading="lazy"
+                        alt="Pipeline diagram with three panels: (a) scalable data generation — GUI demonstration conversion, skill construction and rollout in a live environment producing CLI-only, GUI–CLI and GUI-to-CLI trajectories, alongside RLVR task synthesis with interface guides, verifiers and validation labelling; (b) supervised fine-tuning on the SFT corpus; (c) online agentic RL with CLI-aware rewards.">
+                    <figcaption>
+                        <b>Figure 3.</b> <b>(a)</b> Generation of GUI-only, CLI-only and interleaved trajectories, plus
+                        annotated RL tasks. <b>(b)</b> Supervised fine-tuning on 𝒟<sub>SFT</sub>. <b>(c)</b> Online
+                        agentic RL with CLI-aware reward signals.
+                    </figcaption>
+                </figure>
+
+                <h3 class="sub">One action space, two interfaces</h3>
+                <div class="two-col two-col-wide">
+                    <div class="prose">
+                        <p>
+                            Rather than exposing separate GUI and CLI tools, every executable interaction goes through
+                            the same <code>bash</code> action. A direct shell command and a quoted Python heredoc of
+                            <code>pyautogui</code> calls are both just commands, so switching interfaces costs the model
+                            no extra grammar. The wrapper is a <i>representation</i>, not a reclassification: PyAutoGUI
+                            through <code>bash</code> is still a GUI action.
+                        </p>
+                        <p>
+                            At step <i>t</i> the agent observes the current screenshot and, when the preceding action
+                            was a direct command, its stdout/stderr. CLI-only trajectories therefore restrict the
+                            <i>action</i> interface, not the observation modality — they still contain screenshots.
+                        </p>
+                        <p>
+                            Ablating this choice matters: keeping the two interfaces in distinct tools
+                            (<code>computer_use</code> and <code>cli</code>) costs <b>7.2</b> accuracy points against
+                            the unified schema under matched training.
+                        </p>
+                    </div>
+                    <div class="code-pair">
+                        <div class="code-block">
+                            <div class="code-label"><span class="dot dot-gui"></span>GUI action</div>
+                            <pre><code>bash(command=<span class="s">"""python3 &lt;&lt;'PY'
+import pyautogui
+pyautogui.click(500, 400)
+pyautogui.hotkey('alt', 'f')
+PY"""</span>)</code></pre>
+                        </div>
+                        <div class="code-block">
+                            <div class="code-label"><span class="dot dot-cli"></span>CLI action</div>
+                            <pre><code>bash(command=<span class="s">"""python3 &lt;&lt;'PY'
+import docx
+d = docx.Document(p)
+run.font.size = Pt(12)
+d.save(p)
+PY"""</span>)</code></pre>
+                        </div>
+                        <p class="code-note">
+                            Plus the control actions <code>wait</code>, <code>terminate</code> and
+                            <code>answer</code>. Coordinates are predicted in a 1000×1000 space and mapped to the
+                            display at execution time.
+                        </p>
                     </div>
                 </div>
-                <div class="column is-one-third">
-                    <div class="box highlight-box">
-                        <span class="icon is-large has-text-link"><i class="fas fa-check-double fa-2x"></i></span>
-                        <h3 class="title is-5">Verifiable rewards</h3>
-                        <p>TODO: RLVR task bundles carry executable checkers, giving dense
-                            outcome signal without a learned reward model.</p>
+
+                <h3 class="sub">Stage I — supervised warm-up</h3>
+                <div class="prose wrap-narrow-inner">
+                    <p>
+                        The three trajectory types are combined into 𝒟<sub>SFT</sub> and serialised as an instruction
+                        followed by observations and actions in the unified format, optimising next-token prediction
+                        over agent-generated responses. They supply complementary supervision: GUI control, shell
+                        command syntax, and interface routing. Expanding each trajectory at every decision step yields
+                        52,227 samples, 46,876 after filtering to a 12,000-token context; at most three screenshots are
+                        kept per prefix, the current one at full resolution and two downsampled.
+                    </p>
+                </div>
+
+                <h3 class="sub">Stage II — CLI-aware online RL</h3>
+                <div class="prose wrap-narrow-inner">
+                    <p>
+                        A plain accuracy reward gives weak credit for interface choice: successful rollouts score the
+                        same despite unnecessary switches, and a failed command goes unpenalised if the task eventually
+                        completes. HybridCUA adds two signals at complementary granularities.
+                    </p>
+                </div>
+
+                <div class="reward-grid">
+                    <div class="card reward-card">
+                        <span class="tag tag-task">Task level · when</span>
+                        <p class="eq">R<sub>CLI</sub> = 𝟙[Success(τ)] · 𝟙[b(τ) = b<sup>★</sup>]</p>
+                        <p>
+                            Every RLVR task carries a label <b>b<sup>★</sup></b> for whether CLI use has a clear
+                            execution advantage, obtained by sampling 16 rollouts per interface mode and ranking them.
+                            A successful rollout is rewarded only when its CLI usage matches that label, so the model
+                            learns to reach for the shell selectively — not maximally.
+                        </p>
+                        <p class="meta">Added to the trajectory reward with λ<sub>CLI</sub> = 0.1, before group
+                            normalisation.</p>
+                    </div>
+                    <div class="card reward-card">
+                        <span class="tag tag-step">Step level · how</span>
+                        <p class="eq">r<sub>t</sub><sup>exec</sup> = −1 if the command fails, else 0</p>
+                        <p>
+                            Terminal feedback localises the blame. A shell-level execution failure penalises exactly the
+                            tokens of the action that caused it, so command reliability improves without muddying the
+                            trajectory-level signal. Non-CLI steps get zero.
+                        </p>
+                        <p class="meta">Added to the normalised GRPO advantage with λ<sub>exec</sub> = 0.3, on the
+                            responsible action's tokens only.</p>
                     </div>
                 </div>
-                <div class="column is-one-third">
-                    <div class="box highlight-box">
-                        <span class="icon is-large has-text-link"><i class="fas fa-layer-group fa-2x"></i></span>
-                        <h3 class="title is-5">Hybrid action space</h3>
-                        <p>TODO: the agent interleaves GUI actions with shell/CLI calls,
-                            shortening long clerical trajectories.</p>
+
+                <details class="spec">
+                    <summary>Training configuration</summary>
+                    <div class="spec-grid" id="spec-grid"></div>
+                </details>
+            </div>
+        </section>
+
+        <!-- ==================== DATA ==================== -->
+        <section class="section section-alt" id="data">
+            <div class="wrap">
+                <h2>HybridCUA-8K</h2>
+                <p class="lede wrap-narrow-inner">
+                    5,023 supervised trajectories over 11 application domains and three interaction modes, plus 3,000
+                    RLVR tasks that each ship an executable verifier and a reachable target state. Trajectories average
+                    10.4 logical steps (median 7, p90 22).
+                </p>
+
+                <div class="chart-grid">
+                    <figure class="card chart-card">
+                        <figcaption class="chart-head">
+                            <h3>SFT trajectories by interaction mode</h3>
+                            <p>N = 5,023.</p>
+                        </figcaption>
+                        <div class="chart" id="chart-modality"></div>
+                    </figure>
+                    <figure class="card chart-card">
+                        <figcaption class="chart-head">
+                            <h3>SFT trajectories by application domain</h3>
+                            <p>Office suites and multi-app workflows dominate.</p>
+                        </figcaption>
+                        <div class="chart" id="chart-domains"></div>
+                    </figure>
+                </div>
+
+                <figure class="fig">
+                    <img src="assets/data-composition.png" width="1800" height="718" loading="lazy"
+                        alt="Three panels: a donut of domain by modality composition, a bar chart of trajectory modality (GUI only 870 / 17.3%, CLI only 3,155 / 62.8%, hybrid 998 / 19.9%), and a histogram of logical steps per trajectory peaking at 5–6 steps with median 7.">
+                    <figcaption>
+                        <b>Figure 4.</b> Composition of the supervised corpus: domain × modality, modality totals, and
+                        the distribution of logical steps per trajectory.
+                    </figcaption>
+                </figure>
+
+                <div class="route-grid">
+                    <div class="card route-card">
+                        <span class="route-tag route-gui">GUI only</span>
+                        <h4>Converted demonstrations</h4>
+                        <p>
+                            Open-source UI-MOPD trajectories are re-expressed action by action as equivalent
+                            <code>pyautogui</code> calls inside the unified <code>bash</code> wrapper, preserving the
+                            original GUI supervision.
+                        </p>
+                    </div>
+                    <div class="card route-card">
+                        <span class="route-tag route-cli">CLI only</span>
+                        <h4>Skill-guided rollouts</h4>
+                        <p>
+                            Per-application CLI skills are distilled from documentation and reference code; a
+                            Qwen3.8-27B agent in a Claude Code harness solves CUA-Gym tasks with the shell alone, and
+                            successful rollouts are kept.
+                        </p>
+                    </div>
+                    <div class="card route-card">
+                        <span class="route-tag route-hybrid">Interleaved</span>
+                        <h4>Free switching &amp; GUI→CLI rewriting</h4>
+                        <p>
+                            One route lets the agent choose between both interfaces during execution. The other folds
+                            terminal-typing segments of GUI trajectories back into single commands, replays the result,
+                            and keeps only successful replays.
+                        </p>
+                    </div>
+                </div>
+
+                <details class="table-toggle">
+                    <summary>RLVR task pool by domain (3,000 tasks)</summary>
+                    <div class="table-scroll" id="table-rlvr"></div>
+                </details>
+            </div>
+        </section>
+
+        <!-- ==================== RESULTS ==================== -->
+        <section class="section" id="results">
+            <div class="wrap">
+                <h2>Results</h2>
+
+                <h3 class="sub">Main results on OSWorld</h3>
+                <p class="lede wrap-narrow-inner">
+                    HybridCUA-9B reaches 53.6% accuracy in 14.0 average steps — best on both metrics among comparably
+                    sized models. Merely exposing the CLI cuts steps by 9.5 but accuracy from 38.8% to 18.4%, so the
+                    shorter trajectories reflect early failure, not efficiency. Trained, the second interface pays off at
+                    both stages: 46.0% vs 44.2% after SFT, 53.6% vs 50.4% after RL. Both branches share the same base
+                    model, comparable SFT corpora, and identical RLVR tasks and RL steps.
+                </p>
+                <div class="table-scroll" id="table-main"></div>
+                <p class="note" id="note-main"></p>
+
+                <h3 class="sub">Out-of-distribution generalisation</h3>
+                <p class="lede wrap-narrow-inner">
+                    Two axes of transfer, reported separately. On OSWorld-MCP, HybridCUA-9B scores 47.1%, 9.1 points
+                    over Qwen3.5-9B and on par with API-integrated ToolCUA-8B. On WindowsAgentArena it reaches 36.0%,
+                    +4.0 over its base model — issuing PowerShell commands despite training only on Linux shells, which
+                    suggests what transfers is <i>when</i> to delegate to a shell rather than memorised commands.
+                </p>
+                <div class="table-scroll" id="table-ood"></div>
+                <p class="note" id="note-ood"></p>
+
+                <h3 class="sub">Ablations</h3>
+                <div class="chart-grid">
+                    <div class="card table-card">
+                        <div class="chart-head">
+                            <h3>SFT data composition</h3>
+                            <p>Mixing all three trajectory types beats any single type.</p>
+                        </div>
+                        <div class="table-scroll" id="table-sft"></div>
+                    </div>
+                    <div class="card table-card">
+                        <div class="chart-head">
+                            <h3>Action schema</h3>
+                            <p>A single <code>bash</code> action against two separate tools.</p>
+                        </div>
+                        <div class="table-scroll" id="table-schema"></div>
+                    </div>
+                </div>
+
+                <figure class="fig">
+                    <img src="assets/rl-ablation.png" width="1280" height="311" loading="lazy"
+                        alt="Four line panels over RL steps 0 to 120 comparing full HybridCUA-9B, a variant without the task-level CLI reward, and a variant without the step-level execution reward: accuracy rises to about 53.6, average steps fall to 14, CLI step ratio rises to 64 percent, and CLI execution error falls to 11.5 percent for the full model while the no-execution-reward variant climbs above 16 percent.">
+                    <figcaption>
+                        <b>Figure 5.</b> Removing R<sub>CLI</sub> costs little accuracy but stalls the efficiency gain
+                        (CLI usage 58.9% instead of 64.0%; trajectories shorten 18.2% rather than 29.3%). Removing
+                        r<sub>t</sub><sup>exec</sup> leaves accuracy and steps nearly intact, yet execution errors climb
+                        back to 16.5% — above the SFT level — while the full model settles at 11.5%. The task-level
+                        reward decides <i>when</i>; the step-level reward governs <i>how reliably</i>.
+                    </figcaption>
+                </figure>
+            </div>
+        </section>
+
+        <!-- ==================== ANALYSIS ==================== -->
+        <section class="section section-alt" id="analysis">
+            <div class="wrap">
+                <h2>What the model learns to route where</h2>
+                <p class="lede wrap-narrow-inner">
+                    Interface choice tracks the interaction the task actually needs. The CLI dominates OS tasks (84% of
+                    steps), where commands reach files and system settings directly; the GUI dominates Chrome (74%),
+                    where the work lives on a rendered page.
+                </p>
+
+                <figure class="card chart-card chart-card-wide">
+                    <figcaption class="chart-head">
+                        <h3>Per-domain accuracy and interface split on OSWorld</h3>
+                        <p>Left: GUI-only counterpart → HybridCUA-9B. Right: share of executable steps.</p>
+                    </figcaption>
+                    <div class="legend" id="legend-domain"></div>
+                    <div class="chart" id="chart-domain"></div>
+                </figure>
+
+                <details class="table-toggle">
+                    <summary>View as table</summary>
+                    <div class="table-scroll" id="table-domain"></div>
+                </details>
+
+                <div class="chart-grid">
+                    <figure class="card chart-card">
+                        <figcaption class="chart-head">
+                            <h3>Interface choice by operation type</h3>
+                            <p>What the step is trying to accomplish predicts which interface it uses.</p>
+                        </figcaption>
+                        <div class="legend" id="legend-op"></div>
+                        <div class="chart" id="chart-op"></div>
+                    </figure>
+                    <div class="prose prose-card">
+                        <h3 class="sub sub-tight">Reading the split</h3>
+                        <p>
+                            <b>Content editing (85.8% CLI)</b> and <b>result verification (98.4% CLI)</b> suit direct
+                            data manipulation and state inspection — reading a saved file back is something a command
+                            does exactly and a screenshot does approximately.
+                        </p>
+                        <p>
+                            <b>Spatial adjustment (58.4% GUI)</b> goes the other way: positioning and layout need the
+                            visual feedback loop that the screen provides.
+                        </p>
+                        <p>
+                            <b>Information gathering</b> splits nearly evenly, which is the point — neither interface
+                            wins categorically, so the routing decision has to be learned per situation.
+                        </p>
+                    </div>
+                </div>
+
+                <figure class="fig">
+                    <img src="assets/domain-results.png" width="1280" height="488" loading="lazy"
+                        alt="Two panels: per-domain accuracy gains from OS +18.3 through Multi-apps +16.9 with Thunderbird the single regression at -9.6, and the matching GUI/CLI step share per domain.">
+                    <figcaption><b>Figure 6.</b> Domain-level accuracy and GUI/CLI step shares on OSWorld.</figcaption>
+                </figure>
+            </div>
+        </section>
+
+        <!-- ==================== CASES ==================== -->
+        <section class="section" id="cases">
+            <div class="wrap">
+                <h2>Cooperation, not just coexistence</h2>
+                <p class="lede wrap-narrow-inner">
+                    In an essay-formatting task the two interfaces cooperate at two levels. <b>Across the
+                    trajectory</b>, GUI steps focus the Writer window and open its menu (step 7) while CLI steps use
+                    python-docx to apply 12-point text and single, double and one-and-a-half line spacing before saving
+                    (step 10). <b>Within a single step</b>, step 13 dismisses the menu with pyautogui and then reopens
+                    the saved file through the shell to check font size and spacing — both in one <code>bash</code> call.
+                </p>
+
+                <figure class="fig">
+                    <img src="assets/case-study.png" width="1280" height="571" loading="lazy"
+                        alt="Case study: a user asks for an essay with single-spaced introduction, double-spaced body and one-and-a-half-spaced conclusion at 12 point. Step 7 uses pyautogui to focus the document and open the menu, step 10 uses python-docx to set sizes and spacing and save, step 13 combines a pyautogui escape keypress with a python-docx read-back that prints ALL CHECKS PASSED.">
+                    <figcaption>
+                        <b>Figure 7.</b> GUI–CLI cooperation in essay formatting. Code is excerpted and screenshots are
+                        cropped.
+                    </figcaption>
+                </figure>
+
+                <h3 class="sub">Trajectory types in the corpus</h3>
+                <div class="tabs" id="traj-tabs">
+                    <div class="tablist" role="tablist" aria-label="Trajectory type">
+                        <button role="tab" id="tab-gui" aria-controls="panel-gui" aria-selected="true">GUI only</button>
+                        <button role="tab" id="tab-cli" aria-controls="panel-cli" aria-selected="false">CLI only</button>
+                        <button role="tab" id="tab-hybrid" aria-controls="panel-hybrid" aria-selected="false">Interleaved</button>
+                    </div>
+
+                    <div class="tabpanel" role="tabpanel" id="panel-gui" aria-labelledby="tab-gui">
+                        <figure class="fig fig-tight">
+                            <img src="assets/traj-gui-only.png" width="1280" height="565" loading="lazy"
+                                alt="A GUI-only Impress trajectory that changes a slide background from the default colour to red, with each source action shown beside its equivalent pyautogui call.">
+                            <figcaption>
+                                Changing a presentation slide background to red. Each source operation — clicking,
+                                dragging, scrolling, shortcuts, text entry — is translated into the equivalent
+                                PyAutoGUI call.
+                            </figcaption>
+                        </figure>
+                    </div>
+
+                    <div class="tabpanel" role="tabpanel" id="panel-cli" aria-labelledby="tab-cli" hidden>
+                        <figure class="fig fig-tight">
+                            <img src="assets/traj-cli-only.png" width="1280" height="530" loading="lazy"
+                                alt="A CLI-only Impress trajectory using Python and UNO to identify slides 1 and 5 by their speaker-photo placeholders, recolour their backgrounds to pale yellow, save, and cross-check the live UNO state against the saved XML.">
+                            <figcaption>
+                                Using Python/UNO, the agent identifies slides 1 and 5 from their speaker-photo
+                                placeholders, recolours them to <code>#FFFFCC</code>, saves, then cross-checks the live
+                                UNO state against the saved XML and confirms the other four slides are unchanged.
+                            </figcaption>
+                        </figure>
+                    </div>
+
+                    <div class="tabpanel" role="tabpanel" id="panel-hybrid" aria-labelledby="tab-hybrid" hidden>
+                        <figure class="fig fig-tight">
+                            <img src="assets/traj-hybrid.png" width="1280" height="581" loading="lazy"
+                                alt="An interleaved trajectory: the CLI installs the Night Owl VS Code extension, GUI actions open the theme picker and preview and confirm the theme, then the CLI reads back the persisted workbench.colorTheme setting.">
+                            <figcaption>
+                                The CLI installs the Night Owl extension; GUI actions open the theme picker, preview and
+                                confirm the exact theme; the CLI then reads back the persisted
+                                <code>workbench.colorTheme</code> to verify the selection was saved.
+                            </figcaption>
+                        </figure>
                     </div>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <!-- ==================== METHOD ==================== -->
-    <section class="section has-background-light" id="method">
-        <div class="container is-max-desktop">
-            <h2 class="title is-3 has-text-centered">Method</h2>
+        <!-- ==================== CODE ==================== -->
+        <section class="section section-alt" id="code">
+            <div class="wrap">
+                <h2>Code</h2>
+                <p class="lede wrap-narrow-inner">
+                    The release has two halves: <code>env_infra</code> serves desktop environments over an HTTP session
+                    protocol, and <code>online-rl</code> runs GRPO against them (slime + Megatron-LM for the actor,
+                    SGLang for rollout). The trainer never launches VMs itself; it only speaks HTTP to an env server.
+                </p>
 
-            <figure class="image">
-                <img src="assets/pipeline.png" alt="Training pipeline">
-                <figcaption><b>Figure 2.</b> TODO: training pipeline caption.</figcaption>
-            </figure>
-
-            <div class="content">
-                <h3 class="title is-4">Training stack</h3>
-                <p>TODO: trainer, rollout engine, and environment platform in one paragraph.</p>
-
-                <h3 class="title is-4">Environments</h3>
-                <p>TODO: which worlds are served, how sessions are allocated, task counts.</p>
-
-                <h3 class="title is-4">Reward</h3>
-                <p>TODO: outcome reward composition, optional process signals.</p>
-            </div>
-        </div>
-    </section>
-
-    <!-- ==================== RESULTS / LEADERBOARD ==================== -->
-    <section class="section" id="leaderboard">
-        <div class="container is-max-desktop">
-            <h2 class="title is-3 has-text-centered">Results</h2>
-            <p class="has-text-centered subtitle is-6">
-                Success rate (%). Sorted by overall; click a column header to re-sort.
-            </p>
-
-            <div class="table-container">
-                <table class="table is-fullwidth is-hoverable leaderboard-table">
-                    <thead>
-                        <tr>
-                            <th>#</th>
-                            <th data-sort="model">Model</th>
-                            <th data-sort="size">Size</th>
-                            <th data-sort="overall">Overall</th>
-                            <th data-sort="office">Office</th>
-                            <th data-sort="os">OS</th>
-                            <th data-sort="web">Web</th>
-                        </tr>
-                    </thead>
-                    <tbody id="leaderboard-body">
-                        <!-- Loaded from leaderboard.json -->
-                        <tr>
-                            <td colspan="7" class="has-text-centered has-text-grey">Loading…</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-
-            <h3 class="title is-4 has-text-centered" style="margin-top: 3rem;">Training curve</h3>
-            <div class="chart-wrapper">
-                <canvas id="training-chart"></canvas>
-            </div>
-        </div>
-    </section>
-
-    <!-- ==================== GETTING STARTED ==================== -->
-    <section class="section has-background-light" id="getting-started">
-        <div class="container is-max-desktop">
-            <h2 class="title is-3 has-text-centered">Getting Started</h2>
-            <div class="content">
-                <p>Launch a run on the head node (the one holding the actor GPUs):</p>
-                <pre><code class="language-bash">git clone https://github.com/TODO/HybridCUA.git
+                <div class="prose">
+                    <p>Clone and build the training environment on a GPU node with <code>nvcc</code>:</p>
+                    <pre class="code"><code><span class="c"># build the training venv (compiles flash-attn / apex / TE in place)</span>
+git clone https://github.com/ZJU-REAL/HybridCUA.git
 cd HybridCUA
+bash online-rl/install_env.sh</code></pre>
 
-# 1. build the training venv (needs a GPU node with nvcc)
-bash online-rl/install_env.sh
-
-# 2. start the environment platform, then point the trainer at it
-WANDB_API_KEY=&lt;your-key&gt; \
-HF_CKPT=/path/to/checkpoint \
-GUI_ENV_SERVER_URL=http://127.0.0.1:19000 \
+                    <p>Start an environment server from <code>env_infra</code>, then launch the run on the head node:</p>
+                    <pre class="code"><code>WANDB_API_KEY=<span class="v">&lt;your-key&gt;</span> \
+HF_CKPT=<span class="v">/path/to/sft/checkpoint</span> \
+GUI_ENV_SERVER_URL=<span class="v">http://127.0.0.1:19000</span> \
   bash online-rl/gui-rl/scripts/HybridCUA-9B_16gpu_fully_async.sh</code></pre>
-                <p>Each additional worker node joins the same Ray cluster:</p>
-                <pre><code class="language-bash">RAY_HEAD_ADDR=&lt;head-ip&gt; WORKER_NUM_GPUS=8 \
-  bash online-rl/gui-rl/scripts/gpu_worker_join_ray.sh</code></pre>
-                <p>TODO: link to the full docs once they are published.</p>
-            </div>
-        </div>
-    </section>
 
-    <!-- ==================== CITATION ==================== -->
-    <section class="section" id="citation">
-        <div class="container is-max-desktop">
-            <h2 class="title is-3 has-text-centered">Citation</h2>
-            <pre><code class="language-bibtex">@article{TODO2026hybridcua,
-  title   = {HybridCUA: Online RL for Hybrid Computer-Use Agents},
-  author  = {TODO},
-  journal = {arXiv preprint arXiv:TODO},
+                    <p>Each additional worker node joins the same Ray cluster:</p>
+                    <pre class="code"><code>RAY_HEAD_ADDR=<span class="v">&lt;head-ip&gt;</span> WORKER_NUM_GPUS=8 \
+  bash online-rl/gui-rl/scripts/gpu_worker_join_ray.sh</code></pre>
+
+                    <p>
+                        Keep the three concurrency knobs aligned — the real ceiling is their minimum:
+                        <code>SGLANG_SERVER_CONCURRENCY × num_engines</code> (the in-flight pool),
+                        <code>GUI_FAST_ROLLOUT_PROCS</code> (the worker pool), and
+                        <code>GUI_TRAJECTORY_CONCURRENCY</code> (env sessions). All default to 64.
+                        <code>online-rl/gui-rl/config.py</code> is the single source of truth for every
+                        <code>GUI_*</code> variable.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== CITATION ==================== -->
+        <section class="section" id="citation">
+            <div class="wrap wrap-narrow">
+                <h2>BibTeX</h2>
+                <div class="bibtex">
+                    <button class="copy-btn" id="copy-bib" type="button">Copy</button>
+                    <pre class="code"><code id="bib">@article{chen2026hybridcua,
+  title   = {HybridCUA: Learning to Orchestrate GUI and CLI for Computer-Use Agents},
+  author  = {Chen, Tongbo and Niu, Junbo and Lu, Zhengxi and Lian, Niu and
+             Tang, Fei and Yan, Yuchen and Hong, Yike and Du, Yong and
+             Liu, Yizhou and Chen, Bofan and Shen, Yongliang},
+  journal = {arXiv preprint},
   year    = {2026}
 }</code></pre>
-        </div>
-    </section>
+                </div>
+            </div>
+        </section>
+    </main>
 
-    <!-- ==================== FOOTER ==================== -->
     <footer class="footer">
-        <div class="content has-text-centered">
-            <p>
-                Questions and issues:
-                <a href="https://github.com/TODO/HybridCUA/issues">open a GitHub issue</a>.
-            </p>
-            <p class="is-size-7 has-text-grey">
-                Page layout adapted from the Bulma-based academic project page template.
-                Released under a
-                <a href="http://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a> license.
+        <div class="wrap">
+            <div class="footer-cols">
+                <div>
+                    <h4>Links</h4>
+                    <a href="https://arxiv.org/abs/2604.00000" rel="noopener">arXiv</a>
+                    <a href="https://github.com/ZJU-REAL/HybridCUA" rel="noopener">Code</a>
+                    <a href="https://huggingface.co/collections/077lukamagic/hybridcua" rel="noopener">Data &amp; Models</a>
+                </div>
+                <div>
+                    <h4>Questions</h4>
+                    <a href="https://github.com/ZJU-REAL/HybridCUA/issues" rel="noopener">Open a GitHub issue</a>
+                </div>
+                <div>
+                    <h4>Safety</h4>
+                    <p>
+                        Shell access amplifies what an agent can do in one action. All experiments run in sandboxed VMs
+                        that are reset between episodes, with no access to real accounts or credentials.
+                    </p>
+                </div>
+            </div>
+            <p class="footer-note">
+                Every number on this page is transcribed from the paper and lives in
+                <code>leaderboard.json</code>. Page released under
+                <a href="http://creativecommons.org/licenses/by-sa/4.0/" rel="noopener">CC BY-SA 4.0</a>.
             </p>
         </div>
     </footer>
 
-    <script>
-        // ---------- mobile nav ----------
-        const burger = document.getElementById('navbar-burger');
-        const menu = document.getElementById('navbar-menu');
-        burger.addEventListener('click', () => {
-            burger.classList.toggle('is-active');
-            menu.classList.toggle('is-active');
-        });
+    <div class="tooltip" id="tooltip" role="status" aria-live="polite"></div>
 
-        // ---------- code highlighting ----------
-        hljs.highlightAll();
-
-        // ---------- leaderboard ----------
-        const NUMERIC_COLS = ['overall', 'office', 'os', 'web'];
-        let rows = [];
-        let sortKey = 'overall';
-        let sortAsc = false;
-
-        function render() {
-            const body = document.getElementById('leaderboard-body');
-            if (!rows.length) {
-                body.innerHTML = '<tr><td colspan="7" class="has-text-centered has-text-grey">No entries yet.</td></tr>';
-                return;
-            }
-
-            const sorted = [...rows].sort((a, b) => {
-                const x = a[sortKey], y = b[sortKey];
-                const cmp = (typeof x === 'number' && typeof y === 'number')
-                    ? x - y
-                    : String(x).localeCompare(String(y));
-                return sortAsc ? cmp : -cmp;
-            });
-
-            // Best value per numeric column gets bolded.
-            const best = {};
-            for (const col of NUMERIC_COLS) {
-                best[col] = Math.max(...rows.map(r => Number(r[col]) || -Infinity));
-            }
-
-            body.innerHTML = sorted.map((r, i) => {
-                const cell = col => {
-                    const v = r[col];
-                    if (v === null || v === undefined || v === '') return '<td>–</td>';
-                    const isBest = Number(v) === best[col];
-                    return `<td>${isBest ? `<b>${v}</b>` : v}</td>`;
-                };
-                const name = r.url
-                    ? `<a href="${r.url}" target="_blank" rel="noopener">${r.model}</a>`
-                    : r.model;
-                return `<tr${r.highlight ? ' class="is-selected-row"' : ''}>
-                    <td>${i + 1}</td>
-                    <td>${name}</td>
-                    <td>${r.size ?? '–'}</td>
-                    ${NUMERIC_COLS.map(cell).join('')}
-                </tr>`;
-            }).join('');
-        }
-
-        document.querySelectorAll('.leaderboard-table th[data-sort]').forEach(th => {
-            th.style.cursor = 'pointer';
-            th.addEventListener('click', () => {
-                const key = th.dataset.sort;
-                sortAsc = (key === sortKey) ? !sortAsc : false;
-                sortKey = key;
-                render();
-            });
-        });
-
-        // ---------- training curve ----------
-        function drawChart(curve) {
-            const canvas = document.getElementById('training-chart');
-            if (!canvas || !curve || !curve.steps) return;
-            new Chart(canvas, {
-                type: 'line',
-                data: {
-                    labels: curve.steps,
-                    datasets: (curve.series || []).map((s, i) => ({
-                        label: s.label,
-                        data: s.values,
-                        borderWidth: 2,
-                        tension: 0.3,
-                        pointRadius: 0,
-                        borderColor: ['#3273dc', '#ff3860', '#23d160', '#ffdd57'][i % 4],
-                    })),
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    interaction: { mode: 'index', intersect: false },
-                    scales: {
-                        x: { title: { display: true, text: 'training step' } },
-                        y: { title: { display: true, text: 'success rate (%)' }, beginAtZero: true },
-                    },
-                },
-            });
-        }
-
-        (async () => {
-            try {
-                const resp = await fetch('leaderboard.json');
-                const data = await resp.json();
-                rows = data.entries || [];
-                render();
-                drawChart(data.training_curve);
-            } catch (e) {
-                console.error('failed to load leaderboard.json', e);
-                document.getElementById('leaderboard-body').innerHTML =
-                    '<tr><td colspan="7" class="has-text-centered has-text-danger">Failed to load leaderboard.json</td></tr>';
-            }
-        })();
-    </script>
+    <script src="app.js"></script>
 </body>
 
 </html>
