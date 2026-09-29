@@ -656,15 +656,6 @@ figcaption {
     color: var(--text-muted);
 }
 
-.chart-card figcaption.chart-head {
-    margin: 0 0 14px;
-    text-align: left;
-}
-
-.chart-card-wide {
-    margin-bottom: 1.5rem;
-}
-
 .table-card .chart-head {
     margin-bottom: 14px;
 }
@@ -1109,157 +1100,176 @@ td .best {
     text-align: right;
 }
 
-/* ============================== charts ============================== */
+/* ============================== step-by-step cases ============================== */
 
-.chart {
-    width: 100%;
+.case {
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    margin-bottom: 20px;
 }
 
-.chart svg {
+.case:last-child {
+    margin-bottom: 0;
+}
+
+.case-kicker {
+    margin: 0 0 .3rem;
+    font-size: .6875rem;
+    font-weight: 700;
+    letter-spacing: .07em;
+    text-transform: uppercase;
+    color: var(--accent-ink);
+}
+
+.case-head h3 {
+    font-size: 1.0625rem;
+    margin-bottom: .6rem;
+}
+
+.case-task {
+    margin: 0 0 .4rem;
+    font-size: .9375rem;
+    color: var(--text-secondary);
+}
+
+.case-task b {
+    color: var(--text-primary);
+}
+
+.case-flow {
+    margin: 0 0 18px;
+    font-family: var(--mono);
+    font-size: .8125rem;
+    color: var(--text-muted);
+}
+
+.case-body {
+    display: grid;
+    grid-template-columns: 1.55fr 1fr;
+    gap: 24px;
+    align-items: start;
+}
+
+/* ---------- step strip ---------- */
+
+.steps {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 12px;
+}
+
+.step {
+    min-width: 36px;
+    height: 30px;
+    padding: 0 9px;
+    font-family: var(--mono);
+    font-size: .75rem;
+    font-weight: 650;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-secondary);
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-top: 2px solid var(--border-strong);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: background .12s ease, color .12s ease;
+}
+
+/* the top edge carries the interface, so selection is never colour-alone */
+.step-gui {
+    border-top-color: var(--gui);
+}
+
+.step-cli {
+    border-top-color: var(--cli);
+}
+
+.step-control {
+    border-top-color: var(--border-strong);
+}
+
+.step-result {
+    border-top-color: var(--good);
+    color: var(--good);
+}
+
+.step:hover {
+    color: var(--text-primary);
+    background: var(--surface-3);
+}
+
+.step[aria-selected="true"] {
+    color: var(--text-primary);
+    background: var(--surface-3);
+    border-color: var(--border-strong);
+    box-shadow: inset 0 0 0 1px var(--border-strong);
+}
+
+.case-frame {
+    margin: 0;
+}
+
+.case-frame img {
     display: block;
     width: 100%;
     height: auto;
-    overflow: visible;
-}
-
-.chart .grid-line {
-    stroke: var(--grid);
-    stroke-width: 1;
-}
-
-.chart .axis-line {
-    stroke: var(--axis);
-    stroke-width: 1;
-}
-
-.chart .tick {
-    font-size: 11px;
-    fill: var(--text-muted);
-    font-variant-numeric: tabular-nums;
-}
-
-.chart .cat-label {
-    font-size: 12px;
-    fill: var(--text-secondary);
-}
-
-.chart .cat-label.is-ours {
-    fill: var(--text-primary);
-    font-weight: 650;
-}
-
-.chart .val-label {
-    font-size: 11.5px;
-    fill: var(--text-secondary);
-    font-variant-numeric: tabular-nums;
-}
-
-.chart .val-label.strong {
-    fill: var(--text-primary);
-    font-weight: 650;
-}
-
-.chart .in-bar {
-    font-size: 11px;
-    fill: var(--text-primary);
-    font-variant-numeric: tabular-nums;
-}
-
-.chart .axis-title {
-    font-size: 11px;
-    fill: var(--text-muted);
-}
-
-.chart .panel-title {
-    font-size: 12px;
-    font-weight: 650;
-    fill: var(--text-primary);
-}
-
-.chart .mark {
-    transition: opacity .12s ease;
-}
-
-.chart .hit {
-    fill: transparent;
-    cursor: default;
-}
-
-.chart g.dim .mark {
-    opacity: .35;
-}
-
-.legend {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px 18px;
-    margin-bottom: 12px;
-    font-size: .8125rem;
-    color: var(--text-secondary);
-}
-
-.legend span {
-    display: inline-flex;
-    align-items: center;
-    gap: 7px;
-}
-
-.legend i {
-    width: 11px;
-    height: 11px;
-    border-radius: 3px;
-    flex: 0 0 auto;
-}
-
-/* ---------- tooltip ---------- */
-
-.tooltip {
-    position: fixed;
-    z-index: 90;
-    pointer-events: none;
-    opacity: 0;
-    transform: translate(-50%, -100%);
-    padding: 8px 11px;
-    min-width: 120px;
-    font-size: .8125rem;
-    line-height: 1.5;
-    color: var(--text-primary);
-    background: var(--surface-1);
-    border: 1px solid var(--border-strong);
+    aspect-ratio: 1100 / 619;
+    object-fit: cover;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
     border-radius: var(--radius-sm);
-    box-shadow: var(--shadow-md);
-    transition: opacity .1s ease;
 }
 
-.tooltip.on {
-    opacity: 1;
+.case-frame figcaption {
+    margin-top: .6rem;
+    font-size: .8125rem;
+    color: var(--text-muted);
 }
 
-.tooltip .tt-title {
-    font-weight: 650;
-    margin-bottom: 4px;
-}
+/* ---------- notes ---------- */
 
-.tooltip .tt-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 14px;
+.case-notes p {
+    margin: 0 0 .9rem;
+    font-size: .875rem;
+    line-height: 1.65;
     color: var(--text-secondary);
 }
 
-.tooltip .tt-row b {
-    color: var(--text-primary);
-    font-variant-numeric: tabular-nums;
+.case-notes p:last-child {
+    margin-bottom: 0;
 }
 
-.tooltip .tt-swatch {
+.note-tag {
     display: inline-block;
-    width: 9px;
-    height: 9px;
-    border-radius: 2px;
     margin-right: 6px;
-    vertical-align: -1px;
+    padding: 1px 7px;
+    font-size: .6875rem;
+    font-weight: 700;
+    letter-spacing: .05em;
+    border-radius: 4px;
+    vertical-align: 1px;
+}
+
+.note-gui {
+    color: var(--text-primary);
+    background: var(--gui-soft);
+}
+
+.note-cli {
+    color: var(--accent-ink);
+    background: var(--cli-soft);
+}
+
+.case-analysis {
+    padding-top: .9rem;
+    border-top: 1px solid var(--border);
+}
+
+.case-analysis b {
+    color: var(--text-primary);
 }
 
 /* ============================== footer ============================== */

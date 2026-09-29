@@ -7,11 +7,15 @@ Static single-page site built from the paper in `projects/HybridCUA-arxiv`.
 site/
 ├── index.html        markup and copy
 ├── style.css         design tokens + layout (light/dark)
-├── app.js            renders every table and chart from leaderboard.json
+├── app.js            tables, KPI tiles and the rollout step viewer
 ├── leaderboard.json  ALL numbers live here — the only file to edit for results
 ├── .nojekyll         tells GitHub Pages to serve files as-is
-└── assets/           figures exported from the paper (see below)
+└── assets/           the paper's figures, plus cases/ rollout screenshots
 ```
+
+Division of labour: **figures come from the paper as-is; tables are rebuilt as
+HTML.** A chart the paper already drew is never redrawn here — that would let the
+two drift apart.
 
 ## Local preview
 
@@ -41,14 +45,15 @@ Best-in-column bolding, deltas, and the `→` arrows are computed at render time
 Training hyperparameters are in the `SPEC` constant in `app.js` (they are prose,
 not results). `null` renders as `–`.
 
-## Charts
+Figures 2 and 6 additionally carry a `<details>` table view of the plotted
+numbers, so the data is reachable without reading values off an image.
 
-Hand-built inline SVG so marks inherit the CSS custom properties and re-render on
-theme change. The palette is the validated categorical slots 1–3 plus a neutral
-for the GUI series; interface identity is always carried by a legend *and* direct
-labels, never colour alone, and every chart has a `<details>` table view.
+## Colour
 
-Re-run the check after changing any series colour:
+The two interface colours (`--cli` blue, `--gui` neutral) and the accents come
+from a palette validated in both modes; interface identity in the UI is always
+carried by a label or a border edge as well, never colour alone. If you change
+`--series-*` in `style.css`, re-run:
 
 ```bash
 node scripts/validate_palette.js "#2a78d6,#eb6834,#1baf7a" --mode light --surface "#ffffff" --pairs all
@@ -57,19 +62,47 @@ node scripts/validate_palette.js "#3987e5,#d95926,#199e70" --mode dark  --surfac
 
 ## Assets
 
-Only four figures are shipped — anything the page can render live from
-`leaderboard.json` is a chart, not an image, so the two never disagree:
+**Every figure on the page is the paper's own figure** — the page never redraws
+a plot the paper already has. Tables are rebuilt as HTML (sortable, themed,
+accessible); figures are shipped as PNG.
 
 | `assets/` | source in `figures/` | used in |
 |---|---|---|
-| `teaser.png` | `intro.png` | hero |
-| `pipeline.png` | `method.png` | Method |
-| `rl-ablation.png` | `training_ablation.png` | Results |
-| `case-study.png` | `case_study.png` | Analysis |
+| `teaser.png` | `intro.png` | hero (Fig. 1) |
+| `problem.png` | `GUI_CLI.png` | Problem (Fig. 2) |
+| `pipeline.png` | `method.png` | Method (Fig. 3) |
+| `data-composition.png` | `traj-distribution.png` | Method (Fig. 4) |
+| `rl-ablation.png` | `training_ablation.png` | Results (Fig. 5) |
+| `domain-results.png` | `domain_results.png` | Analysis (Fig. 6) |
+| `operation-share.png` | `stats.png` | Analysis (Fig. 7) |
+| `case-study.png` | `case_study.png` | Analysis (Fig. 8) |
+| `traj-gui-only.png` | `gui-only-case.png` | Trajectory types (Fig. 9) |
+| `traj-cli-only.png` | `cli-only-case.png` | Trajectory types (Fig. 10) |
+| `traj-hybrid.png` | `hybrid-case.png` | Trajectory types (Fig. 11) |
+| `cases/<name>/step_N.jpg` | `case_studies/<name>/step_N.png` | Rollouts |
 
-`GUI_CLI.png`, `traj-distribution.png`, `domain_results.png` and `stats.png` are
-deliberately *not* included: the page plots that data itself. To refresh a shipped
-figure, re-export with PIL at 1800px max width and keep the filename.
+PNGs are downscaled to 1800px max width. The 28 rollout screenshots are JPEG
+q82 (1.6 MB total instead of 7.4 MB as PNG) since they are photographic
+screenshots, not line art.
+
+## Rollout step viewer
+
+The `cases` array in `leaderboard.json` drives the step-by-step viewer. Per case:
+`dir` (the folder under `assets/cases/`), `title`, `pattern`, `flow`, `task`,
+the `gui_note` / `cli_note` / `analysis` prose (inline HTML allowed), and `steps`
+— one entry per **action** step, each `"GUI" | "CLI" | "Control"`.
+
+The image count must be `steps.length + 1`: `step_0 … step_{N-1}` are the
+pre-action screenshots and `step_N` is the final observation, rendered as the
+`✓` button. Verify after adding a case:
+
+```bash
+python3 -c "
+import json,os
+for c in json.load(open('leaderboard.json'))['cases']:
+    have=len([f for f in os.listdir(f'assets/cases/{c[\"dir\"]}') if f.endswith('.jpg')])
+    print(c['dir'], len(c['steps'])+1 == have)"
+```
 
 ## Deploying
 

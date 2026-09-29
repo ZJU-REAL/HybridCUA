@@ -35,6 +35,7 @@
                 <a href="#method">Method</a>
                 <a href="#results">Results</a>
                 <a href="#analysis">Analysis</a>
+                <a href="#rollouts">Rollouts</a>
                 <a href="#code">Code</a>
                 <a href="#citation">BibTeX</a>
             </div>
@@ -155,27 +156,19 @@
                     well-chosen interface from a successful but inefficient path.
                 </p>
 
-                <div class="chart-grid">
-                    <figure class="card chart-card">
-                        <figcaption class="chart-head">
-                            <h3>OSWorld accuracy, before and after exposing the CLI</h3>
-                            <p>Each pair is one agent, evaluated GUI-only and with GUI+CLI.</p>
-                        </figcaption>
-                        <div class="legend" id="legend-exposure"></div>
-                        <div class="chart" id="chart-exposure"></div>
-                    </figure>
-
-                    <figure class="card chart-card">
-                        <figcaption class="chart-head">
-                            <h3>CLI step share</h3>
-                            <p>Share of executable steps issued as direct shell commands, pooled.</p>
-                        </figcaption>
-                        <div class="chart" id="chart-share"></div>
-                    </figure>
-                </div>
+                <figure class="fig">
+                    <img src="assets/problem.png" width="1280" height="538" loading="lazy"
+                        alt="Paired bar chart: Qwen3.5-27B drops 51.4 to 48.9, EvoCUA-32B 56.7 to 53.0, Kimi-K3 84.8 to 73.3, Claude-Opus5 83.4 to 76.8 once the CLI is exposed, while HybridCUA-9B rises from 38.8 to 53.6. A second panel shows CLI step shares of 15.0%, 0.15%, 59.0%, 67.0% and 64.0%.">
+                    <figcaption>
+                        <b>Figure 2.</b> <b>(a)</b> Adding a CLI interface to existing agents reduces OSWorld accuracy,
+                        whereas the trained HybridCUA-9B improves over its GUI-only counterpart. <b>(b)</b> CLI step
+                        share varies substantially across existing agents; HybridCUA learns to use the CLI selectively
+                        rather than merely maximising command usage.
+                    </figcaption>
+                </figure>
 
                 <details class="table-toggle">
-                    <summary>View as table</summary>
+                    <summary>View the underlying numbers as a table</summary>
                     <div class="table-scroll" id="table-exposure"></div>
                 </details>
             </div>
@@ -196,9 +189,20 @@
                     <img src="assets/pipeline.png" width="1280" height="744" loading="lazy"
                         alt="Pipeline diagram with three panels: (a) scalable data generation — GUI demonstration conversion, skill construction and rollout in a live environment producing CLI-only, GUI–CLI and GUI-to-CLI trajectories, alongside RLVR task synthesis with interface guides, verifiers and validation labelling; (b) supervised fine-tuning on the SFT corpus; (c) online agentic RL with CLI-aware rewards.">
                     <figcaption>
-                        <b>Figure 2.</b> <b>(a)</b> Generation of GUI-only, CLI-only and interleaved trajectories, plus
+                        <b>Figure 3.</b> <b>(a)</b> Generation of GUI-only, CLI-only and interleaved trajectories, plus
                         annotated RL tasks. <b>(b)</b> Supervised fine-tuning on 𝒟<sub>SFT</sub>. <b>(c)</b> Online
                         agentic RL with CLI-aware reward signals.
+                    </figcaption>
+                </figure>
+
+                <figure class="fig">
+                    <img src="assets/data-composition.png" width="1800" height="718" loading="lazy"
+                        alt="Three panels: a donut of domain by modality composition, a bar chart of trajectory modality (GUI only 870 / 17.3%, CLI only 3,155 / 62.8%, hybrid 998 / 19.9%), and a histogram of logical steps per trajectory peaking at 5–6 steps with median 7, mean 10.4, p90 22.">
+                    <figcaption>
+                        <b>Figure 4.</b> Composition of the supervised corpus. <b>(a)</b> Application-domain totals,
+                        with the outer-ring shade indicating GUI-only, CLI-only or hybrid interaction within each
+                        domain. <b>(b)</b> Overall trajectory counts by modality. <b>(c)</b> Distribution of logical
+                        steps per trajectory, stacked by modality.
                     </figcaption>
                 </figure>
 
@@ -352,7 +356,7 @@ PY"""</span>)</code></pre>
                     <img src="assets/rl-ablation.png" width="1280" height="311" loading="lazy"
                         alt="Four line panels over RL steps 0 to 120 comparing full HybridCUA-9B, a variant without the task-level CLI reward, and a variant without the step-level execution reward: accuracy rises to about 53.6, average steps fall to 14, CLI step ratio rises to 64 percent, and CLI execution error falls to 11.5 percent for the full model while the no-execution-reward variant climbs above 16 percent.">
                     <figcaption>
-                        <b>Figure 3.</b> Removing R<sub>CLI</sub> costs little accuracy but stalls the efficiency gain
+                        <b>Figure 5.</b> Removing R<sub>CLI</sub> costs little accuracy but stalls the efficiency gain
                         (CLI usage 58.9% instead of 64.0%; trajectories shorten 18.2% rather than 29.3%). Removing
                         r<sub>t</sub><sup>exec</sup> leaves accuracy and steps nearly intact, yet execution errors climb
                         back to 16.5% — above the SFT level — while the full model settles at 11.5%. The task-level
@@ -375,27 +379,25 @@ PY"""</span>)</code></pre>
                     is the point: neither interface wins categorically, so routing has to be learned per situation.
                 </p>
 
-                <figure class="card chart-card chart-card-wide">
-                    <figcaption class="chart-head">
-                        <h3>Per-domain accuracy and interface split on OSWorld</h3>
-                        <p>Left: GUI-only counterpart → HybridCUA-9B. Right: share of executable steps.</p>
+                <figure class="fig">
+                    <img src="assets/domain-results.png" width="1280" height="488" loading="lazy"
+                        alt="Two panels: per-domain accuracy from OS 60.9 to 79.2 (+18.3) through Multi-apps 19.9 to 36.8 (+16.9), with Thunderbird the single regression at 66.7 to 57.1 (-9.6); and the matching GUI/CLI step share per domain, from 84% CLI on OS to 26% CLI on Chrome.">
+                    <figcaption>
+                        <b>Figure 6.</b> Domain-level accuracy and GUI/CLI step shares on OSWorld.
                     </figcaption>
-                    <div class="legend" id="legend-domain"></div>
-                    <div class="chart" id="chart-domain"></div>
                 </figure>
 
                 <details class="table-toggle">
-                    <summary>View as table</summary>
+                    <summary>View the underlying numbers as a table</summary>
                     <div class="table-scroll" id="table-domain"></div>
                 </details>
 
-                <figure class="card chart-card chart-card-wide">
-                    <figcaption class="chart-head">
-                        <h3>Interface choice by operation type</h3>
-                        <p>What the step is trying to accomplish predicts which interface it uses.</p>
+                <figure class="fig">
+                    <img src="assets/operation-share.png" width="1280" height="365" loading="lazy"
+                        alt="Four pie charts of GUI versus CLI step share: information gathering 36.1% CLI, content editing 85.8% CLI, spatial adjustment 41.6% CLI, result verification 98.4% CLI.">
+                    <figcaption>
+                        <b>Figure 7.</b> GUI/CLI step shares by operation category for HybridCUA-9B.
                     </figcaption>
-                    <div class="legend" id="legend-op"></div>
-                    <div class="chart" id="chart-op"></div>
                 </figure>
 
                 <h3 class="sub">Cooperation, not just coexistence</h3>
@@ -410,10 +412,68 @@ PY"""</span>)</code></pre>
                     <img src="assets/case-study.png" width="1280" height="571" loading="lazy"
                         alt="Case study: a user asks for an essay with single-spaced introduction, double-spaced body and one-and-a-half-spaced conclusion at 12 point. Step 7 uses pyautogui to focus the document and open the menu, step 10 uses python-docx to set sizes and spacing and save, step 13 combines a pyautogui escape keypress with a python-docx read-back that prints ALL CHECKS PASSED.">
                     <figcaption>
-                        <b>Figure 4.</b> GUI–CLI cooperation in essay formatting. Code is excerpted and screenshots are
+                        <b>Figure 8.</b> GUI–CLI cooperation in essay formatting. Code is excerpted and screenshots are
                         cropped.
                     </figcaption>
                 </figure>
+            </div>
+        </section>
+
+        <!-- ==================== TRAJECTORY TYPES ==================== -->
+        <section class="section section-alt" id="trajectories">
+            <div class="wrap">
+                <h2>Trajectory types in the corpus</h2>
+                <p class="lede wrap-narrow-inner">
+                    One representative example of each of the three construction routes behind
+                    <b>HybridCUA-8K</b>.
+                </p>
+
+                <figure class="fig">
+                    <img src="assets/traj-gui-only.png" width="1280" height="565" loading="lazy"
+                        alt="A GUI-only Impress trajectory that changes a slide background from the default colour to red, with each source action shown beside its equivalent pyautogui call.">
+                    <figcaption>
+                        <b>Figure 9. GUI only.</b> A representative trajectory paired with its direct PyAutoGUI
+                        representation: the slide background changes from the default colour to red, and each source
+                        operation — clicking, dragging, scrolling, shortcuts, text entry — becomes the equivalent
+                        PyAutoGUI call.
+                    </figcaption>
+                </figure>
+
+                <figure class="fig">
+                    <img src="assets/traj-cli-only.png" width="1280" height="530" loading="lazy"
+                        alt="A CLI-only Impress trajectory using Python and UNO to identify slides 1 and 5 by their speaker-photo placeholders, recolour their backgrounds to pale yellow, save, and cross-check the live UNO state against the saved XML.">
+                    <figcaption>
+                        <b>Figure 10. CLI only.</b> Using Python/UNO, the agent identifies slides 1 and 5 from their
+                        speaker-photo placeholders, changes their backgrounds from white to pale yellow
+                        (<code>#FFFFCC</code>), saves the presentation, and cross-checks the live UNO state against the
+                        saved XML while confirming that the other four slides remain unchanged.
+                    </figcaption>
+                </figure>
+
+                <figure class="fig">
+                    <img src="assets/traj-hybrid.png" width="1280" height="581" loading="lazy"
+                        alt="An interleaved trajectory: the CLI installs the Night Owl VS Code extension, GUI actions open the theme picker and preview and confirm the theme, then the CLI reads back the persisted workbench.colorTheme setting.">
+                    <figcaption>
+                        <b>Figure 11. Interleaved GUI–CLI.</b> The CLI installs the Night Owl extension, making it
+                        available to VS Code; GUI actions then open the theme picker, select and preview the exact
+                        theme, and confirm the choice; the trajectory returns to the CLI to read back the persisted
+                        <code>workbench.colorTheme</code> setting. Direct commands handle setup and state inspection,
+                        while the GUI is retained for the visually grounded selection step.
+                    </figcaption>
+                </figure>
+            </div>
+        </section>
+
+        <!-- ==================== STEP-BY-STEP CASES ==================== -->
+        <section class="section" id="rollouts">
+            <div class="wrap">
+                <h2>Successful rollouts, step by step</h2>
+                <p class="lede wrap-narrow-inner">
+                    Three complete OSWorld rollouts from the appendix, each pairing the pre-action screenshot with the
+                    action the model issued at that step. Use the step buttons to walk through a trajectory; every one
+                    of these scored 1.0 with the task evaluator.
+                </p>
+                <div id="cases"></div>
             </div>
         </section>
 
@@ -486,8 +546,6 @@ RAY_HEAD_ADDR=<span class="v">&lt;head-ip&gt;</span> WORKER_NUM_GPUS=8 \
             </p>
         </div>
     </footer>
-
-    <div class="tooltip" id="tooltip" role="status" aria-live="polite"></div>
 
     <script src="app.js"></script>
 </body>

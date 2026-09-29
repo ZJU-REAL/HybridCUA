@@ -1,16 +1,15 @@
-/* HybridCUA project page — tables and charts, all values read from leaderboard.json.
-   No dependencies; SVG is built by hand so it inherits the CSS colour tokens. */
+/* HybridCUA project page — chrome plus every table, rendered from leaderboard.json.
+   Figures are the paper's own PNGs; only tabular data is rebuilt as HTML. */
 
 (() => {
     'use strict';
 
     const $ = (id) => document.getElementById(id);
-    const NS = 'http://www.w3.org/2000/svg';
     const OURS = /HybridCUA/i;
 
     /* ---------------------------------------------------------------- chrome */
 
-    // theme toggle: explicit choice wins over the OS setting, and persists
+    // theme toggle: an explicit choice wins over the OS setting, and persists
     const root = document.documentElement;
     const stored = localStorage.getItem('hc-theme');
     if (stored === 'light' || stored === 'dark') root.dataset.theme = stored;
@@ -72,123 +71,27 @@
         setTimeout(() => { copyBtn.textContent = 'Copy'; }, 1800);
     });
 
-    /* ---------------------------------------------------------------- tooltip */
-
-    const tip = $('tooltip');
-    let tipOwner = null;
-
-    function showTip(html, ev, owner) {
-        tip.innerHTML = html;
-        tip.classList.add('on');
-        tipOwner = owner;
-        const r = tip.getBoundingClientRect();
-        const x = Math.min(Math.max(ev.clientX, r.width / 2 + 8), innerWidth - r.width / 2 - 8);
-        const y = Math.max(ev.clientY - 12, r.height + 12);
-        tip.style.left = `${x}px`;
-        tip.style.top = `${y}px`;
-    }
-
-    function hideTip(owner) {
-        if (owner && owner !== tipOwner) return;
-        tip.classList.remove('on');
-        tipOwner = null;
-    }
-
-    /* Attach hover behaviour to a mark group: dims its siblings and shows a tooltip. */
-    function hoverable(target, group, html) {
-        const enter = (ev) => {
-            [...group.children].forEach((c) => { if (c !== target) c.classList.add('dim'); });
-            showTip(html, ev, target);
-        };
-        const move = (ev) => showTip(html, ev, target);
-        const leave = () => {
-            [...group.children].forEach((c) => c.classList.remove('dim'));
-            hideTip(target);
-        };
-        target.addEventListener('pointerenter', enter);
-        target.addEventListener('pointermove', move);
-        target.addEventListener('pointerleave', leave);
-    }
-
-    /* ---------------------------------------------------------------- svg helpers */
-
-    const svgEl = (name, attrs = {}) => {
-        const el = document.createElementNS(NS, name);
-        for (const [k, v] of Object.entries(attrs)) {
-            if (v !== null && v !== undefined) el.setAttribute(k, String(v));
-        }
-        return el;
-    };
-
-    const text = (x, y, str, cls, attrs = {}) => {
-        const t = svgEl('text', { x, y, class: cls, ...attrs });
-        t.textContent = str;
-        return t;
-    };
-
-    function canvas(host, w, h) {
-        host.textContent = '';
-        const svg = svgEl('svg', {
-            viewBox: `0 0 ${w} ${h}`,
-            role: 'img',
-            preserveAspectRatio: 'xMidYMid meet',
-        });
-        host.appendChild(svg);
-        return svg;
-    }
-
-    /* A bar anchored to the baseline with only its data-end rounded (4px). */
-    function barPath(x, y, w, h, r = 4, dir = 'up') {
-        const rr = Math.max(0, Math.min(r, w / 2, h));
-        if (h <= 0.5) return `M${x} ${y + h} h${w}`;
-        if (dir === 'up') {
-            return `M${x} ${y + h} V${y + rr} q0 ${-rr} ${rr} ${-rr} h${w - 2 * rr} q${rr} 0 ${rr} ${rr} V${y + h} Z`;
-        }
-        // 'right': grows left→right, right end rounded
-        const rh = Math.max(0, Math.min(r, h / 2, w));
-        return `M${x} ${y} h${w - rh} q${rh} 0 ${rh} ${rh} v${h - 2 * rh} q0 ${rh} ${-rh} ${rh} H${x} Z`;
-    }
-
-    const legend = (host, items) => {
-        host.innerHTML = items
-            .map((it) => `<span><i style="background:${it.color}"></i>${it.label}</span>`)
-            .join('');
-    };
+    /* ---------------------------------------------------------------- tables */
 
     const fmt = (v, d = 1) => (v === null || v === undefined ? '–' : v.toFixed(d));
-    const css = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
-
-    /* Charts re-render on theme change so mark fills track the tokens. */
-    const redraws = [];
-    const register = (fn) => { redraws.push(fn); fn(); };
-    const rerender = () => redraws.forEach((fn) => fn());
-    new MutationObserver(rerender).observe(root, { attributes: true, attributeFilter: ['data-theme'] });
-    matchMedia('(prefers-color-scheme: dark)').addEventListener('change', rerender);
-
-    let resizeTimer;
-    addEventListener('resize', () => {
-        clearTimeout(resizeTimer);
-        resizeTimer = setTimeout(rerender, 180);
-    });
-
-    /* ---------------------------------------------------------------- tables */
 
     function table(cols, rows) {
         const t = document.createElement('table');
+
         const thead = document.createElement('thead');
-        const tr = document.createElement('tr');
+        const headRow = document.createElement('tr');
         cols.forEach((c) => {
             const th = document.createElement('th');
             th.textContent = c.label;
-            if (c.width) th.style.width = c.width;
-            tr.appendChild(th);
+            headRow.appendChild(th);
         });
-        thead.appendChild(tr);
+        thead.appendChild(headRow);
         t.appendChild(thead);
 
         const tbody = document.createElement('tbody');
         rows.forEach((r) => {
             const row = document.createElement('tr');
+
             if (r._group) {
                 const td = document.createElement('td');
                 td.colSpan = cols.length;
@@ -198,13 +101,12 @@
                 tbody.appendChild(row);
                 return;
             }
+
             if (r.highlight) row.classList.add('hl');
             if (r.rule) row.classList.add('rule-above');
             cols.forEach((c, i) => {
                 const td = document.createElement('td');
-                const cell = c.cell(r);
-                if (cell instanceof Node) td.appendChild(cell);
-                else td.innerHTML = cell;
+                td.innerHTML = c.cell(r);
                 if (i === 0 && r.indent) td.classList.add('indent');
                 row.appendChild(td);
             });
@@ -217,8 +119,7 @@
     const deltaSpan = (v, goodWhenNegative = false) => {
         if (v === null || v === undefined) return '';
         const good = goodWhenNegative ? v < 0 : v > 0;
-        const sign = v > 0 ? '+' : '−';
-        return `<span class="delta ${good ? 'up' : 'dn'}">${sign}${Math.abs(v).toFixed(1)}</span>`;
+        return `<span class="delta ${good ? 'up' : 'dn'}">${v > 0 ? '+' : '−'}${Math.abs(v).toFixed(1)}</span>`;
     };
 
     const chip = (space) =>
@@ -237,6 +138,8 @@
                 ? `<span class="best">${v.toFixed(d)}</span>`
                 : v.toFixed(d);
 
+    const name = (s) => (OURS.test(s) ? `<b>${s}</b>` : s);
+
     /* ---------------------------------------------------------------- KPIs */
 
     function renderKpis(h) {
@@ -251,7 +154,6 @@
             {
                 label: 'Average steps',
                 value: fmt(h.avg_steps),
-                unit: '',
                 delta: '−17.6 vs base',
                 sub: '29.3% shorter than after SFT alone',
             },
@@ -264,7 +166,6 @@
             {
                 label: 'HybridCUA-8K',
                 value: h.sft_trajectories.toLocaleString('en-US'),
-                unit: '',
                 sub: `trajectories + ${h.rlvr_tasks.toLocaleString('en-US')} verified RLVR tasks`,
             },
         ];
@@ -278,309 +179,6 @@
                 </div>`,
             )
             .join('');
-    }
-
-    /* ------------------------------------------------- chart: CLI exposure */
-
-    function chartExposure(host, rows) {
-        const w = 520;
-        const padT = 16;
-        const padB = 54;
-        const padL = 34;
-        const padR = 12;
-        const h = 300;
-        const plotH = h - padT - padB;
-        const plotW = w - padL - padR;
-
-        const svg = canvas(host, w, h);
-        svg.setAttribute('aria-label',
-            'Grouped bar chart of OSWorld accuracy for five agents with a GUI-only action space and with GUI plus CLI.');
-
-        const max = 90;
-        const y = (v) => padT + plotH - (v / max) * plotH;
-
-        for (let v = 0; v <= max; v += 15) {
-            svg.appendChild(svgEl('line',
-                { x1: padL, x2: w - padR, y1: y(v), y2: y(v), class: 'grid-line' }));
-            svg.appendChild(text(padL - 7, y(v) + 4, String(v), 'tick', { 'text-anchor': 'end' }));
-        }
-        svg.appendChild(text(padL - 7, padT - 4, '%', 'tick', { 'text-anchor': 'end' }));
-
-        const band = plotW / rows.length;
-        const barW = Math.min(26, (band - 14) / 2);
-        const gap = 2;                       // 2px surface gap between adjacent bars
-        const marks = svgEl('g');
-        svg.appendChild(marks);
-
-        rows.forEach((r, i) => {
-            const cx = padL + band * (i + 0.5);
-            const g = svgEl('g');
-            marks.appendChild(g);
-
-            const series = [
-                { key: 'gui', label: 'GUI only', color: css('--gui'), v: r.gui },
-                { key: 'hybrid', label: 'GUI + CLI', color: css('--cli'), v: r.hybrid },
-            ];
-
-            series.forEach((s, j) => {
-                const x = cx - barW - gap / 2 + j * (barW + gap);
-                const top = y(s.v);
-                const bar = svgEl('path', {
-                    d: barPath(x, top, barW, padT + plotH - top),
-                    fill: s.color,
-                    class: 'mark',
-                });
-                g.appendChild(bar);
-                svg.appendChild(text(x + barW / 2, top - 6, fmt(s.v),
-                    `val-label${r.highlight ? ' strong' : ''}`, { 'text-anchor': 'middle' }));
-            });
-
-            const delta = r.hybrid - r.gui;
-            const hit = svgEl('rect', {
-                x: cx - band / 2, y: padT, width: band, height: plotH, class: 'hit',
-            });
-            g.appendChild(hit);
-            hoverable(hit, marks, `<div class="tt-title">${r.model}</div>
-                <div class="tt-row"><span><i class="tt-swatch" style="background:${css('--gui')}"></i>GUI only</span><b>${fmt(r.gui)}%</b></div>
-                <div class="tt-row"><span><i class="tt-swatch" style="background:${css('--cli')}"></i>GUI + CLI</span><b>${fmt(r.hybrid)}%</b></div>
-                <div class="tt-row"><span>Δ with CLI</span><b style="color:${delta > 0 ? css('--good') : css('--bad')}">${delta > 0 ? '+' : '−'}${Math.abs(delta).toFixed(1)}</b></div>
-                <div class="tt-row"><span>CLI step share</span><b>${fmt(r.cli_share, 2)}%</b></div>`);
-
-            // two-line category label
-            const parts = r.model.split('-');
-            const label = svgEl('text', {
-                x: cx, y: h - padB + 18, class: `cat-label${r.highlight ? ' is-ours' : ''}`,
-                'text-anchor': 'middle',
-            });
-            const l1 = svgEl('tspan', { x: cx });
-            l1.textContent = parts.length > 1 ? parts.slice(0, -1).join('-') : r.model;
-            const l2 = svgEl('tspan', { x: cx, dy: 14 });
-            l2.textContent = parts.length > 1 ? `-${parts.at(-1)}` : '';
-            label.append(l1, l2);
-            svg.appendChild(label);
-            if (r.highlight) {
-                svg.appendChild(text(cx, h - padB + 46, '(ours)',
-                    'val-label strong', { 'text-anchor': 'middle' }));
-            }
-        });
-
-        svg.appendChild(svgEl('line',
-            { x1: padL, x2: w - padR, y1: y(0), y2: y(0), class: 'axis-line' }));
-    }
-
-    /* ------------------------------------------------- chart: CLI step share */
-
-    function chartShare(host, rows) {
-        const w = 520;
-        const rowH = 38;
-        const padT = 8;
-        const padB = 30;
-        const padL = 122;
-        const padR = 46;
-        const h = padT + rows.length * rowH + padB;
-        const plotW = w - padL - padR;
-
-        const svg = canvas(host, w, h);
-        svg.setAttribute('aria-label',
-            'Horizontal bars of the share of executable steps issued as direct shell commands, per agent.');
-
-        const x = (v) => padL + (v / 100) * plotW;
-
-        [0, 25, 50, 75, 100].forEach((v) => {
-            svg.appendChild(svgEl('line',
-                { x1: x(v), x2: x(v), y1: padT, y2: padT + rows.length * rowH, class: 'grid-line' }));
-            svg.appendChild(text(x(v), h - padB + 18, `${v}%`, 'tick', { 'text-anchor': 'middle' }));
-        });
-
-        const marks = svgEl('g');
-        svg.appendChild(marks);
-        const barH = 15;
-
-        rows.forEach((r, i) => {
-            const cy = padT + i * rowH + rowH / 2;
-            const g = svgEl('g');
-            marks.appendChild(g);
-
-            const bw = Math.max(2, (r.cli_share / 100) * plotW);
-            g.appendChild(svgEl('path', {
-                d: barPath(padL, cy - barH / 2, bw, barH, 4, 'right'),
-                fill: r.highlight ? css('--cli') : css('--blue-light'),
-                class: 'mark',
-            }));
-
-            svg.appendChild(text(padL - 10, cy + 4, r.model,
-                `cat-label${r.highlight ? ' is-ours' : ''}`, { 'text-anchor': 'end' }));
-            svg.appendChild(text(padL + bw + 8, cy + 4, `${fmt(r.cli_share, r.cli_share < 1 ? 2 : 1)}%`,
-                `val-label${r.highlight ? ' strong' : ''}`));
-
-            const hit = svgEl('rect',
-                { x: padL, y: cy - rowH / 2, width: plotW, height: rowH, class: 'hit' });
-            g.appendChild(hit);
-            hoverable(hit, marks, `<div class="tt-title">${r.model}</div>
-                <div class="tt-row"><span>CLI steps</span><b>${fmt(r.cli_share, 2)}%</b></div>
-                <div class="tt-row"><span>GUI steps</span><b>${fmt(100 - r.cli_share, 2)}%</b></div>`);
-        });
-
-        svg.appendChild(svgEl('line', {
-            x1: padL, x2: padL, y1: padT, y2: padT + rows.length * rowH, class: 'axis-line',
-        }));
-    }
-
-    /* ------------------------------------------------- chart: domain results */
-
-    function chartDomain(host, rows) {
-        const w = 1000;
-        const rowH = 30;
-        const padT = 26;
-        const padB = 26;
-        const labelW = 150;
-        const gutter = 46;
-        const h = padT + rows.length * rowH + padB;
-
-        const accW = 330;
-        const shareW = 330;
-        const accX = labelW;
-        const shareX = labelW + accW + gutter + 62;   // 62px reserved for the "a → b  Δ" text
-
-        const svg = canvas(host, w, h);
-        svg.setAttribute('aria-label',
-            'Per-domain accuracy of HybridCUA-9B against its GUI-only counterpart, and the GUI/CLI split of its executable steps.');
-
-        svg.appendChild(text(accX, 12, '(a) Accuracy', 'panel-title'));
-        svg.appendChild(text(shareX, 12, '(b) Step share', 'panel-title'));
-
-        const ax = (v) => accX + (v / 100) * accW;
-        const sx = (v) => shareX + (v / 100) * shareW;
-
-        [0, 25, 50, 75, 100].forEach((v) => {
-            [[ax(v), accX], [sx(v), shareX]].forEach(([px]) => {
-                svg.appendChild(svgEl('line',
-                    { x1: px, x2: px, y1: padT - 6, y2: padT + rows.length * rowH, class: 'grid-line' }));
-            });
-            svg.appendChild(text(ax(v), padT - 10, `${v}%`, 'tick', { 'text-anchor': 'middle' }));
-            svg.appendChild(text(sx(v), padT - 10, `${v}%`, 'tick', { 'text-anchor': 'middle' }));
-        });
-
-        const marks = svgEl('g');
-        svg.appendChild(marks);
-        const barH = 13;
-        const cBase = css('--blue-light');
-        const cGain = css('--cli');
-        const cLoss = css('--series-2');
-        const cGui = css('--gui');
-
-        rows.forEach((r, i) => {
-            const cy = padT + i * rowH + rowH / 2;
-            const g = svgEl('g');
-            marks.appendChild(g);
-            const delta = r.after - r.before;
-            const lo = Math.min(r.before, r.after);
-            const hi = Math.max(r.before, r.after);
-
-            // (a) before→after: common range, then the gain or loss segment
-            g.appendChild(svgEl('path', {
-                d: barPath(accX, cy - barH / 2, Math.max(2, ax(lo) - accX), barH, 4, 'right'),
-                fill: cBase, class: 'mark',
-            }));
-            if (hi > lo) {
-                g.appendChild(svgEl('path', {
-                    d: barPath(ax(lo) + 2, cy - barH / 2, Math.max(2, ax(hi) - ax(lo) - 2), barH, 4, 'right'),
-                    fill: delta > 0 ? cGain : cLoss, class: 'mark',
-                }));
-            }
-
-            svg.appendChild(text(accX - 10, cy + 4, r.domain, 'cat-label', { 'text-anchor': 'end' }));
-            svg.appendChild(text(accX + accW + 12, cy + 4,
-                `${fmt(r.before)} → ${fmt(r.after)}`, 'val-label'));
-            const d = text(accX + accW + gutter + 46, cy + 4,
-                `${delta > 0 ? '+' : '−'}${Math.abs(delta).toFixed(1)}`, 'val-label strong',
-                { 'text-anchor': 'end', fill: delta > 0 ? css('--good') : css('--bad') });
-            svg.appendChild(d);
-
-            // (b) GUI/CLI step share, stacked with a 2px surface gap
-            const guiW = (r.gui / 100) * shareW;
-            g.appendChild(svgEl('rect', {
-                x: shareX, y: cy - barH / 2, width: Math.max(2, guiW - 1), height: barH,
-                fill: cGui, class: 'mark', rx: 0,
-            }));
-            g.appendChild(svgEl('path', {
-                d: barPath(shareX + guiW + 1, cy - barH / 2, Math.max(2, shareW - guiW - 1), barH, 4, 'right'),
-                fill: css('--blue-light'), class: 'mark',
-            }));
-            if (r.gui >= 16) {
-                svg.appendChild(text(shareX + guiW / 2, cy + 4, `${r.gui}%`,
-                    'in-bar', { 'text-anchor': 'middle' }));
-            }
-            if (r.cli >= 16) {
-                svg.appendChild(text(shareX + guiW + (shareW - guiW) / 2, cy + 4, `${r.cli}%`,
-                    'in-bar', { 'text-anchor': 'middle' }));
-            }
-
-            const hit = svgEl('rect',
-                { x: 0, y: cy - rowH / 2, width: w, height: rowH, class: 'hit' });
-            g.appendChild(hit);
-            hoverable(hit, marks, `<div class="tt-title">${r.domain}</div>
-                <div class="tt-row"><span>GUI-only counterpart</span><b>${fmt(r.before)}%</b></div>
-                <div class="tt-row"><span>HybridCUA-9B</span><b>${fmt(r.after)}%</b></div>
-                <div class="tt-row"><span>Δ</span><b style="color:${delta > 0 ? css('--good') : css('--bad')}">${delta > 0 ? '+' : '−'}${Math.abs(delta).toFixed(1)}</b></div>
-                <div class="tt-row"><span><i class="tt-swatch" style="background:${cGui}"></i>GUI steps</span><b>${r.gui}%</b></div>
-                <div class="tt-row"><span><i class="tt-swatch" style="background:${css('--blue-light')}"></i>CLI steps</span><b>${r.cli}%</b></div>`);
-        });
-
-        [[accX, accX], [shareX, shareX]].forEach(([px]) => {
-            svg.appendChild(svgEl('line',
-                { x1: px, x2: px, y1: padT - 6, y2: padT + rows.length * rowH, class: 'axis-line' }));
-        });
-    }
-
-    /* ------------------------------------------------- chart: operation share */
-
-    function chartOperation(host, rows) {
-        const w = 1000;
-        const rowH = 46;
-        const padT = 6;
-        const padL = 168;
-        const padR = 16;
-        const h = padT + rows.length * rowH + 4;
-        const plotW = w - padL - padR;
-
-        const svg = canvas(host, w, h);
-        svg.setAttribute('aria-label',
-            'Stacked bars showing the GUI and CLI share of steps for four operation categories.');
-
-        const marks = svgEl('g');
-        svg.appendChild(marks);
-        const barH = 18;
-        const cGui = css('--gui');
-        const cCli = css('--cli');
-
-        rows.forEach((r, i) => {
-            const cy = padT + i * rowH + rowH / 2 - 4;
-            const g = svgEl('g');
-            marks.appendChild(g);
-
-            const cliW = (r.cli / 100) * plotW;
-            g.appendChild(svgEl('rect', {
-                x: padL, y: cy - barH / 2, width: Math.max(2, cliW - 1), height: barH,
-                fill: cCli, class: 'mark',
-            }));
-            g.appendChild(svgEl('path', {
-                d: barPath(padL + cliW + 1, cy - barH / 2, Math.max(2, plotW - cliW - 1), barH, 4, 'right'),
-                fill: cGui, class: 'mark',
-            }));
-
-            svg.appendChild(text(padL - 10, cy + 4, r.operation, 'cat-label', { 'text-anchor': 'end' }));
-            svg.appendChild(text(padL, cy + barH / 2 + 17, `CLI ${fmt(r.cli)}%`, 'val-label strong'));
-            svg.appendChild(text(padL + plotW, cy + barH / 2 + 17, `GUI ${fmt(r.gui)}%`,
-                'val-label', { 'text-anchor': 'end' }));
-
-            const hit = svgEl('rect',
-                { x: padL, y: cy - rowH / 2, width: plotW, height: rowH, class: 'hit' });
-            g.appendChild(hit);
-            hoverable(hit, marks, `<div class="tt-title">${r.operation}</div>
-                <div class="tt-row"><span><i class="tt-swatch" style="background:${cCli}"></i>CLI</span><b>${fmt(r.cli)}%</b></div>
-                <div class="tt-row"><span><i class="tt-swatch" style="background:${cGui}"></i>GUI</span><b>${fmt(r.gui)}%</b></div>`);
-        });
     }
 
     /* ---------------------------------------------------------------- spec */
@@ -629,13 +227,13 @@
         },
     ];
 
-    function renderSpec() {
+    const renderSpec = () => {
         $('spec-grid').innerHTML = SPEC.map(
             (b) => `<div class="spec-block"><h4>${b.title}</h4><dl>${b.rows
                 .map(([k, v]) => `<div class="spec-row"><dt>${k}</dt><dd>${v}</dd></div>`)
                 .join('')}</dl></div>`,
         ).join('');
-    }
+    };
 
     /* ---------------------------------------------------------------- boot */
 
@@ -647,7 +245,7 @@
             d = await resp.json();
         } catch (err) {
             console.error('failed to load leaderboard.json', err);
-            document.querySelectorAll('.table-scroll, .chart').forEach((el) => {
+            document.querySelectorAll('.table-scroll').forEach((el) => {
                 el.innerHTML =
                     '<p class="note" style="padding:14px 16px">Could not load <code>leaderboard.json</code> — serve this page over HTTP rather than opening the file directly.</p>';
             });
@@ -658,7 +256,7 @@
         renderSpec();
 
         /* ---- main results ---- */
-        const mainRows = d.main_results.groups.flatMap((g) => [{ _group: g.name }, ...g.rows]);
+        const grouped = d.main_results.groups.flatMap((g) => [{ _group: g.name }, ...g.rows]);
         const flatMain = d.main_results.groups.flatMap((g) => g.rows);
         const bestAcc = bestOf(flatMain, 'acc');
         const bestSteps = minOf(flatMain, 'steps');
@@ -666,7 +264,7 @@
         $('table-main').appendChild(
             table(
                 [
-                    { label: 'Model', cell: (r) => (OURS.test(r.model) ? `<b>${r.model}</b>` : r.model) },
+                    { label: 'Model', cell: (r) => name(r.model) },
                     { label: 'Action space', cell: (r) => chip(r.space) },
                     { label: 'Acc. ↑', cell: (r) => mark(r.acc, bestAcc) + deltaSpan(r.acc_delta) },
                     {
@@ -674,23 +272,21 @@
                         cell: (r) => mark(r.steps, bestSteps) + deltaSpan(r.steps_delta, true),
                     },
                 ],
-                mainRows,
+                grouped,
             ),
         );
-        $('note-main').textContent = d.main_results.caption
-            + ' Bold marks the best value in a column; deltas are relative to Qwen3.5-9B with a GUI-only action space.';
+        $('note-main').textContent = `${d.main_results.caption} Bold marks the best value in a column;`
+            + ' deltas are relative to Qwen3.5-9B with a GUI-only action space.';
 
         /* ---- OOD ---- */
         const ood = d.ood_results.rows;
-        const bestMcp = bestOf(ood, 'mcp');
-        const bestWaa = bestOf(ood, 'waa');
         $('table-ood').appendChild(
             table(
                 [
-                    { label: 'Model', cell: (r) => (OURS.test(r.model) ? `<b>${r.model}</b>` : r.model) },
+                    { label: 'Model', cell: (r) => name(r.model) },
                     { label: 'Action space', cell: (r) => chip(r.space) },
-                    { label: 'OSWorld-MCP ↑', cell: (r) => mark(r.mcp, bestMcp) },
-                    { label: 'WindowsAgentArena ↑', cell: (r) => mark(r.waa, bestWaa) },
+                    { label: 'OSWorld-MCP ↑', cell: (r) => mark(r.mcp, bestOf(ood, 'mcp')) },
+                    { label: 'WindowsAgentArena ↑', cell: (r) => mark(r.waa, bestOf(ood, 'waa')) },
                 ],
                 ood,
             ),
@@ -698,65 +294,42 @@
         $('note-ood').textContent = d.ood_results.caption;
 
         /* ---- ablations ---- */
-        const sft = d.sft_ablation.rows;
-        $('table-sft').appendChild(
-            table(
-                [
-                    { label: 'Configuration', cell: (r) => (r.highlight ? `<b>${r.config}</b>` : r.config) },
-                    { label: 'Acc. ↑', cell: (r) => mark(r.acc, bestOf(sft, 'acc')) },
-                    { label: 'Avg. steps ↓', cell: (r) => mark(r.steps, minOf(sft, 'steps')) },
-                ],
-                sft,
-            ),
-        );
+        const ablation = (hostId, rows) =>
+            $(hostId).appendChild(
+                table(
+                    [
+                        { label: 'Configuration', cell: (r) => (r.highlight ? `<b>${r.config}</b>` : r.config) },
+                        { label: 'Acc. ↑', cell: (r) => mark(r.acc, bestOf(rows, 'acc')) },
+                        { label: 'Avg. steps ↓', cell: (r) => mark(r.steps, minOf(rows, 'steps')) },
+                    ],
+                    rows,
+                ),
+            );
+        ablation('table-sft', d.sft_ablation.rows);
+        ablation('table-schema', d.schema_ablation.rows);
 
-        const schema = d.schema_ablation.rows;
-        $('table-schema').appendChild(
-            table(
-                [
-                    { label: 'Configuration', cell: (r) => (r.highlight ? `<b>${r.config}</b>` : r.config) },
-                    { label: 'Acc. ↑', cell: (r) => mark(r.acc, bestOf(schema, 'acc')) },
-                    { label: 'Avg. steps ↓', cell: (r) => mark(r.steps, minOf(schema, 'steps')) },
-                ],
-                schema,
-            ),
-        );
-
-        /* ---- exposure table view ---- */
-        const exp = d.cli_exposure.rows;
+        /* ---- numbers behind Figure 2 ---- */
         $('table-exposure').appendChild(
             table(
                 [
-                    { label: 'Model', cell: (r) => (OURS.test(r.model) ? `<b>${r.model}</b>` : r.model) },
+                    { label: 'Model', cell: (r) => name(r.model) },
                     { label: 'GUI only', cell: (r) => fmt(r.gui) },
                     { label: 'GUI + CLI', cell: (r) => fmt(r.hybrid) },
-                    {
-                        label: 'Δ',
-                        cell: (r) => {
-                            const v = r.hybrid - r.gui;
-                            return `<span class="delta ${v > 0 ? 'up' : 'dn'}">${v > 0 ? '+' : '−'}${Math.abs(v).toFixed(1)}</span>`;
-                        },
-                    },
+                    { label: 'Δ', cell: (r) => deltaSpan(Number((r.hybrid - r.gui).toFixed(1))) },
                     { label: 'CLI step share', cell: (r) => `${fmt(r.cli_share, r.cli_share < 1 ? 2 : 1)}%` },
                 ],
-                exp,
+                d.cli_exposure.rows,
             ),
         );
 
-        /* ---- domain table view ---- */
+        /* ---- numbers behind Figure 6 ---- */
         $('table-domain').appendChild(
             table(
                 [
                     { label: 'Domain', cell: (r) => r.domain },
                     { label: 'GUI only', cell: (r) => fmt(r.before) },
                     { label: 'HybridCUA-9B', cell: (r) => `<span class="best">${fmt(r.after)}</span>` },
-                    {
-                        label: 'Δ',
-                        cell: (r) => {
-                            const v = r.after - r.before;
-                            return `<span class="delta ${v > 0 ? 'up' : 'dn'}">${v > 0 ? '+' : '−'}${Math.abs(v).toFixed(1)}</span>`;
-                        },
-                    },
+                    { label: 'Δ', cell: (r) => deltaSpan(Number((r.after - r.before).toFixed(1))) },
                     { label: 'CLI steps', cell: (r) => `${r.cli}%` },
                     { label: 'GUI steps', cell: (r) => `${r.gui}%` },
                 ],
@@ -764,30 +337,96 @@
             ),
         );
 
-        /* ---- charts ---- */
-        register(() => {
-            legend($('legend-exposure'), [
-                { label: 'GUI only', color: css('--gui') },
-                { label: 'GUI + CLI', color: css('--cli') },
-            ]);
-            chartExposure($('chart-exposure'), exp);
-        });
-        register(() => chartShare($('chart-share'), exp));
-        register(() => {
-            legend($('legend-domain'), [
-                { label: 'Common range', color: css('--blue-light') },
-                { label: 'Gain', color: css('--cli') },
-                { label: 'Loss', color: css('--series-2') },
-                { label: 'GUI steps', color: css('--gui') },
-            ]);
-            chartDomain($('chart-domain'), d.domain_results.rows);
-        });
-        register(() => {
-            legend($('legend-op'), [
-                { label: 'CLI', color: css('--cli') },
-                { label: 'GUI', color: css('--gui') },
-            ]);
-            chartOperation($('chart-op'), d.operation_share.rows);
+        renderCases(d.cases);
+    }
+
+    /* ---------------------------------------------------------------- cases */
+
+    /* Each case ships one screenshot per action step plus a final-state frame:
+       N actions → step_0 … step_N, where step_N is the outcome. */
+    function renderCases(cases) {
+        const host = $('cases');
+
+        cases.forEach((c, ci) => {
+            const total = c.steps.length;
+            const frames = [
+                ...c.steps.map((kind, i) => ({
+                    src: `assets/cases/${c.dir}/step_${i}.jpg`,
+                    label: String(i + 1).padStart(2, '0'),
+                    kind,
+                    caption: `Step ${i + 1} of ${total} · ${kind} · pre-action screenshot`,
+                })),
+                {
+                    src: `assets/cases/${c.dir}/step_${total}.jpg`,
+                    label: '✓',
+                    kind: 'Result',
+                    caption: 'Final observation after the last action · evaluator score 1.0',
+                },
+            ];
+
+            const sec = document.createElement('section');
+            sec.className = 'case';
+            sec.innerHTML = `
+                <header class="case-head">
+                    <p class="case-kicker">Case ${ci + 1} · ${c.pattern}</p>
+                    <h3>${c.title}</h3>
+                    <p class="case-task"><b>Task.</b> ${c.task}</p>
+                    <p class="case-flow">${c.flow}</p>
+                </header>
+                <div class="case-body">
+                    <div class="case-viewer">
+                        <div class="steps" role="tablist" aria-label="Trajectory steps"></div>
+                        <figure class="case-frame">
+                            <img alt="" loading="lazy" decoding="async">
+                            <figcaption></figcaption>
+                        </figure>
+                    </div>
+                    <div class="case-notes">
+                        <p><span class="note-tag note-gui">GUI</span> ${c.gui_note}</p>
+                        <p><span class="note-tag note-cli">CLI</span> ${c.cli_note}</p>
+                        <p class="case-analysis"><b>Analysis.</b> ${c.analysis}</p>
+                    </div>
+                </div>`;
+            host.appendChild(sec);
+
+            const strip = sec.querySelector('.steps');
+            const img = sec.querySelector('.case-frame img');
+            const cap = sec.querySelector('.case-frame figcaption');
+            const buttons = [];
+
+            const show = (i) => {
+                const f = frames[i];
+                img.src = f.src;
+                img.alt = `${c.title} — ${f.caption}`;
+                cap.textContent = f.caption;
+                buttons.forEach((b, j) => {
+                    b.setAttribute('aria-selected', String(j === i));
+                    b.tabIndex = j === i ? 0 : -1;
+                });
+            };
+
+            frames.forEach((f, i) => {
+                const b = document.createElement('button');
+                b.type = 'button';
+                b.setAttribute('role', 'tab');
+                b.className = `step step-${f.kind.toLowerCase()}`;
+                b.textContent = f.label;
+                b.title = f.caption;
+                b.setAttribute('aria-label', f.caption);
+                b.addEventListener('click', () => show(i));
+                b.addEventListener('keydown', (e) => {
+                    const dir = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
+                    if (!dir) return;
+                    e.preventDefault();
+                    const n = (i + dir + frames.length) % frames.length;
+                    show(n);
+                    buttons[n].focus();
+                });
+                strip.appendChild(b);
+                buttons.push(b);
+            });
+
+            show(0);
         });
     }
 
