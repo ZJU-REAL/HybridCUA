@@ -35,7 +35,7 @@ Edit **`leaderboard.json` only**; `index.html` hardcodes no numbers. Keys:
 | `cli_exposure` | the paired accuracy chart + CLI step-share chart + its table view |
 | `domain_results` | the per-domain gain/step-share chart + its table view |
 | `operation_share` | the operation-category stacked bars |
-| `corpus` | the modality and domain bars, and the RLVR pool table |
+| `corpus` | trajectory counts quoted in the Method prose (not currently charted) |
 
 Best-in-column bolding, deltas, and the `→` arrows are computed at render time.
 Training hyperparameters are in the `SPEC` constant in `app.js` (they are prose,
@@ -57,22 +57,19 @@ node scripts/validate_palette.js "#3987e5,#d95926,#199e70" --mode dark  --surfac
 
 ## Assets
 
-Exported from `projects/HybridCUA-arxiv/figures/`, downscaled to 1800px wide max:
+Only four figures are shipped — anything the page can render live from
+`leaderboard.json` is a chart, not an image, so the two never disagree:
 
-| `assets/` | source | used in |
+| `assets/` | source in `figures/` | used in |
 |---|---|---|
 | `teaser.png` | `intro.png` | hero |
-| `problem.png` | `GUI_CLI.png` | Problem |
 | `pipeline.png` | `method.png` | Method |
-| `data-composition.png` | `traj-distribution.png` | Data |
 | `rl-ablation.png` | `training_ablation.png` | Results |
-| `domain-results.png` | `domain_results.png` | Analysis |
-| `operation-share.png` | `stats.png` | (reference; page renders this live) |
-| `case-study.png` | `case_study.png` | Cases |
-| `traj-{gui-only,cli-only,hybrid}.png` | `{gui,cli}-only-case.png`, `hybrid-case.png` | Cases tabs |
+| `case-study.png` | `case_study.png` | Analysis |
 
-To refresh after the paper's figures change, re-export with PIL at the same max
-width and keep the filenames.
+`GUI_CLI.png`, `traj-distribution.png`, `domain_results.png` and `stats.png` are
+deliberately *not* included: the page plots that data itself. To refresh a shipped
+figure, re-export with PIL at 1800px max width and keep the filename.
 
 ## Deploying
 
@@ -89,8 +86,8 @@ The `site/` prefix is stripped on publish, so keep every internal path
 
 ## Before publishing
 
-- [ ] Replace the placeholder arXiv ID `2604.00000` (4 places: 2 × `index.html`
-      hero/footer, `og:` meta, and the BibTeX block) once the paper is posted.
+- [ ] Replace the placeholder arXiv ID `2604.00000` (hero button and footer link)
+      once the paper is posted, and add the ID to the BibTeX `journal` field.
 - [ ] Confirm the Hugging Face collection URL resolves publicly.
 - [ ] Re-check for internal hostnames and IPs:
 

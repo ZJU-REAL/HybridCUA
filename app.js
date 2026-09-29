@@ -72,29 +72,6 @@
         setTimeout(() => { copyBtn.textContent = 'Copy'; }, 1800);
     });
 
-    // trajectory tabs
-    const tabs = [...document.querySelectorAll('#traj-tabs [role="tab"]')];
-    const selectTab = (tab) => {
-        tabs.forEach((t) => {
-            const on = t === tab;
-            t.setAttribute('aria-selected', String(on));
-            t.tabIndex = on ? 0 : -1;
-            $(t.getAttribute('aria-controls')).hidden = !on;
-        });
-    };
-    tabs.forEach((t, i) => {
-        t.tabIndex = i === 0 ? 0 : -1;
-        t.addEventListener('click', () => selectTab(t));
-        t.addEventListener('keydown', (e) => {
-            const d = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
-            if (!d) return;
-            e.preventDefault();
-            const next = tabs[(tabs.indexOf(t) + d + tabs.length) % tabs.length];
-            selectTab(next);
-            next.focus();
-        });
-    });
-
     /* ---------------------------------------------------------------- tooltip */
 
     const tip = $('tooltip');
@@ -449,110 +426,6 @@
         }));
     }
 
-    /* ------------------------------------------------- chart: SFT modality */
-
-    function chartModality(host, rows) {
-        const w = 520;
-        const rowH = 52;
-        const padT = 6;
-        const padL = 118;
-        const padR = 78;
-        const h = padT + rows.length * rowH + 10;
-        const plotW = w - padL - padR;
-        const max = 3400;
-
-        const svg = canvas(host, w, h);
-        svg.setAttribute('aria-label',
-            'Horizontal bars of supervised trajectory counts by interaction mode.');
-
-        const marks = svgEl('g');
-        svg.appendChild(marks);
-        const barH = 20;
-        const shades = [css('--cli'), css('--blue-light'), css('--gui')];
-
-        rows.forEach((r, i) => {
-            const cy = padT + i * rowH + rowH / 2;
-            const g = svgEl('g');
-            marks.appendChild(g);
-
-            const bw = Math.max(2, (r.count / max) * plotW);
-            g.appendChild(svgEl('path', {
-                d: barPath(padL, cy - barH / 2, bw, barH, 4, 'right'),
-                fill: shades[i % shades.length],
-                class: 'mark',
-            }));
-
-            svg.appendChild(text(padL - 10, cy + 4, r.label, 'cat-label', { 'text-anchor': 'end' }));
-            svg.appendChild(text(padL + bw + 9, cy - 1,
-                r.count.toLocaleString('en-US'), 'val-label strong'));
-            svg.appendChild(text(padL + bw + 9, cy + 13, `${fmt(r.pct)}%`, 'val-label'));
-
-            const hit = svgEl('rect',
-                { x: padL, y: cy - rowH / 2, width: plotW + padR - 8, height: rowH, class: 'hit' });
-            g.appendChild(hit);
-            hoverable(hit, marks, `<div class="tt-title">${r.label}</div>
-                <div class="tt-row"><span>Trajectories</span><b>${r.count.toLocaleString('en-US')}</b></div>
-                <div class="tt-row"><span>Share of corpus</span><b>${fmt(r.pct)}%</b></div>`);
-        });
-
-        svg.appendChild(svgEl('line',
-            { x1: padL, x2: padL, y1: padT, y2: padT + rows.length * rowH, class: 'axis-line' }));
-    }
-
-    /* ------------------------------------------------- chart: SFT domains */
-
-    function chartDomains(host, rows) {
-        const w = 520;
-        const rowH = 24;
-        const padT = 6;
-        const padL = 148;
-        const padR = 52;
-        const h = padT + rows.length * rowH + 26;
-        const plotW = w - padL - padR;
-        const max = 900;
-
-        const svg = canvas(host, w, h);
-        svg.setAttribute('aria-label',
-            'Horizontal bars of supervised trajectory counts by application domain.');
-
-        const x = (v) => padL + (v / max) * plotW;
-        [0, 300, 600, 900].forEach((v) => {
-            svg.appendChild(svgEl('line',
-                { x1: x(v), x2: x(v), y1: padT, y2: padT + rows.length * rowH, class: 'grid-line' }));
-            svg.appendChild(text(x(v), padT + rows.length * rowH + 18, String(v),
-                'tick', { 'text-anchor': 'middle' }));
-        });
-
-        const marks = svgEl('g');
-        svg.appendChild(marks);
-        const barH = 11;
-
-        rows.forEach((r, i) => {
-            const cy = padT + i * rowH + rowH / 2;
-            const g = svgEl('g');
-            marks.appendChild(g);
-
-            const bw = Math.max(2, (r.count / max) * plotW);
-            g.appendChild(svgEl('path', {
-                d: barPath(padL, cy - barH / 2, bw, barH, 4, 'right'),
-                fill: css('--blue-dark'),
-                class: 'mark',
-            }));
-
-            svg.appendChild(text(padL - 10, cy + 4, r.label, 'cat-label', { 'text-anchor': 'end' }));
-            svg.appendChild(text(padL + bw + 8, cy + 4, r.count.toLocaleString('en-US'), 'val-label'));
-
-            const hit = svgEl('rect',
-                { x: padL, y: cy - rowH / 2, width: plotW + padR - 6, height: rowH, class: 'hit' });
-            g.appendChild(hit);
-            hoverable(hit, marks, `<div class="tt-title">${r.label}</div>
-                <div class="tt-row"><span>Trajectories</span><b>${r.count.toLocaleString('en-US')}</b></div>`);
-        });
-
-        svg.appendChild(svgEl('line',
-            { x1: padL, x2: padL, y1: padT, y2: padT + rows.length * rowH, class: 'axis-line' }));
-    }
-
     /* ------------------------------------------------- chart: domain results */
 
     function chartDomain(host, rows) {
@@ -663,10 +536,10 @@
     /* ------------------------------------------------- chart: operation share */
 
     function chartOperation(host, rows) {
-        const w = 520;
-        const rowH = 50;
+        const w = 1000;
+        const rowH = 46;
         const padT = 6;
-        const padL = 150;
+        const padL = 168;
         const padR = 16;
         const h = padT + rows.length * rowH + 4;
         const plotW = w - padL - padR;
@@ -891,28 +764,6 @@
             ),
         );
 
-        /* ---- RLVR pool ---- */
-        const rlvr = d.corpus.rlvr_domains;
-        const maxPct = bestOf(rlvr, 'pct');
-        $('table-rlvr').appendChild(
-            table(
-                [
-                    { label: 'Domain', cell: (r) => `<code>${r.label}</code>` },
-                    {
-                        label: 'Share of 3,000 tasks',
-                        cell: (r) => {
-                            const wrapEl = document.createElement('span');
-                            wrapEl.className = 'bar-cell';
-                            wrapEl.innerHTML = `<span>${fmt(r.pct)}%</span>
-                                <span class="bar-track"><span class="bar-fill" style="width:${(r.pct / maxPct) * 100}%"></span></span>`;
-                            return wrapEl;
-                        },
-                    },
-                ],
-                rlvr,
-            ),
-        );
-
         /* ---- charts ---- */
         register(() => {
             legend($('legend-exposure'), [
@@ -922,8 +773,6 @@
             chartExposure($('chart-exposure'), exp);
         });
         register(() => chartShare($('chart-share'), exp));
-        register(() => chartModality($('chart-modality'), d.corpus.modality));
-        register(() => chartDomains($('chart-domains'), d.corpus.domains));
         register(() => {
             legend($('legend-domain'), [
                 { label: 'Common range', color: css('--blue-light') },
