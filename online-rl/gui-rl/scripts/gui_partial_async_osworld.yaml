@@ -11,8 +11,5 @@ gui_eval_wait_after_reset: 60
 
 prm_enable: false
 
-# 2026-09-24: lambda_exec 0.3 -> 0 (per-step e_t term dropped). lambda_cli stays
-# non-zero ON PURPOSE: reward_func.cli_aware_enabled skips the RM entirely when
-# EVERY lambda is 0, and then no signal key (cli_diag) appears at all.
 lambda_cli: 0.1
-lambda_exec: 0
+lambda_exec: 0.3

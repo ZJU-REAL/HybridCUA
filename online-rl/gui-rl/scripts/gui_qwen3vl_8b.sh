@@ -1,16 +1,4 @@
 #!/bin/bash
-# Semi-async ("partial-async") GUI-RL with a REMOTE OSWorld env server.
-# Single node, 8x GPU: actor 4 (TP=4) + rollout 4 (4 SGLang engines x 1 GPU).
-#
-# This is the refactored online-rl counterpart of the reference
-# computeruseagent/gui-rl/scripts/gui_qwen3vl_8b_rl_remote_env.sh, with:
-#   - entrypoints pointing at rollout/partial_async_rollout_gui.py
-#   - GUI/dynamic-history args injected via --custom-config-path (upstream slime
-#     is unpatched, so --gui-*/--dynamic-history are NOT valid CLI flags here)
-#   - PRM disabled (outcome-only reward); no reward agent required
-#
-# Usage:  bash scripts/gui_qwen3vl_8b_partial_async.sh
-# Requires a reachable remote env server at GUI_ENV_SERVER_URL.
 
 pkill -9 sglang || true
 sleep 3
@@ -27,7 +15,6 @@ set -ex
 export WANDB_API_KEY
 export WANDB_BASE_URL=${WANDB_BASE_URL:-"https://api.wandb.ai"}
 
-# SCRIPT_DIR = gui-rl/ (scripts/.. resolves to the package root).
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." &>/dev/null && pwd)"
 SLIME_DIR="$(cd -- "${SCRIPT_DIR}/../slime" &>/dev/null && pwd)"
 MODEL_ARGS_ROTARY_BASE=5000000 source "${SLIME_DIR}/scripts/models/qwen3-8B.sh"
@@ -53,17 +40,10 @@ if (( ACTOR_GPUS + ROLLOUT_GPUS > NUM_GPUS )); then
   exit 1
 fi
 
-# Remote env server (OSWorld cluster, /allocate lease protocol). Override as needed.
 export GUI_ENV_SERVER_URL=${GUI_ENV_SERVER_URL:-"http://127.0.0.1:18000"}
-# Env client backend: "session" = self-contained /v1/sessions adapter (clients/),
-# "legacy" = lease-HTTP GuiEnvClient. Override with GUI_ENV_CLIENT=legacy to compare.
 export GUI_ENV_CLIENT=${GUI_ENV_CLIENT:-"session"}
-# Concurrent GUI env sessions per rollout (independent from sglang concurrency).
-# Bounds how many trajectories hit the remote env cluster at once.
 export GUI_POOL_MAX_ENVS=${GUI_POOL_MAX_ENVS:-64}
 export GUI_TRAJECTORY_CONCURRENCY=${GUI_TRAJECTORY_CONCURRENCY:-64}
-# Fast multiprocess rollout (rollout/): pool size = N worker processes,
-# one trajectory per process. Disable the legacy Ray TrajectoryDispatcher.
 export GUI_ROLLOUT_WORKERS=1
 export GUI_FAST_ROLLOUT_PROCS=${GUI_FAST_ROLLOUT_PROCS:-64}
 export GUI_ACTION_SPACE=${GUI_ACTION_SPACE:-"pyautogui"}
@@ -71,7 +51,6 @@ export GUI_OBSERVATION_TYPE=${GUI_OBSERVATION_TYPE:-"screenshot"}
 export GUI_COORDINATE_TYPE=${GUI_COORDINATE_TYPE:-"relative"}
 export GUI_AGENT_CLASS_PATH=${GUI_AGENT_CLASS_PATH:-"agents.qwen3vl_agent.Qwen3VLAgentLocal"}
 MULTIMODAL_KEYS=${MULTIMODAL_KEYS:-'{"image":"images"}'}
-# GUI rollout/eval step counts etc. come from CUSTOM_CONFIG_PATH (see yaml).
 
 WANDB_PROJECT=${WANDB_PROJECT:-slime_gui}
 WANDB_GROUP=${WANDB_GROUP:-qwen3-8b-rl-remote-env}
@@ -83,9 +62,6 @@ export GUI_RESULT_DIR="${GUI_RESULT_DIR}/${GUI_PROJECT_NAME}"
 export GUI_TEST_CONFIG_BASE_DIR=${GUI_TEST_CONFIG_BASE_DIR:-"${SCRIPT_DIR}/evaluation_examples"}
 export GUI_TRAIN_META_PATH=${GUI_TRAIN_META_PATH:-"${GUI_TEST_CONFIG_BASE_DIR}/train_nochrome.json"}
 export GUI_EVAL_META_PATH=${GUI_EVAL_META_PATH:-"${GUI_TEST_CONFIG_BASE_DIR}/test_nochrome.json"}
-# RLVR (CUA-Gym) task data. GUI_CUA_GYM_TASKS_META is an OSWorld-shaped
-# {app_type: [bundle_uuid, ...]} map; each uuid resolves to a bundle dir under
-# GUI_CUA_GYM_BUNDLES carrying task.json/config.json + reward.py.
 CUA_GYM_DATA=${CUA_GYM_DATA:-"${SCRIPT_DIR}/../../env_infra/cua_gym_data"}
 export GUI_CUA_GYM_BUNDLES=${GUI_CUA_GYM_BUNDLES:-"${CUA_GYM_DATA}/rlvr"}
 export GUI_ENV_RUNTIME=${GUI_ENV_RUNTIME:-"cua_gym"}
@@ -139,8 +115,6 @@ fi
 ROLLOUT_BATCH_SIZE=${ROLLOUT_BATCH_SIZE:-8}
 N_SAMPLES_PER_PROMPT=${N_SAMPLES_PER_PROMPT:-8}
 
-# NOTE: --gui-* flags are intentionally NOT passed here (upstream slime would
-# drop them). They are injected via CUSTOM_CONFIG_PATH instead.
 ROLLOUT_ARGS=(
   --data-source-path ${GUI_DATA_SOURCE_PATH:-data.gui_data_source.CuaGymDataSource}
   --reward-key score
@@ -157,11 +131,6 @@ echo "Configured rollout-batch-size x n-samples-per-prompt = ${IN_FLIGHT_SAMPLES
 echo "Using remote GUI env server: ${GUI_ENV_SERVER_URL}"
 echo "Injecting custom config: ${CUSTOM_CONFIG_PATH}"
 
-# --gui-eval-* come from CUSTOM_CONFIG_PATH, not here.
-# online-rl/slime requires a non-empty args.eval_datasets whenever --eval-interval
-# is set. GUI eval does NOT consume these datasets (the real tasks come from
-# GUI_EVAL_META_PATH via our custom --eval-function-path); --eval-config only
-# satisfies slime's validation so the periodic eval hook fires.
 GUI_EVAL_CONFIG=${GUI_EVAL_CONFIG:-"${SCRIPT_DIR}/scripts/gui_eval_dataset.yaml"}
 GUI_EVAL_INTERVAL=${GUI_EVAL_INTERVAL:-20}
 EVAL_ARGS=(
@@ -200,7 +169,6 @@ PERF_ARGS=(
   --max-tokens-per-gpu 1024
 )
 
-# --dynamic_history is injected via CUSTOM_CONFIG_PATH (not a valid upstream flag).
 GRPO_ARGS=(
   --advantage-estimator grpo
   --use-kl-loss
@@ -214,8 +182,6 @@ SGLANG_ARGS=(
   --sglang-mem-fraction-static 0.72
 )
 
-# Refactored entrypoints. No --custom-rollout-log-function-path: the online-rl
-# tree has no gui_rollout_logging module.
 CUSTOM_ARGS=(
   --custom-generate-function-path rollout.partial_async_gui_rollout.generate
   --custom-rm-path reward.reward_func.reward_func

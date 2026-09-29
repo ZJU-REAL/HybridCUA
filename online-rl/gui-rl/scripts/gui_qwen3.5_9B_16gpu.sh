@@ -1,48 +1,4 @@
 #!/bin/bash
-# Qwen3.5-9B (DENSE multimodal VLM) GRPO training on OSWorld GUI tasks, SEMI-async.
-#
-# Derived from gui_qwen3.5_9B_16gpu_fast_platform.sh. 9B is a DENSE model (no
-# experts), so ALL MoE/EP/DeepEP machinery is stripped.
-#
-# 9B model facts (from HF config.json + slime/scripts/models/qwen3.5-9B.sh):
-#   - DENSE: num_experts absent -> no --expert-*/--moe-*/DeepEP flags.
-#   - VLM:   config has vision_config/image_token_id (真多模态，自带 ViT)。
-#   - GDN:   --use-gated-attention -> Gated Delta Net 线性注意力层。GDN 不支持 packed
-#            sequence -> 必须 --qkv-format bshd + 关 dynamic-batch。
-#   - MTP:   mtp_num_hidden_layers=1 -> 需 GUI_DISABLE_MTP=1(否则 bridge 映射崩)。
-#   - heads: num_attention_heads=16, num_query_groups=4。
-#
-# ⚠️ TP=8 触发 Megatron GQA output-gate 补丁(attention.py)：num_query_groups(4)<world_size(8)。
-#    补丁已在 attention.py，会自动生效。
-#
-# 半异步 vs 全异步的唯一区别 = 训练主循环调度:
-#   - 全异步(fully_async): TRAIN_ENTRY=train_fully_async.py + --rollout-function-path
-#             rollout.fully_async_rollout(后台超采 + staleness + 钉死 in-flight 池)。
-#   - 本脚本(半异步):      TRAIN_ENTRY=slime/train_async.py, rollout 走 slime 默认
-#             generate_rollout(预取下一轮/ray.get 上一轮/训练)。无 staleness, 不钉死池。
-#
-# ====================================================================
-# 手动启动版 (manual Ray bring-up)。
-# 与 gui_qwen3.5_9B_16gpu_fast_platform.sh 的唯一区别 = Ray 启动方式:
-#   - platform.sh: 平台注入 RANK/WORLD_SIZE, 所有节点跑同一脚本, RANK guard 分流
-#   - 本脚本:      本节点 ray start --head 起 Head 并提交 job;
-#                  其余 GPU 节点各自手动跑 gpu_worker_join_ray.sh 加入集群。
-# 模型/算法/rollout body 完全相同。
-#
-# 2-node layout (16 GPUs = 2 x 8)，每节点 = 4 actor + 4 rollout(对齐 qwen3-vl-16gpu):
-#   - Actor:   2 节点 × 4 GPU (TP=4, DP=2)。dense 无 MoE/EP 约束，actor 拆 2 节点使每节点
-#              host RAM 减半(8 个 train actor 各~120GB 挤单节点会 Ray host-RAM OOM)。
-#   - Rollout: 8 GPUs as 8 sglang engines of 1 GPU each(与 actor 同节点共存)。
-#   TP=4 时 num_query_groups=4 不触发 attention.py 的 GQA gate 二次切分(TP=8 才触发)。
-#
-# 用法:
-#   # Head 节点(有 actor GPU 的那台):
-#   bash scripts/gui_qwen3.5_9B_16gpu.sh
-#   # 每个 Worker 节点(另起终端/另一台机器)：
-#   RAY_HEAD_ADDR=<head_ip> WORKER_NUM_GPUS=8 bash scripts/gpu_worker_join_ray.sh
-#
-#   可选 eval:  GUI_ENABLE_EVAL=1 开周期 eval。
-# ====================================================================
 
 pkill -9 sglang || true
 sleep 3
@@ -59,11 +15,8 @@ set -ex
 export WANDB_API_KEY
 export WANDB_BASE_URL=${WANDB_BASE_URL:-"https://api.wandb.ai"}
 
-# SCRIPT_DIR = gui-rl/ (scripts/.. resolves to the package root).
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." &>/dev/null && pwd)"
 
-# 确保 libnuma.so.1 存在 (sgl_kernel 依赖;缺了 SGLangEngine 起不来)。
-# 首选共享盘上的 vendor_libs/libnuma.so.1，apt/yum 次选。
 NUMA_LIB_DIR=""
 VENDORED_NUMA="${SCRIPT_DIR}/../vendor_libs"
 if ! ldconfig -p | grep -q libnuma; then
@@ -88,8 +41,6 @@ if ! ldconfig -p | grep -q libnuma; then
 fi
 
 SLIME_DIR="$(cd -- "${SCRIPT_DIR}/../slime" &>/dev/null && pwd)"
-# Qwen3.5-9B is a DENSE multimodal model. Its model def sets --rotary-base 10000000
-# itself, so we do NOT override MODEL_ARGS_ROTARY_BASE.
 source "${SLIME_DIR}/scripts/models/qwen3.5-9B.sh"
 MEGATRON_LM_PATH=${MEGATRON_LM_PATH:-"${SCRIPT_DIR}/../Megatron-LM"}
 CUSTOM_CONFIG_PATH=${CUSTOM_CONFIG_PATH:-"${SCRIPT_DIR}/scripts/gui_partial_async.yaml"}
@@ -102,13 +53,10 @@ export RAY_health_check_period_ms=${RAY_health_check_period_ms:-5000}
 export RAY_health_check_timeout_ms=${RAY_health_check_timeout_ms:-30000}
 export RAY_num_heartbeats_timeout=${RAY_num_heartbeats_timeout:-60}
 
-# 16 GPUs across 2 nodes: actor 8 (2节点×4, TP=4, DENSE 无 EP) + rollout 8 (8 engines x 1 GPU).
 NUM_GPUS=${NUM_GPUS:-16}
 ACTOR_GPUS=${ACTOR_GPUS:-8}
 ROLLOUT_GPUS=${ROLLOUT_GPUS:-8}
 ROLLOUT_NUM_GPUS_PER_ENGINE=${ROLLOUT_NUM_GPUS_PER_ENGINE:-1}
-# actor 拆 2 节点 × 4 GPU(对齐 qwen3-vl-16gpu)：dense 无 EP 约束，分散后每节点只有 4 个 train
-# actor，host RAM 减半，避免 8 actor 挤单节点的 Ray host-RAM OOM。
 ACTOR_NUM_NODES=${ACTOR_NUM_NODES:-2}
 ACTOR_NUM_GPUS_PER_NODE=${ACTOR_NUM_GPUS_PER_NODE:-4}
 
@@ -118,15 +66,12 @@ if (( ACTOR_GPUS + ROLLOUT_GPUS > NUM_GPUS )); then
   exit 1
 fi
 
-# Remote env server (OSWorld cluster, /v1/sessions session protocol on :19000).
 export GUI_ENV_SERVER_URL=${GUI_ENV_SERVER_URL:-"http://127.0.0.1:19000"}
 export GUI_ENV_CLIENT=${GUI_ENV_CLIENT:-session}
 export GUI_POOL_MAX_ENVS=${GUI_POOL_MAX_ENVS:-64}
 export GUI_TRAJECTORY_CONCURRENCY=${GUI_TRAJECTORY_CONCURRENCY:-64}
 export GUI_ROLLOUT_WORKERS=1
 export GUI_FAST_ROLLOUT_PROCS=${GUI_FAST_ROLLOUT_PROCS:-64}
-# Rollout 后端: ray = 每条轨迹结果(含图 Sample)由常驻 Ray actor 写 plasma、RolloutManager
-# 零拷贝读回，绕开 process 池单管道 unpickle 大 blob 的瓶颈(dispatch_wait 卡顿)。
 export GUI_LOG_LEVEL=${GUI_LOG_LEVEL:-INFO}
 export GUI_ACTION_SPACE=${GUI_ACTION_SPACE:-"pyautogui"}
 export GUI_OBSERVATION_TYPE=${GUI_OBSERVATION_TYPE:-"screenshot"}
@@ -134,8 +79,6 @@ export GUI_COORDINATE_TYPE=${GUI_COORDINATE_TYPE:-"relative"}
 export GUI_AGENT_CLASS_PATH=${GUI_AGENT_CLASS_PATH:-"agents.qwen35_agent.Qwen35VLAgentLocal"}
 export GUI_ENV_RUNTIME=${GUI_ENV_RUNTIME:-"cua_gym"}
 export ENABLE_THINKING=${ENABLE_THINKING:-False}
-# GUI_DISABLE_MTP=1: config 有 mtp_num_hidden_layers=1，但 GRPO 不用 MTP，且 bridge
-# 映射对不上 -> 加载崩溃。由 slime/backends/megatron_utils/model_provider.py 消费。
 export GUI_DISABLE_MTP=${GUI_DISABLE_MTP:-1}
 MULTIMODAL_KEYS=${MULTIMODAL_KEYS:-'{"image":"images"}'}
 
@@ -150,9 +93,6 @@ export GUI_RESULT_DIR="${GUI_RESULT_DIR}/${GUI_PROJECT_NAME}"
 export GUI_TEST_CONFIG_BASE_DIR=${GUI_TEST_CONFIG_BASE_DIR:-"${SCRIPT_DIR}/evaluation_examples"}
 export GUI_TRAIN_META_PATH=${GUI_TRAIN_META_PATH:-"${GUI_TEST_CONFIG_BASE_DIR}/train_nochrome.json"}
 export GUI_EVAL_META_PATH=${GUI_EVAL_META_PATH:-"${GUI_TEST_CONFIG_BASE_DIR}/test_nochrome.json"}
-# RLVR (CUA-Gym) task data. GUI_CUA_GYM_TASKS_META is an OSWorld-shaped
-# {app_type: [bundle_uuid, ...]} map; each uuid resolves to a bundle dir under
-# GUI_CUA_GYM_BUNDLES carrying task.json/config.json + reward.py.
 CUA_GYM_DATA=${CUA_GYM_DATA:-"${SCRIPT_DIR}/../../env_infra/cua_gym_data"}
 export GUI_CUA_GYM_BUNDLES=${GUI_CUA_GYM_BUNDLES:-"${CUA_GYM_DATA}/rlvr"}
 export GUI_CUA_GYM_TASKS_META=${GUI_CUA_GYM_TASKS_META:-"${CUA_GYM_DATA}/rlvr_curriculum_1000_meta.json"}
@@ -208,11 +148,6 @@ fi
 ROLLOUT_BATCH_SIZE=${ROLLOUT_BATCH_SIZE:-8}
 N_SAMPLES_PER_PROMPT=${N_SAMPLES_PER_PROMPT:-8}
 
-# ===========================================================================
-# SEMI-ASYNC: rollout 走 slime 默认 generate_rollout(不设 --rollout-function-path),
-# 主循环由 train_async.py 驱动(预取下一轮/ray.get 上一轮/训练)。无 staleness 过滤,
-# 不钉死 in-flight 池(无 --sglang-server-concurrency)。
-# ===========================================================================
 NUM_ROLLOUT=${NUM_ROLLOUT:-1000}
 ROLLOUT_ARGS=(
   --data-source-path ${GUI_DATA_SOURCE_PATH:-data.gui_data_source.CuaGymDataSource}
@@ -231,7 +166,6 @@ echo "process pool GUI_FAST_ROLLOUT_PROCS=${GUI_FAST_ROLLOUT_PROCS}, env cap GUI
 echo "Using remote GUI env server: ${GUI_ENV_SERVER_URL}"
 echo "Injecting custom config: ${CUSTOM_CONFIG_PATH}"
 
-# Eval: 半异步用 partial-async 专用 eval 入口。默认关(GUI_ENABLE_EVAL=1 开)。
 EVAL_ARGS=()
 if [[ "${GUI_ENABLE_EVAL:-0}" == "1" ]]; then
   GUI_EVAL_CONFIG=${GUI_EVAL_CONFIG:-"${SCRIPT_DIR}/scripts/gui_eval_dataset.yaml"}
@@ -260,8 +194,6 @@ OPTIMIZER_ARGS=(
   --overlap-cpu-optimizer-d2h-h2d
   --use-precision-aware-optimizer
 )
-# On a single-node 8-actor DENSE 9B layout the pinned host copies are small, so
-# pinning is left ON (Megatron default). Flip NO_PIN_CPU_*=1 only on host-RAM OOM.
 if [[ "${NO_PIN_CPU_PARAMS:-0}" == "1" ]]; then
   OPTIMIZER_ARGS+=(--no-pin-cpu-params)
 fi
@@ -269,18 +201,12 @@ if [[ "${NO_PIN_CPU_GRADS:-0}" == "1" ]]; then
   OPTIMIZER_ARGS+=(--no-pin-cpu-grads)
 fi
 
-# DENSE parallelism: actor 8 GPU 拆 2 节点，attention runs TP=4 (DP=2). NO experts.
-# TP=4(而非 8)：dense 无 EP 约束可跨节点，拆 2 节点让每节点 host RAM 减半(避免 host OOM)。
-# TP=4 时 num_query_groups(4)==world_size(4) 不触发 attention.py 的 GQA gate 二次切分(TP=8 才触发)。
 PERF_ARGS=(
   --tensor-model-parallel-size ${TRAIN_TP:-4}
   --sequence-parallel
   --pipeline-model-parallel-size 1
   --context-parallel-size ${TRAIN_CP:-1}
   --megatron-to-hf-mode bridge
-  # Qwen3.5 有 GDN(Gated Delta Net)线性注意力层，不支持 packed sequence。
-  # 必须关 --use-dynamic-batch-size + 用 --qkv-format bshd，否则 compute_log_prob 到
-  # GDN 层报 "NotImplementedError: GDN does not support packed sequence for now."。
   --qkv-format bshd
   --micro-batch-size 1
   --recompute-granularity full
@@ -289,7 +215,6 @@ PERF_ARGS=(
   --max-tokens-per-gpu 1024
 )
 
-# --dynamic_history is injected via CUSTOM_CONFIG_PATH (not a valid upstream flag).
 GRPO_ARGS=(
   --advantage-estimator grpo
   --use-kl-loss
@@ -300,14 +225,8 @@ GRPO_ARGS=(
 
 SGLANG_CHUNKED_PREFILL_SIZE=${SGLANG_CHUNKED_PREFILL_SIZE:-4096}
 SGLANG_ATTENTION_BACKEND=${SGLANG_ATTENTION_BACKEND:-fa3}
-# 半异步不钉死 in-flight 池(无 --sglang-server-concurrency)，但仍需 --sglang-max-running-requests
-# 限住 sglang engine 内部并发，避免 GUI 大截图图像预处理峰值打爆运行时显存 -> CUDA OOM。
 SGLANG_ARGS=(
   --rollout-num-gpus-per-engine ${ROLLOUT_NUM_GPUS_PER_ENGINE}
-  # mem-fraction 0.7(非 0.8): 9B 是 GDN 混合模型，mamba state cache 与 KV cache 是两套
-  # 独立显存。0.8 时长 GUI 截图(单请求可达 11390 token)的 prefill 激活 + mamba state 峰值
-  # 会把某个 TP=1 engine 剩余运行时显存打爆 -> CUDA OOM 死亡，采样期不报、update_weights
-  # 调 pause_generation 时才暴露成 Connection refused。降到 0.7 给运行时留更多余量。
   --sglang-mem-fraction-static 0.7
   --sglang-attention-backend ${SGLANG_ATTENTION_BACKEND}
   --sglang-max-running-requests ${GUI_POOL_MAX_ENVS}
@@ -362,8 +281,6 @@ export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True,max_split_size_mb:2048
 export RAY_object_spilling_threshold=0.80
 export RAY_local_fs_capacity_threshold=0.99
 
-# cuDNN ABI fix: pin the venv's self-consistent cuDNN set to the FRONT of
-# LD_LIBRARY_PATH for every Ray actor.
 VENV_CUDNN_DIR="$(python3 - <<'PY' 2>/dev/null || true
 import os, nvidia.cudnn
 print(os.path.join(os.path.dirname(nvidia.cudnn.__file__), "lib"))
@@ -380,18 +297,13 @@ ACTOR_NUMA_DIR="${NUMA_LIB_DIR}"
 export ACTOR_LD_LIBRARY_PATH="${VENV_CUDNN_DIR}${ACTOR_NUMA_DIR:+:${ACTOR_NUMA_DIR}}:${LD_LIBRARY_PATH:-}"
 echo "Pinning actor LD_LIBRARY_PATH cuDNN dir: ${VENV_CUDNN_DIR}; libnuma dir: ${ACTOR_NUMA_DIR:-<system ldconfig>}"
 
-# ===========================================================================
-# 手动 Ray 启动: 本节点起 Head。其余 GPU 节点各自跑 gpu_worker_join_ray.sh 加入。
-# ===========================================================================
 RAY_TEMP_DIR=${RAY_TEMP_DIR:-"/mnt/llmshared-ssd-hd/chentongbo/ray"}
 mkdir -p "${RAY_TEMP_DIR}"
-# Plasma object store — MUST match gpu_worker_join_ray.sh (600GB)。含图 rollout 批很大。
 OBJECT_STORE_GB=${OBJECT_STORE_GB:-600}
 OBJECT_STORE_BYTES=$(( OBJECT_STORE_GB * 1024 * 1024 * 1024 ))
 echo "Ray object store (plasma) = ${OBJECT_STORE_GB} GB"
 ray start --head --num-gpus "${ACTOR_GPUS}" --object-store-memory ${OBJECT_STORE_BYTES} --temp-dir "${RAY_TEMP_DIR}" --disable-usage-stats --dashboard-host=0.0.0.0 --dashboard-port=8265
 
-# Head: 等待 worker 节点加入(rollout 8 GPU 在另一台)。EXPECTED_NODES 默认 2。
 EXPECTED_NODES=${EXPECTED_NODES:-2}
 echo "Waiting for ${EXPECTED_NODES} nodes to join Ray cluster (run gpu_worker_join_ray.sh on the other node)..."
 for i in $(seq 1 120); do
@@ -456,7 +368,6 @@ RUNTIME_ENV_JSON="{
   }
 }"
 
-# Entry: slime 上游半异步训练主循环(train_async.py)。全异步版才用 gui-rl 私有 train_fully_async.py。
 TRAIN_ENTRY=${TRAIN_ENTRY:-"${SLIME_DIR}/train_async.py"}
 
 ray job submit --address="http://127.0.0.1:8265" \

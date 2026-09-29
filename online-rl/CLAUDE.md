@@ -150,7 +150,7 @@ file (`scripts/topologies/{2node,3node}.env`, selected with `TOPOLOGY=`).
 
 | Script | GPUs | Model | Async |
 |---|---|---|---|
-| `HybridCUA-9B_{8,16,24,32,40}gpu_fully_async.sh` | 8–40 | Qwen3.5-9B dense VLM | both layers |
+| `HybridCUA-9B_{8,16,24}gpu_fully_async.sh` | 8–24 | Qwen3.5-9B dense VLM | both layers |
 | `HybridCUA-9B_8gpu.sh` | 8 | Qwen3.5-9B | worker pool only |
 | `gui_qwen3.5_9B_{16,24}gpu*.sh` | 16/24 | Qwen3.5-9B | per suffix |
 | `gui_qwen3.5_35B_A3B_16gpu_fully_async.sh` | 16 | Qwen3.5-35B-A3B (MoE) | both |

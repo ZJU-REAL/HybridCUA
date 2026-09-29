@@ -1,38 +1,8 @@
 #!/usr/bin/env bash
-# _common.sh — shared boilerplate for gui-rl training scripts.
-#
-# Source this file near the top of each training script, after defining
-# LOG_FILE_PREFIX (e.g. "hybridcua8") and optionally DETACH_GUARD_VAR.
-#
-# Provides:
-#   setup_background_exec <log_prefix>  — re-exec detached with log capture
-#   kill_stale_python                   — kill leftover python, spare env server
-#   cleanup_ray                         — stop sglang + ray + stale python
-#   setup_proxy                         — configure outbound proxy for Ray jobs
-#   ensure_libnuma                      — locate / install libnuma.so.1
-#
-# Required env vars (must be set before sourcing or calling functions):
-#   (none mandatory at source time; each function documents its own inputs)
-#
-# Optional env vars:
-#   BACKGROUND=0              disable auto-detach (default: 1)
-#   GUI_ENV_SERVER_PROC_PATTERN  pattern to spare from pkill (default: cluster.master.server)
-#   USE_STAR_PROXY=1          enable outbound proxy; requires STAR_PROXY_URL
-#   STAR_PROXY_URL            proxy URL, e.g. http://your-proxy.example.com:3128
-#   STAR_NO_PROXY             comma-separated no-proxy list (auto-built from hostname -I)
 
-# ---------------------------------------------------------------------------
-# setup_background_exec <log_prefix>
-#
-# Re-execs the calling script detached (setsid) with all output captured to
-# a timestamped log file under <SCRIPT_DIR>/logs/, then exits the foreground
-# shell. Set BACKGROUND=0 to skip and run in the foreground.
-#
-# Must be called before set -ex so the foreground exit is clean.
-# ---------------------------------------------------------------------------
 setup_background_exec() {
   local prefix="${1:?setup_background_exec requires a log prefix argument}"
-  local guard_var="_${prefix^^}_DETACHED"   # e.g. _HYBRIDCUA8_DETACHED
+  local guard_var="_${prefix^^}_DETACHED"
 
   if [[ "${BACKGROUND:-1}" == "1" && -z "${!guard_var:-}" ]]; then
     local run_dir
@@ -51,14 +21,6 @@ setup_background_exec() {
   fi
 }
 
-# ---------------------------------------------------------------------------
-# kill_stale_python
-#
-# Kill all python processes EXCEPT the env server (matched by
-# GUI_ENV_SERVER_PROC_PATTERN, default: cluster.master.server).
-# A blanket pkill -9 python would kill the co-located OSWorld/MobileWorld
-# cluster env server, breaking the healthz check on the next run.
-# ---------------------------------------------------------------------------
 GUI_ENV_SERVER_PROC_PATTERN=${GUI_ENV_SERVER_PROC_PATTERN:-cluster.master.server}
 
 kill_stale_python() {
@@ -71,12 +33,6 @@ kill_stale_python() {
   done
 }
 
-# ---------------------------------------------------------------------------
-# cleanup_ray
-#
-# Stop sglang and Ray, then kill leftover python processes (twice, to catch
-# children spawned during the first round).
-# ---------------------------------------------------------------------------
 cleanup_ray() {
   pkill -9 sglang || true
   sleep 3
@@ -88,23 +44,6 @@ cleanup_ray() {
   kill_stale_python
 }
 
-# ---------------------------------------------------------------------------
-# setup_proxy
-#
-# Configure the outbound proxy for the Ray training job (wandb egress).
-# The proxy is intentionally NOT set in this shell or in Ray itself — only
-# injected into RUNTIME_ENV_JSON so Ray workers can reach wandb.ai while
-# all Ray/sglang/env-server traffic stays direct.
-#
-# Reads:
-#   USE_STAR_PROXY   1 = enable (default: 0)
-#   STAR_PROXY_URL   proxy URL (required when USE_STAR_PROXY=1)
-#   STAR_NO_PROXY    override the auto-built no-proxy list
-#
-# Writes (exported for use by the caller in RUNTIME_ENV_JSON):
-#   GUI_JOB_HTTP_PROXY
-#   GUI_JOB_NO_PROXY
-# ---------------------------------------------------------------------------
 setup_proxy() {
   USE_STAR_PROXY=${USE_STAR_PROXY:-0}
   if [[ "${USE_STAR_PROXY}" == "1" ]]; then
@@ -116,8 +55,6 @@ setup_proxy() {
     local local_ips
     local_ips=$(hostname -I 2>/dev/null | tr ' ' ',' | sed 's/,\+/,/g; s/^,//; s/,$//')
     STAR_NO_PROXY=${STAR_NO_PROXY:-"localhost,127.0.0.1,::1,${local_ips},<node-ip>/8,<node-ip>/12,<node-ip>/16"}
-    # Keep the proxy OUT of this shell and out of Ray — only inject into
-    # RUNTIME_ENV_JSON below. A proxy in Ray's env breaks job submission.
     unset http_proxy https_proxy HTTP_PROXY HTTPS_PROXY all_proxy ALL_PROXY no_proxy NO_PROXY
     GUI_JOB_HTTP_PROXY="${STAR_PROXY_URL}"
     GUI_JOB_NO_PROXY="${STAR_NO_PROXY}"
@@ -130,16 +67,6 @@ setup_proxy() {
   export GUI_JOB_HTTP_PROXY GUI_JOB_NO_PROXY
 }
 
-# ---------------------------------------------------------------------------
-# ensure_libnuma
-#
-# Ensure libnuma.so.1 is on LD_LIBRARY_PATH.
-# sgl_kernel links against it; without it SGLangEngine fails to start.
-# Search order: vendored copy → apt/yum → find fallback.
-#
-# Reads:
-#   SCRIPT_DIR   gui-rl package root (set by caller before sourcing)
-# ---------------------------------------------------------------------------
 ensure_libnuma() {
   local vendored_numa="${SCRIPT_DIR}/../vendor_libs"
   if ldconfig -p 2>/dev/null | grep -q libnuma; then

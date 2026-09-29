@@ -15,7 +15,6 @@ set -ex
 export WANDB_API_KEY
 export WANDB_BASE_URL=${WANDB_BASE_URL:-"https://api.wandb.ai"}
 
-# SCRIPT_DIR = gui-rl/ (scripts/.. resolves to the package root).
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." &>/dev/null && pwd)"
 SLIME_DIR="$(cd -- "${SCRIPT_DIR}/../slime" &>/dev/null && pwd)"
 MODEL_ARGS_ROTARY_BASE=5000000 source "${SLIME_DIR}/scripts/models/qwen3-8B.sh"
@@ -30,7 +29,6 @@ export RAY_health_check_period_ms=${RAY_health_check_period_ms:-5000}
 export RAY_health_check_timeout_ms=${RAY_health_check_timeout_ms:-30000}
 export RAY_num_heartbeats_timeout=${RAY_num_heartbeats_timeout:-60}
 
-# 16 GPUs across 2 nodes: actor 8 (2x4, TP=4 DP=2) + rollout 8 (8 engines x 1 GPU).
 NUM_GPUS=${NUM_GPUS:-16}
 ACTOR_GPUS=${ACTOR_GPUS:-8}
 ROLLOUT_GPUS=${ROLLOUT_GPUS:-8}
@@ -44,21 +42,12 @@ if (( ACTOR_GPUS + ROLLOUT_GPUS > NUM_GPUS )); then
   exit 1
 fi
 
-# Remote env server (OSWorld cluster, /v1/sessions session protocol on :19000).
-# Override as needed; the legacy /allocate lease server lives on :18000.
 export GUI_ENV_SERVER_URL=${GUI_ENV_SERVER_URL:-"http://127.0.0.1:19000"}
-# session protocol -> SessionGuiEnvClient (/v1/sessions). Leave unset to fall back
-# to the legacy lease-HTTP GuiEnvClient (/allocate on :18000).
 export GUI_ENV_CLIENT=${GUI_ENV_CLIENT:-session}
-# Concurrent GUI env sessions. Under fully-async the worker keeps a fixed
-# in-flight pool, so this cap is what actually protects the remote env cluster.
 export GUI_POOL_MAX_ENVS=${GUI_POOL_MAX_ENVS:-64}
 export GUI_TRAJECTORY_CONCURRENCY=${GUI_TRAJECTORY_CONCURRENCY:-64}
-# Fast multiprocess rollout (rollout/): pool size = N worker processes,
-# one trajectory per process. Disable the legacy Ray TrajectoryDispatcher.
 export GUI_ROLLOUT_WORKERS=1
 export GUI_FAST_ROLLOUT_PROCS=${GUI_FAST_ROLLOUT_PROCS:-64}
-# INFO 看全量日志（调回 WARNING 用 GUI_LOG_LEVEL=WARNING bash ...）。
 export GUI_LOG_LEVEL=${GUI_LOG_LEVEL:-INFO}
 export GUI_ACTION_SPACE=${GUI_ACTION_SPACE:-"pyautogui"}
 export GUI_OBSERVATION_TYPE=${GUI_OBSERVATION_TYPE:-"screenshot"}
@@ -66,7 +55,6 @@ export GUI_COORDINATE_TYPE=${GUI_COORDINATE_TYPE:-"relative"}
 export GUI_AGENT_CLASS_PATH=${GUI_AGENT_CLASS_PATH:-"agents.qwen3vl_agent.Qwen3VLAgentLocal"}
 export GUI_ENV_RUNTIME=${GUI_ENV_RUNTIME:-"cua_gym"}
 MULTIMODAL_KEYS=${MULTIMODAL_KEYS:-'{"image":"images"}'}
-# GUI rollout/eval step counts etc. come from CUSTOM_CONFIG_PATH (see yaml).
 
 WANDB_PROJECT=${WANDB_PROJECT:-slime_gui}
 WANDB_GROUP=${WANDB_GROUP:-qwen3vl-8b-16gpu}
@@ -79,9 +67,6 @@ export GUI_RESULT_DIR="${GUI_RESULT_DIR}/${GUI_PROJECT_NAME}"
 export GUI_TEST_CONFIG_BASE_DIR=${GUI_TEST_CONFIG_BASE_DIR:-"${SCRIPT_DIR}/evaluation_examples"}
 export GUI_TRAIN_META_PATH=${GUI_TRAIN_META_PATH:-"${GUI_TEST_CONFIG_BASE_DIR}/train_nochrome.json"}
 export GUI_EVAL_META_PATH=${GUI_EVAL_META_PATH:-"${GUI_TEST_CONFIG_BASE_DIR}/test_nochrome.json"}
-# RLVR (CUA-Gym) task data. GUI_CUA_GYM_TASKS_META is an OSWorld-shaped
-# {app_type: [bundle_uuid, ...]} map; each uuid resolves to a bundle dir under
-# GUI_CUA_GYM_BUNDLES carrying task.json/config.json + reward.py.
 CUA_GYM_DATA=${CUA_GYM_DATA:-"${SCRIPT_DIR}/../../env_infra/cua_gym_data"}
 export GUI_CUA_GYM_BUNDLES=${GUI_CUA_GYM_BUNDLES:-"${CUA_GYM_DATA}/rlvr"}
 export GUI_CUA_GYM_TASKS_META=${GUI_CUA_GYM_TASKS_META:-"${CUA_GYM_DATA}/rlvr_curriculum_1000_meta.json"}
@@ -134,10 +119,6 @@ fi
 ROLLOUT_BATCH_SIZE=${ROLLOUT_BATCH_SIZE:-8}
 N_SAMPLES_PER_PROMPT=${N_SAMPLES_PER_PROMPT:-8}
 
-# ===========================================================================
-# FULLY-ASYNC CHANGE #1: switch the train rollout scheduler to slime's
-# fully-async worker. Only flag that distinguishes this from gui_qwen3vl_16gpu.sh.
-# ===========================================================================
 NUM_ROLLOUT=${NUM_ROLLOUT:-1000}
 ROLLOUT_ARGS=(
   --rollout-function-path rollout.fully_async_rollout.generate_rollout_fully_async
@@ -151,12 +132,6 @@ ROLLOUT_ARGS=(
   --num-steps-per-rollout 1
 )
 
-# Consumer-side staleness filter (rollout/fully_async_rollout.py). Injected only
-# when ROLLOUT_MAX_STALENESS is set; unset = arg omitted = default None = no-op
-# (no /get_weight_version curl, no staleness.jsonl dump — byte-identical to before).
-# OBSERVE mode: set a huge value (e.g. 999) to enable the dump + curl while never
-# dropping (current-birth > 999 is never true), so staleness.jsonl records the real
-# distribution. Then pick a real cap (2~4, ROLL's async_generation_ratio) to filter.
 if [[ -n "${ROLLOUT_MAX_STALENESS:-}" ]]; then
   ROLLOUT_ARGS+=(--rollout-max-staleness ${ROLLOUT_MAX_STALENESS})
   echo "Staleness filter ENABLED: --rollout-max-staleness ${ROLLOUT_MAX_STALENESS} (>=999 = observe-only, never drops)"
@@ -164,16 +139,10 @@ else
   echo "Staleness filter DISABLED (ROLLOUT_MAX_STALENESS unset -> no curl, no staleness.jsonl)."
 fi
 
-# ===========================================================================
-# FULLY-ASYNC CHANGE #2: pin the in-flight pool to equal process pool + env cap.
-# in-flight = sglang_server_concurrency x num_engines. Target 64 with 8 engines
-# -> sglang_server_concurrency = 8. (Default sglang 512 would give 512x8 = 4096.)
-# ===========================================================================
 NUM_ENGINES=$(( ROLLOUT_GPUS / ROLLOUT_NUM_GPUS_PER_ENGINE ))
 if (( NUM_ENGINES < 1 )); then NUM_ENGINES=1; fi
 TARGET_IN_FLIGHT=${TARGET_IN_FLIGHT:-64}
 SGLANG_SERVER_CONCURRENCY=${SGLANG_SERVER_CONCURRENCY:-$(( (TARGET_IN_FLIGHT + NUM_ENGINES - 1) / NUM_ENGINES ))}
-# SGLANG_SERVER_CONCURRENCY=16
 if (( SGLANG_SERVER_CONCURRENCY < 1 )); then SGLANG_SERVER_CONCURRENCY=1; fi
 
 IN_FLIGHT_SAMPLES_ESTIMATE=$(( ROLLOUT_BATCH_SIZE * N_SAMPLES_PER_PROMPT ))
@@ -183,20 +152,6 @@ echo "process pool GUI_FAST_ROLLOUT_PROCS=${GUI_FAST_ROLLOUT_PROCS}, env cap GUI
 echo "Using remote GUI env server: ${GUI_ENV_SERVER_URL}"
 echo "Injecting custom config: ${CUSTOM_CONFIG_PATH}"
 
-# --gui-eval-* come from CUSTOM_CONFIG_PATH, not here.
-# online-rl/slime requires a non-empty args.eval_datasets whenever --eval-interval
-# is set. GUI eval does NOT consume these datasets; --eval-config only satisfies
-# slime's validation so the periodic eval hook fires.
-#
-# ===== EVAL OFF BY DEFAULT under fully-async =====
-# fully-async training cannot eval (generate_rollout_fully_async raises on
-# evaluation=True), and a periodic eval contends with the in-flight pool for the
-# same worker/env slots. Ckpts are saved every SAVE_INTERVAL step; eval offline.
-# Opt in with GUI_EVAL_INTERVAL=<n>, which routes eval through its own
-# --eval-function-path (eval_rollout_fully_async).
-# Note: dynamic_history fan-out only triggers when evaluation=False
-# (rollout/trajectory_runner.py: `if dynamic_history and not evaluation`), so
-# eval returns plain Sample objects and never hits the nested-group path.
 GUI_EVAL_CONFIG=${GUI_EVAL_CONFIG:-"${SCRIPT_DIR}/scripts/gui_eval_dataset.yaml"}
 GUI_EVAL_INTERVAL=${GUI_EVAL_INTERVAL:-0}
 if (( GUI_EVAL_INTERVAL > 0 )); then
@@ -204,7 +159,6 @@ if (( GUI_EVAL_INTERVAL > 0 )); then
     --eval-temperature 0.0
     --n-samples-per-eval-prompt 1
     --eval-interval "${GUI_EVAL_INTERVAL}"
-    # --eval-at-start
     --eval-config "${GUI_EVAL_CONFIG}"
     --eval-reward-key acc
     --eval-function-path rollout.fully_async_rollout.eval_rollout_fully_async
@@ -241,7 +195,6 @@ PERF_ARGS=(
   --max-tokens-per-gpu 1024
 )
 
-# --dynamic_history is injected via CUSTOM_CONFIG_PATH (not a valid upstream flag).
 GRPO_ARGS=(
   --advantage-estimator grpo
   --use-kl-loss
@@ -250,12 +203,6 @@ GRPO_ARGS=(
   --loss-mask-type qwen3
 )
 
-# FULLY-ASYNC CHANGE #2 (cont.): the pinned --sglang-server-concurrency.
-# --use-distributed-post kept for non-pool paths; pool workers force it off.
-# chunked_prefill_size: GUI prompts are ~7640 token, which under the default
-# 8192 produces ONE half-full chunk (low GPU util, ~11% full-chunk rate vs eval's
-# 64%). Splitting at 4096 makes a 7640 prompt -> 4096+3544 (two fuller chunks),
-# raising prefill GPU utilization. Tune via SGLANG_CHUNKED_PREFILL_SIZE; 8192 = sglang default.
 SGLANG_CHUNKED_PREFILL_SIZE=${SGLANG_CHUNKED_PREFILL_SIZE:-4096}
 SGLANG_ARGS=(
   --rollout-num-gpus-per-engine ${ROLLOUT_NUM_GPUS_PER_ENGINE}
@@ -266,8 +213,6 @@ SGLANG_ARGS=(
   --sglang-enable-metrics
 )
 
-# Refactored entrypoints. --custom-generate-function-path STAYS on rollout
-# (the process pool) — this is what fully-async dispatches each trajectory through.
 CUSTOM_ARGS=(
   --custom-generate-function-path rollout.partial_async_gui_rollout.generate
   --custom-rm-path reward.reward_func.reward_func
@@ -311,22 +256,12 @@ export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True,max_split_size_mb:2048
 export RAY_object_spilling_threshold=0.80
 export RAY_local_fs_capacity_threshold=0.99
 
-# cuDNN ABI fix: the system ships an OLDER cuDNN 9 in /usr/lib/x86_64-linux-gnu
-# (libcudnn_graph.so.9.10.2) while the venv pip-installed nvidia-cudnn-cu12 is
-# 9.17. transformer_engine loads the venv's libcudnn_cnn (9.17) with RTLD_GLOBAL,
-# but ldconfig resolves libcudnn_graph to the system 9.10.2 which lacks the
-# OperationGraph vtable symbol -> "undefined symbol ... libcudnn_graph.so.9" and
-# every SGLangEngine actor dies at import. Force the venv's self-consistent cuDNN
-# set to the FRONT of LD_LIBRARY_PATH for every Ray actor (both nodes share this
-# venv over /mnt/llmshared-ssd-hd, so the path is valid cluster-wide).
-# Prefer asking python where nvidia.cudnn lives; fall back to the project-root venv.
 VENV_CUDNN_DIR="$(python3 - <<'PY' 2>/dev/null || true
 import os, nvidia.cudnn
 print(os.path.join(os.path.dirname(nvidia.cudnn.__file__), "lib"))
 PY
 )"
 if [[ -z "${VENV_CUDNN_DIR}" || ! -d "${VENV_CUDNN_DIR}" ]]; then
-  # SCRIPT_DIR is gui-rl/; the venv sits at <project-root>/venvs/online-rl.
   PROJECT_ROOT="$(cd -- "${SCRIPT_DIR}/.." &>/dev/null && pwd)"
   VENV_CUDNN_DIR="${PROJECT_ROOT}/venvs/online-rl/lib/python3.12/site-packages/nvidia/cudnn/lib"
 fi
@@ -339,20 +274,14 @@ echo "Pinning actor LD_LIBRARY_PATH cuDNN dir: ${VENV_CUDNN_DIR}"
 RAY_TEMP_DIR=${RAY_TEMP_DIR:-"/mnt/llmshared-ssd-hd/chentongbo/ray"}
 mkdir -p "${RAY_TEMP_DIR}"
 
-# Head node starts Ray. Worker nodes join via gpu_worker_join_ray.sh separately.
 NUM_GPUS_PER_NODE=${NUM_GPUS_PER_NODE:-8}
 EXPECTED_NODES=${EXPECTED_NODES:-2}
-# Ray plasma object store size — MUST match the worker (gpu_worker_join_ray.sh 默认 600GB)。
-# 默认(~30% RAM)会被 fan-out 的含图 rollout 批(dynamic_history 700~960 张图样本)打满 ->
-# 触发多 TB spill 到磁盘 -> 训练被 IO 拖死 -> DP rank 到不了 gather_object -> gloo 600s 超时。
-# head 此前漏设此项(head 用默认、worker 用 600GB,两侧不对称),曾导致 2.1TB spill 崩溃。
 OBJECT_STORE_GB=${OBJECT_STORE_GB:-600}
 OBJECT_STORE_BYTES=$(( OBJECT_STORE_GB * 1024 * 1024 * 1024 ))
 echo "Ray object store (plasma) = ${OBJECT_STORE_GB} GB"
 ray start --head --num-gpus "${NUM_GPUS_PER_NODE}" --object-store-memory ${OBJECT_STORE_BYTES} --temp-dir "${RAY_TEMP_DIR}" --disable-usage-stats --dashboard-host=0.0.0.0 --dashboard-port=8265
 echo "Head node started. Run gpu_worker_join_ray.sh on worker nodes to join."
 
-# Wait for all nodes to join before submitting the job.
 echo "Waiting for ${EXPECTED_NODES} nodes to join Ray cluster..."
 for i in $(seq 1 120); do
   ACTIVE_NODES=$(ray status 2>/dev/null | grep -c "node_" || echo 0)
@@ -413,10 +342,6 @@ RUNTIME_ENV_JSON="{
   }
 }"
 
-# Entry: private GUI-RL copy of slime/train_async.py under gui-rl/, so the
-# fully-async MAIN LOOP (eval drain/isolation, staleness, backpressure) can be
-# tuned without patching slime. Override TRAIN_ENTRY to point back at
-# "${SLIME_DIR}/train_async.py" to use the upstream loop.
 TRAIN_ENTRY=${TRAIN_ENTRY:-"${SCRIPT_DIR}/train_fully_async.py"}
 
 ray job submit --address="http://127.0.0.1:8265" \

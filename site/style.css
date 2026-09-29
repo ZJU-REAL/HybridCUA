@@ -210,10 +210,6 @@ code {
     border-radius: 3px;
 }
 
-.nowrap {
-    white-space: nowrap;
-}
-
 /* ============================== layout ============================== */
 
 .wrap {
@@ -231,7 +227,7 @@ code {
 }
 
 .section {
-    padding: 72px 0;
+    padding: 60px 0;
     background: var(--page);
 }
 
@@ -247,15 +243,9 @@ code {
 
 h3.sub {
     font-size: 1.15rem;
-    margin: 3rem 0 1rem;
-    padding-top: 1.5rem;
+    margin: 2.5rem 0 1rem;
+    padding-top: 1.35rem;
     border-top: 1px solid var(--border);
-}
-
-h3.sub-tight {
-    margin-top: 0;
-    padding-top: 0;
-    border-top: 0;
 }
 
 .lede {
@@ -412,11 +402,21 @@ h3.sub-tight {
 }
 
 .hero-title {
-    font-size: clamp(1.75rem, 4.2vw, 2.6rem);
+    font-size: clamp(1.5rem, 3.4vw, 2.45rem);
     letter-spacing: -.025em;
     margin: 0 auto 1.5rem;
-    max-width: 22ch;
+}
+
+/* Two deliberate lines; they only rewrap once the viewport is too narrow. */
+.hero-title .line {
+    display: block;
     text-wrap: balance;
+}
+
+@media (max-width: 560px) {
+    .hero-title .line {
+        display: inline;
+    }
 }
 
 .authors {
@@ -436,13 +436,14 @@ h3.sub-tight {
 }
 
 .affil {
-    margin: 0 0 .4rem;
+    margin: 0 0 2rem;
     font-size: .9375rem;
     color: var(--text-secondary);
 }
 
 .affil-note {
-    margin: 0 0 2rem;
+    display: block;
+    margin-top: .3rem;
     font-size: .8125rem;
     color: var(--text-muted);
 }
@@ -566,7 +567,7 @@ h3.sub-tight {
 /* ============================== figures ============================== */
 
 .fig {
-    margin: 2.5rem 0;
+    margin: 2rem 0;
 }
 
 .fig img {
@@ -581,14 +582,6 @@ h3.sub-tight {
 .fig-teaser {
     margin-top: 2.5rem;
     margin-bottom: 0;
-}
-
-.fig-tight {
-    margin: 0;
-}
-
-.fig-flush {
-    margin: 0;
 }
 
 figcaption {
@@ -620,70 +613,6 @@ figcaption {
     line-height: 1.8;
     text-align: justify;
     hyphens: auto;
-}
-
-.prose-card {
-    background: var(--surface-1);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 22px 24px;
-}
-
-/* ---------- contributions ---------- */
-
-.contrib {
-    list-style: none;
-    counter-reset: c;
-    padding: 0;
-    margin: 0;
-    display: grid;
-    gap: 14px;
-}
-
-.contrib li {
-    counter-increment: c;
-    position: relative;
-    padding: 18px 22px 18px 58px;
-    background: var(--surface-1);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-}
-
-.contrib li::before {
-    content: counter(c);
-    position: absolute;
-    left: 20px;
-    top: 19px;
-    width: 24px;
-    height: 24px;
-    display: grid;
-    place-items: center;
-    font-size: .8125rem;
-    font-weight: 700;
-    color: #fff;
-    background: var(--accent-ink);
-    border-radius: 6px;
-}
-
-:root[data-theme="dark"] .contrib li::before {
-    color: #0d1118;
-}
-
-@media (prefers-color-scheme: dark) {
-    :root:where(:not([data-theme="light"])) .contrib li::before {
-        color: #0d1118;
-    }
-}
-
-.contrib h4 {
-    font-size: 1rem;
-    margin-bottom: .35rem;
-}
-
-.contrib p {
-    margin: 0;
-    font-size: .9375rem;
-    color: var(--text-secondary);
 }
 
 /* ============================== cards & grids ============================== */
@@ -804,13 +733,8 @@ figcaption {
     margin-top: 2rem;
 }
 
-.route-card h4 {
-    font-size: .9375rem;
-    margin: 10px 0 .45rem;
-}
-
 .route-card p {
-    margin: 0;
+    margin: 10px 0 0;
     font-size: .875rem;
     color: var(--text-secondary);
 }
@@ -1086,30 +1010,6 @@ td .best {
     background: var(--cli-soft);
 }
 
-/* ---------- inline bar cell ---------- */
-
-.bar-cell {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    gap: 9px;
-}
-
-.bar-track {
-    width: 70px;
-    height: 7px;
-    border-radius: 4px;
-    background: var(--surface-3);
-    overflow: hidden;
-    flex: 0 0 auto;
-}
-
-.bar-fill {
-    height: 100%;
-    border-radius: 4px;
-    background: var(--blue-dark);
-}
-
 /* ============================== details ============================== */
 
 .table-toggle,
@@ -1362,85 +1262,31 @@ td .best {
     vertical-align: -1px;
 }
 
-/* ============================== tabs ============================== */
-
-.tablist {
-    display: flex;
-    gap: 4px;
-    padding: 4px;
-    margin-bottom: 18px;
-    background: var(--surface-3);
-    border-radius: 999px;
-    width: fit-content;
-    max-width: 100%;
-    overflow-x: auto;
-}
-
-.tablist button {
-    padding: 7px 18px;
-    font-family: inherit;
-    font-size: .875rem;
-    font-weight: 600;
-    color: var(--text-secondary);
-    background: transparent;
-    border: 0;
-    border-radius: 999px;
-    cursor: pointer;
-    white-space: nowrap;
-}
-
-.tablist button:hover {
-    color: var(--text-primary);
-}
-
-.tablist button[aria-selected="true"] {
-    color: var(--text-primary);
-    background: var(--surface-1);
-    box-shadow: var(--shadow-sm);
-}
-
 /* ============================== footer ============================== */
 
 .footer {
-    padding: 48px 0 40px;
+    padding: 36px 0 32px;
     background: var(--surface-1);
     border-top: 1px solid var(--border);
 }
 
-.footer-cols {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 28px;
-    margin-bottom: 2rem;
-}
-
-.footer-cols h4 {
-    font-size: .75rem;
-    font-weight: 700;
-    letter-spacing: .06em;
-    text-transform: uppercase;
-    color: var(--text-muted);
-    margin-bottom: .6rem;
-}
-
-.footer-cols a {
-    display: block;
+.footer-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 22px;
+    margin: 0 0 1.25rem;
     font-size: .875rem;
-    margin-bottom: .3rem;
-}
-
-.footer-cols p {
-    margin: 0;
-    font-size: .875rem;
-    color: var(--text-secondary);
+    font-weight: 550;
 }
 
 .footer-note {
     margin: 0;
-    padding-top: 1.5rem;
+    padding-top: 1.25rem;
     border-top: 1px solid var(--border);
     font-size: .8125rem;
+    line-height: 1.7;
     color: var(--text-muted);
+    max-width: 78ch;
 }
 
 /* ============================== responsive ============================== */
@@ -1457,8 +1303,7 @@ td .best {
         grid-template-columns: 1fr;
     }
 
-    .route-grid,
-    .footer-cols {
+    .route-grid {
         grid-template-columns: 1fr;
     }
 }
@@ -1515,8 +1360,7 @@ td .best {
         white-space: normal;
     }
 
-    .card,
-    .prose-card {
+    .card {
         padding: 18px;
     }
 }

@@ -1,17 +1,3 @@
-# lambda sweep: R_cli=0.1, R_exec=0.2  (2026-09-22)
-#
-# Copy of gui_partial_async_osworld.yaml with ONE change: lambda_exec 0.3 -> 0.2.
-# The 0.3 run is ..._osworld.yaml (A5 24gpu_20260921_123721 / 0922_141801).
-# Everything else is byte-identical so the comparison is unconfounded.
-#
-# lambda_exec is the one-sided per-step CLI shell-failure penalty (e_t in {-1,0}),
-# added OUTSIDE the GRPO group normalisation.  At 0.5 it made the model avoid CLI
-# rather than write it correctly (see gui_partial_async_32gpu.yaml's notes); this
-# run walks it back from 0.3 another notch to see if that tradeoff moves.
-#
-# NOTE: lambda_exec must stay non-zero -- when every lambda is 0 the RM gate
-# prefills the reward and cli_aware_enabled() is False, so the term never fires.
-
 dynamic_history: true
 
 gui_max_steps: 30
