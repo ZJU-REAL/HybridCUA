@@ -1,0 +1,41 @@
+{
+  "_comment": "TODO: replace placeholder numbers with real results. `highlight: true` tints the row; `url` is optional and links the model name.",
+  "updated": "2026-09-29",
+  "entries": [
+    {
+      "model": "HybridCUA-9B",
+      "size": "9B",
+      "overall": 0.0,
+      "office": 0.0,
+      "os": 0.0,
+      "web": 0.0,
+      "url": null,
+      "highlight": true
+    },
+    {
+      "model": "Baseline A",
+      "size": "8B",
+      "overall": 0.0,
+      "office": 0.0,
+      "os": 0.0,
+      "web": 0.0,
+      "url": null
+    },
+    {
+      "model": "Baseline B",
+      "size": "35B-A3B",
+      "overall": 0.0,
+      "office": 0.0,
+      "os": 0.0,
+      "web": 0.0,
+      "url": null
+    }
+  ],
+  "training_curve": {
+    "steps": [0, 20, 40, 60, 80, 100],
+    "series": [
+      { "label": "train success rate", "values": [0, 0, 0, 0, 0, 0] },
+      { "label": "eval success rate", "values": [0, 0, 0, 0, 0, 0] }
+    ]
+  }
+}

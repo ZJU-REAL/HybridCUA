@@ -1,0 +1,76 @@
+world_id: mobileworld
+version: 1
+display_name: MobileWorld
+adapter: cluster.worlds.mobileworld.adapter:MobileWorldAdapter
+
+driver:
+  kind: docker
+  image: ghcr.io/tongyi-mai/mobile_world:v1.4
+  command: ["python", "-m", "cluster.worlds.mobileworld.sidecar"]
+
+resources:
+  cpu_cores: 4
+  memory_gb: 8
+  gpu: false
+  kvm: true
+
+capabilities:
+  environment: mobile
+  os: android
+  observation:
+    - screenshot
+    - ui_tree
+  action:
+    - click
+    - double_tap
+    - long_press
+    - scroll
+    - swipe
+    - drag
+    - input_text
+    - keyboard_enter
+    - navigate_home
+    - navigate_back
+    - open_app
+    - answer
+    - ask_user
+    - status
+    - wait
+    - finished
+    - unknown
+    - mcp
+  evaluation:
+    - scalar_score
+    - success
+  artifacts:
+    - screenshots
+    - device_logs
+  live_view:
+    protocol: vnc
+    port_key: vnc_port
+
+config_schema:
+  http_proxy:
+    type: string
+    default: http://127.0.0.1:3128
+  device:
+    type: string
+    default: emulator-5554
+  step_wait_time:
+    type: number
+    default: 1.0
+  enable_mcp:
+    type: boolean
+    default: false
+  enable_vnc:
+    type: boolean
+    default: false
+  launch_interval:
+    type: number
+    default: 20
+  ready_timeout:
+    type: number
+    default: 900
+  task_name:
+    type: string
+    required: false

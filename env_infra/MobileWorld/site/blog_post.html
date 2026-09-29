@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog – MobileWorld</title>
+    <meta name="description" content="Research updates and analysis from the MobileWorld benchmark team." id="meta-description">
+
+    <!-- Open Graph / Twitter (updated client-side from post frontmatter) -->
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="Blog – MobileWorld" id="og-title">
+    <meta property="og:description" content="Research updates and analysis from the MobileWorld benchmark team." id="og-description">
+    <meta property="og:url" content="https://tongyi-mai.github.io/MobileWorld/blog.html" id="og-url">
+    <meta property="og:image" content="https://tongyi-mai.github.io/MobileWorld/assets/banner_poster.jpg" id="og-image">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Blog – MobileWorld" id="tw-title">
+    <meta name="twitter:description" content="Research updates and analysis from the MobileWorld benchmark team." id="tw-description">
+    <meta name="twitter:image" content="https://tongyi-mai.github.io/MobileWorld/assets/banner_poster.jpg" id="tw-image">
+    <link rel="canonical" href="https://tongyi-mai.github.io/MobileWorld/blog.html" id="canonical-link">
+
+    <meta name="google-site-verification" content="kjMZV7GMfaOB_viMzX709NKwCzkU50OnzUs5dDBHoO0">
+
+    <!-- Bulma CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Academicons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Noto+Serif:ital,wght@0,400;0,600;0,700;1,400&display=swap"
+        rel="stylesheet">
+    <!-- Highlight.js -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <!-- markdown-it -->
+    <script src="https://cdn.jsdelivr.net/npm/markdown-it@14.1.0/dist/markdown-it.min.js"></script>
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .post-container {
+            padding: 4rem 1.5rem 3rem;
+        }
+
+        .post-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-size: 0.85rem;
+            color: #888;
+            text-decoration: none;
+            margin-bottom: 2rem;
+            transition: color 0.15s;
+        }
+
+        .post-back:hover {
+            color: #333;
+        }
+
+        .post-content {
+            overflow-wrap: break-word;
+            max-width: 100%;
+            hyphens: none;
+            -webkit-hyphens: none;
+        }
+
+        .post-content h1 {
+            font-family: 'Noto Serif', Georgia, serif;
+            font-size: 2rem;
+            font-weight: 600;
+            color: #1a1a1a;
+            line-height: 1.3;
+            margin-bottom: 1.5rem;
+        }
+
+        .post-content h2 {
+            font-family: 'Noto Serif', Georgia, serif;
+            font-size: 1.35rem;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-top: 2.5rem;
+            margin-bottom: 0.75rem;
+            padding-bottom: 0.4rem;
+            border-bottom: 1px solid #eee;
+        }
+
+        .post-content h3 {
+            font-family: 'Noto Sans', sans-serif;
+            font-size: 1.05rem;
+            font-weight: 600;
+            color: #333;
+            margin-top: 1.75rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .post-content p {
+            font-size: 0.95rem;
+            line-height: 1.75;
+            color: #333;
+            margin-bottom: 1rem;
+        }
+
+        .post-content ul,
+        .post-content ol {
+            margin-bottom: 1rem;
+            padding-left: 1.75rem;
+        }
+
+        .post-content ul {
+            list-style-type: disc;
+        }
+
+        .post-content ol {
+            list-style-type: decimal;
+        }
+
+        .post-content ul ul {
+            list-style-type: circle;
+        }
+
+        .post-content li {
+            font-size: 0.95rem;
+            line-height: 1.75;
+            color: #333;
+            margin-bottom: 0.35rem;
+            display: list-item;
+        }
+
+        .post-content li>p {
+            margin-bottom: 0.4rem;
+        }
+
+        .post-content strong {
+            font-weight: 600;
+            color: #1a1a1a;
+        }
+
+        .post-content a {
+            color: #1a5276;
+            text-decoration: underline;
+            text-decoration-color: #ccc;
+            text-underline-offset: 2px;
+            transition: text-decoration-color 0.15s;
+        }
+
+        .post-content a:hover {
+            text-decoration-color: #1a5276;
+        }
+
+        .post-content blockquote {
+            border-left: 3px solid #e0e0e0;
+            margin: 1.25rem 0;
+            padding: 0.5rem 1rem;
+            color: #555;
+        }
+
+        .post-content code {
+            background: #f5f5f3;
+            padding: 0.15rem 0.4rem;
+            border-radius: 3px;
+            font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+            font-size: 0.85em;
+        }
+
+        .post-content pre {
+            background: #f8f8f6;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            padding: 1rem 1.25rem;
+            margin: 1.25rem 0;
+            overflow-x: auto;
+            max-width: 100%;
+        }
+
+        .post-content pre code {
+            background: none;
+            padding: 0;
+            font-size: 0.82rem;
+            line-height: 1.6;
+        }
+
+        .post-content table {
+            border-collapse: collapse;
+            margin: 1.25rem 0;
+            font-size: 0.85rem;
+            min-width: 100%;
+        }
+
+        .post-content thead {
+            background: #fafaf8;
+        }
+
+        .post-content th {
+            font-weight: 600;
+            text-align: left;
+            padding: 0.6rem 0.75rem;
+            border-bottom: 2px solid #eee;
+            color: #555;
+            font-size: 0.82rem;
+        }
+
+        .post-content td {
+            padding: 0.55rem 0.75rem;
+            border-bottom: 1px solid #f0f0f0;
+            color: #333;
+            vertical-align: top;
+        }
+
+        .post-content tbody tr:hover {
+            background: #fafaf8;
+        }
+
+        .post-content hr {
+            border: none;
+            border-top: 1px solid #eee;
+            margin: 2rem 0;
+        }
+
+        .post-content img {
+            max-width: 100%;
+            border-radius: 8px;
+            margin: 1rem 0;
+        }
+
+        .post-loading {
+            text-align: center;
+            padding: 4rem 0;
+            color: #999;
+            font-size: 0.9rem;
+        }
+
+        .post-error {
+            text-align: center;
+            padding: 4rem 0;
+            color: #a8323c;
+            font-size: 0.9rem;
+        }
+
+        .post-meta {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 0.75rem 1.25rem;
+            margin: -0.25rem 0 1.75rem;
+            font-size: 0.85rem;
+            color: #888;
+        }
+
+        .post-meta-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .post-meta-item i {
+            color: #bbb;
+        }
+
+        .post-meta-authors {
+            color: #555;
+        }
+
+        .post-meta-author {
+            font-size: 0.82rem;
+            color: #999;
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+        /* Responsive table wrapper */
+        .table-wrap {
+            overflow-x: auto;
+            margin: 1.25rem 0;
+        }
+
+
+        @media screen and (max-width: 768px) {
+            .post-container {
+                padding: 3rem 1rem 2rem;
+            }
+
+            .post-content h1 {
+                font-size: 1.5rem;
+            }
+
+            .post-content h2 {
+                font-size: 1.15rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar is-fixed-top" role="navigation" aria-label="main navigation" id="main-navbar">
+        <div class="navbar-brand">
+            <a class="navbar-item navbar-title" href="index.html">
+                <strong>MobileWorld</strong>
+            </a>
+            <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" id="navbar-burger">
+                <span aria-hidden="true"></span>
+                <span aria-hidden="true"></span>
+                <span aria-hidden="true"></span>
+            </a>
+        </div>
+        <div class="navbar-menu" id="navbar-menu">
+            <div class="navbar-start">
+                <a class="navbar-item" href="index.html#leaderboard">Leaderboard</a>
+                <a class="navbar-item" href="index.html#arena">Arena</a>
+                <a class="navbar-item" href="index.html#overview">Overview</a>
+                <a class="navbar-item" href="blog.html">Blog</a>
+            </div>
+            <div class="navbar-end">
+                <div class="navbar-item">
+                    <div class="buttons">
+                        <a href="https://arxiv.org/abs/2512.19432" class="button is-small is-dark" target="_blank">
+                            <span class="icon"><i class="ai ai-arxiv"></i></span>
+                            <span>Paper</span>
+                        </a>
+                        <a href="https://huggingface.co/datasets/Tongyi-MAI/MobileWorld" class="button is-small is-dark"
+                            target="_blank">
+                            <span class="icon"><img
+                                    src="https://huggingface.co/front/assets/huggingface_logo-noborder.svg" alt="HF"
+                                    style="height: 14px; opacity: 0.7;"></span>
+                            <span>Dataset</span>
+                        </a>
+                        <a href="https://github.com/Tongyi-MAI/MobileWorld" class="button is-small is-dark"
+                            target="_blank">
+                            <span class="icon"><i class="fab fa-github"></i></span>
+                            <span>Code</span>
+                        </a>
+                        <div class="dropdown is-hoverable is-right" id="cite-dropdown">
+                            <div class="dropdown-trigger">
+                                <button class="button is-small is-dark" aria-haspopup="true" aria-controls="cite-menu">
+                                    <span class="icon"><i class="fas fa-quote-right"></i></span>
+                                    <span>Cite</span>
+                                </button>
+                            </div>
+                            <div class="dropdown-menu" id="cite-menu" role="menu">
+                                <div class="dropdown-content cite-dropdown-content">
+                                    <div class="dropdown-item">
+                                        <p class="is-size-7 has-text-weight-semibold mb-2">BibTeX</p>
+                                        <pre class="cite-bibtex"><code>@inproceedings{kong2025mobileworld,
+      title={MobileWorld: Benchmarking Autonomous Mobile Agents in Agent-User Interactive, and MCP-Augmented Environments},
+      author={Quyu Kong and Xu Zhang and Zhenyu Yang and Nolan Gao and Chen Liu and Panrong Tong and Chenglin Cai and Hanzhang Zhou and Jianan Zhang and Liangyu Chen and Zhidan Liu and Steven Hoi and Yue Wang},
+      booktitle={Proceedings of the 64th Annual Meeting of the Association for Computational Linguistics (ACL)},
+      year={2026},
+      url={https://arxiv.org/abs/2512.19432},
+}</code></pre>
+                                        <button class="button is-small is-fullwidth mt-2" id="copy-cite-btn">
+                                            <span class="icon"><i class="fas fa-copy"></i></span>
+                                            <span>Copy</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container is-max-desktop">
+        <div class="post-container">
+            <a class="post-back" href="blog.html"><i class="fas fa-arrow-left"></i> All posts</a>
+            <article class="post-content" id="post-content">
+                <div class="post-loading"><i class="fas fa-spinner fa-spin"></i> Loading post&hellip;</div>
+            </article>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="content has-text-centered">
+            <p>
+                <strong>MobileWorld Team</strong> &middot;
+                <a href="https://github.com/Tongyi-MAI/MobileWorld">GitHub</a> &middot;
+                <a href="https://github.com/Tongyi-MAI/MobileWorld/issues">Issues</a>
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const $navbarBurger = document.getElementById('navbar-burger');
+            const $navbarMenu = document.getElementById('navbar-menu');
+            const $navbar = document.getElementById('main-navbar');
+
+            if ($navbarBurger) {
+                $navbarBurger.addEventListener('click', () => {
+                    $navbarBurger.classList.toggle('is-active');
+                    $navbarMenu.classList.toggle('is-active');
+                });
+            }
+
+            let ticking = false;
+            window.addEventListener('scroll', () => {
+                if (!ticking) {
+                    requestAnimationFrame(() => {
+                        $navbar.classList.toggle('is-scrolled', window.scrollY > 10);
+                        ticking = false;
+                    });
+                    ticking = true;
+                }
+            }, { passive: true });
+
+            const copyCiteBtn = document.getElementById('copy-cite-btn');
+            if (copyCiteBtn) {
+                copyCiteBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const bibtex = copyCiteBtn.closest('.dropdown-item').querySelector('code').textContent;
+                    navigator.clipboard.writeText(bibtex).then(() => {
+                        const originalHTML = copyCiteBtn.innerHTML;
+                        copyCiteBtn.innerHTML = '<span class="icon"><i class="fas fa-check"></i></span><span>Copied!</span>';
+                        copyCiteBtn.classList.add('is-success');
+                        setTimeout(() => {
+                            copyCiteBtn.innerHTML = originalHTML;
+                            copyCiteBtn.classList.remove('is-success');
+                        }, 2000);
+                    });
+                });
+            }
+        });
+
+        (async function () {
+            const container = document.getElementById('post-content');
+            const params = new URLSearchParams(window.location.search);
+            const post = params.get('post');
+
+            if (!post) {
+                container.innerHTML = '<div class="post-error">No post specified.</div>';
+                return;
+            }
+
+            try {
+                const resp = await fetch(`blog_posts/${post}.md`);
+                if (!resp.ok) throw new Error(`Post not found (${resp.status})`);
+                let md = await resp.text();
+
+                // Parse optional YAML-style frontmatter (--- ... ---)
+                const meta = {};
+                const fmMatch = md.match(/^---\n([\s\S]*?)\n---\n?/);
+                if (fmMatch) {
+                    fmMatch[1].split('\n').forEach(line => {
+                        const idx = line.indexOf(':');
+                        if (idx > -1) {
+                            const k = line.slice(0, idx).trim();
+                            const v = line.slice(idx + 1).trim().replace(/^["']|["']$/g, '');
+                            if (k) meta[k] = v;
+                        }
+                    });
+                    md = md.slice(fmMatch[0].length);
+                }
+
+                const mdi = markdownit({
+                    html: true,
+                    linkify: true,
+                    typographer: false,
+                    highlight: function (str, lang) {
+                        if (lang && hljs.getLanguage(lang)) {
+                            try { return hljs.highlight(str, { language: lang }).value; }
+                            catch (_) { }
+                        }
+                        return '';
+                    }
+                });
+
+                container.innerHTML = mdi.render(md.replace(/\u00a0/g, ' '));
+                const titleText = container.querySelector('h1')?.textContent || 'Blog';
+                document.title = titleText + ' – MobileWorld Blog';
+
+                // Update meta description, OG, Twitter, and canonical from frontmatter
+                const postUrl = `https://tongyi-mai.github.io/MobileWorld/blog_post.html?post=${encodeURIComponent(post)}`;
+                const desc = meta.description || 'Research updates and analysis from the MobileWorld benchmark team.';
+                const setAttr = (id, attr, val) => {
+                    const el = document.getElementById(id);
+                    if (el) el.setAttribute(attr, val);
+                };
+                setAttr('meta-description', 'content', desc);
+                setAttr('og-title', 'content', titleText);
+                setAttr('og-description', 'content', desc);
+                setAttr('og-url', 'content', postUrl);
+                setAttr('tw-title', 'content', titleText);
+                setAttr('tw-description', 'content', desc);
+                setAttr('canonical-link', 'href', postUrl);
+                if (meta.image) {
+                    const imgUrl = /^https?:/.test(meta.image) ? meta.image
+                        : `https://tongyi-mai.github.io/MobileWorld/${meta.image}`;
+                    setAttr('og-image', 'content', imgUrl);
+                    setAttr('tw-image', 'content', imgUrl);
+                }
+
+                // Insert authors meta block right after the title
+                if (meta.authors) {
+                    const h1 = container.querySelector('h1');
+                    if (h1) {
+                        const metaEl = document.createElement('div');
+                        metaEl.className = 'post-meta';
+                        metaEl.innerHTML = `<span class="post-meta-item post-meta-authors">${meta.authors}</span>`;
+                        h1.insertAdjacentElement('afterend', metaEl);
+                    }
+                }
+
+                // Prevent unwanted line breaks at hyphens/dashes in text nodes.
+                // - Replace ASCII hyphen with non-breaking hyphen (U+2011)
+                // - Surround en-dash/em-dash with word-joiners (U+2060) so
+                //   the browser won't break the line at those characters.
+                // Skip <code>, <pre>, <a>.
+                const DASH_RE = /-|\u2013|\u2014/g;
+                function fixDashes(node) {
+                    if (node.nodeType === Node.TEXT_NODE) {
+                        if (DASH_RE.test(node.textContent)) {
+                            DASH_RE.lastIndex = 0;
+                            node.textContent = node.textContent.replace(DASH_RE, function (m) {
+                                if (m === '-') return '\u2011';
+                                return '\u2060' + m + '\u2060';
+                            });
+                        }
+                    } else if (node.nodeType === Node.ELEMENT_NODE &&
+                        !['CODE', 'PRE', 'A'].includes(node.tagName)) {
+                        node.childNodes.forEach(fixDashes);
+                    }
+                }
+                fixDashes(container);
+
+                // Wrap tables for horizontal scroll on mobile
+                container.querySelectorAll('table').forEach(table => {
+                    const wrap = document.createElement('div');
+                    wrap.className = 'table-wrap';
+                    table.parentNode.insertBefore(wrap, table);
+                    wrap.appendChild(table);
+                });
+            } catch (err) {
+                container.innerHTML = `<div class="post-error"><i class="fas fa-exclamation-triangle"></i> ${err.message}</div>`;
+            }
+        })();
+    </script>
+</body>
+
+</html>

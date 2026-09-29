@@ -1,0 +1,60 @@
+# Custom-config for the HybridCUA-9B 32gpu OSWorld run.
+#
+# A SEPARATE copy of gui_partial_async.yaml on purpose: the 40gpu / 24gpu runs
+# read that file, so tuning lambda_* here must not move their reward function.
+#
+# slime reads this via --custom-config-path and setattr()s each key onto `args`
+# (arguments.py:2012). These keys are not in upstream argparse, so passing them
+# as CLI flags would be silently dropped by megatron's ignore_unknown_args.
+
+dynamic_history: true
+
+gui_max_steps: 30
+gui_wait_after_reset: 60
+gui_sleep_after_execution: 0.5
+gui_max_image_history_length: 3
+
+gui_eval_max_steps: 50
+gui_eval_sleep_after_execution: 3.0
+gui_eval_wait_after_reset: 60
+
+prm_enable: false
+
+# Stage II CLI-aware reward (paper eq. 6/7). 0 disables a term; both at 0 is
+# bit-identical to pre-feature behavior -- and also skips the RM entirely, so
+# the signals do NOT reach wandb; read traj.jsonl's cli_diag instead.
+#   R(tau) = R_acc + lambda_cli * R_CLI      (inside sigma_G)
+#   A(t,j) += lambda_exec * e_t              (outside sigma_G, per step)
+#
+# Both terms are live, verified 2026-09-11 against the restarted env server.
+#
+# lambda_exec: the four-quadrant gate passes through the real agent action path
+# (to_cluster_action -> adapter.py bash wrapper). Measured return_code / e_t:
+#   ls /                    rc=0    ->  0
+#   grep zzz /etc/hostname  rc=1    ->  0   (empty stderr: semantic result, not an error)
+#   ls /nonexistent         rc=2    -> -1
+#   foobarbaz               rc=127  -> -1
+#   echo hi; exit 3         rc=3    -> -1
+#
+# lambda_cli: all 222 OSWorld train tasks carry cli_preferred (141 true / 81
+# false), labeled by scripts/label_cli_preferred.py from 1096 eval trials.
+# Replayed over those trials, 129 successful trajectories take the wrong route
+# and so earn no R_CLI -- that gap is the whole signal, and 84 of 222 tasks show
+# within-task variance for GRPO to work with.
+# 2026-09-13: lambda_exec 0.5 -> 0.1. e_t is one-sided ({-1, 0}: a failed CLI
+# step is -1, a *correct* one is 0, and not using CLI at all is also 0) and it
+# is added OUTSIDE sigma_G, where the normalized advantage is O(1) with
+# grpo_std_normalization=True. At 0.5 a single CLI error shifted that step's
+# advantage by half a standard deviation, and since writing correct CLI earned
+# nothing, the cheapest way to avoid the term was to stop emitting CLI at all.
+# Measured on rollout_119 vs the v5 run: CLI share 63.9% -> 48.9% (per-task CLI
+# steps fell in all 10 domains), while the per-step error rate did NOT improve
+# (domain-equal-weighted 11.9% -> 11.5%) and the post-error switch-to-GUI rate
+# stayed flat (3% -> 4%). That is avoidance, not competence.
+# 2026-09-15: lambda_cli 0.2 -> 0. Only lambda_exec is live now, so R(tau) is
+# pure R_acc and the only CLI-aware term is the per-step exec penalty. Note
+# lambda_exec must stay non-zero for the RM to run at all (see reward_func.py
+# SIGNALS note): with BOTH at 0 the gate prefills sample.reward and neither
+# gui_cli_reward nor gui_exec_penalty reaches wandb.
+lambda_cli: 0
+lambda_exec: 0.1

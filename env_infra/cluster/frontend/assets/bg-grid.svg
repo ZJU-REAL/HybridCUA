@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080" fill="none" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <radialGradient id="haze" cx="50%" cy="12%" r="95%">
+      <stop offset="0" stop-color="#2a1257"/>
+      <stop offset="38%" stop-color="#140a2e"/>
+      <stop offset="100%" stop-color="#05050c"/>
+    </radialGradient>
+    <linearGradient id="horizonGlow" x1="0" y1="540" x2="0" y2="1080" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#ff2d9b" stop-opacity="0"/>
+      <stop offset="1" stop-color="#ff2d9b" stop-opacity=".22"/>
+    </linearGradient>
+    <linearGradient id="skyGlow" x1="0" y1="0" x2="0" y2="540" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#00f0ff" stop-opacity=".18"/>
+      <stop offset="1" stop-color="#00f0ff" stop-opacity="0"/>
+    </linearGradient>
+    <pattern id="topGrid" width="64" height="64" patternUnits="userSpaceOnUse">
+      <path d="M64 0H0V64" fill="none" stroke="#00f0ff" stroke-opacity=".08" stroke-width="1"/>
+    </pattern>
+    <filter id="soft" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="26"/>
+    </filter>
+  </defs>
+
+  <!-- base wash -->
+  <rect width="1920" height="1080" fill="url(#haze)"/>
+
+  <!-- atmospheric neon orbs -->
+  <g filter="url(#soft)">
+    <circle cx="250" cy="160" r="230" fill="#7b5cff" fill-opacity=".55"/>
+    <circle cx="1700" cy="120" r="240" fill="#ff2d9b" fill-opacity=".40"/>
+    <circle cx="1500" cy="520" r="200" fill="#00f0ff" fill-opacity=".30"/>
+    <circle cx="420" cy="640" r="220" fill="#b14bff" fill-opacity=".30"/>
+  </g>
+
+  <!-- upper flat grid -->
+  <rect width="1920" height="560" fill="url(#topGrid)"/>
+  <rect width="1920" height="560" fill="url(#skyGlow)"/>
+
+  <!-- horizon line -->
+  <rect x="0" y="556" width="1920" height="2" fill="#00f0ff" fill-opacity=".5"/>
+  <rect x="0" y="552" width="1920" height="10" fill="#00f0ff" fill-opacity=".12" filter="url(#soft)"/>
+
+  <!-- perspective floor grid (Tron / CP2077 horizon) -->
+  <g stroke="#ff2d9b" stroke-opacity=".30" stroke-width="1.4">
+    <!-- verticals converging to vanishing point (960,560) -->
+    <path d="M960 560L-360 1080"/><path d="M960 560L40 1080"/><path d="M960 560L300 1080"/>
+    <path d="M960 560L520 1080"/><path d="M960 560L700 1080"/><path d="M960 560L840 1080"/>
+    <path d="M960 560L960 1080"/>
+    <path d="M960 560L1080 1080"/><path d="M960 560L1220 1080"/><path d="M960 560L1400 1080"/>
+    <path d="M960 560L1620 1080"/><path d="M960 560L1880 1080"/><path d="M960 560L2280 1080"/>
+  </g>
+  <g stroke="#00f0ff" stroke-opacity=".28" stroke-width="1.4">
+    <!-- horizontals receding (denser near horizon) -->
+    <path d="M0 566h1920"/><path d="M0 576h1920"/><path d="M0 592h1920"/><path d="M0 616h1920"/>
+    <path d="M0 650h1920"/><path d="M0 698h1920"/><path d="M0 762h1920"/><path d="M0 846h1920"/>
+    <path d="M0 952h1920"/><path d="M0 1080h1920"/>
+  </g>
+  <rect x="0" y="560" width="1920" height="520" fill="url(#horizonGlow)"/>
+</svg>

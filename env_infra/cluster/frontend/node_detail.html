@@ -1,0 +1,312 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Node Detail</title>
+  <style>
+    :root {
+      /* ── Apple-style light palette — brightened & enriched (shared across all cluster pages) ── */
+      --bg: #f2f2f7;
+      --card: #fff;
+      --text: #1c1c1e;
+      --text2: #48484a;
+      --text3: #8e8e93;
+      --border: rgba(0,0,0,.06);
+      --blue: #0a84ff;
+      --indigo: #5e5ce6;
+      --green: #30d158;
+      --orange: #ff9f0a;
+      --red: #ff453a;
+      --pink: #ff375f;
+      --teal: #40c8e0;
+      --purple: #bf5af2;
+      --r: 16px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif; -webkit-font-smoothing: antialiased; }
+    .shell { max-width: 1200px; margin: 0 auto; padding: 32px 24px 56px; }
+
+    .top { display: flex; align-items: center; gap: 16px; margin-bottom: 28px; }
+    .back { color: var(--blue); text-decoration: none; font-size: 14px; font-weight: 600; }
+    .back:hover { text-decoration: underline; }
+    .top-title { font-size: 28px; font-weight: 700; letter-spacing: -.02em; }
+    .badge { display: inline-flex; align-items: center; gap: 5px; height: 26px; padding: 0 12px; border-radius: 99px; font-size: 12px; font-weight: 700; }
+    .badge::before { content:''; width: 7px; height: 7px; border-radius: 50%; }
+    .badge.healthy { color: var(--green); background: rgba(48,209,88,.16); }
+    .badge.healthy::before { background: var(--green); }
+    .badge.unhealthy { color: var(--orange); background: rgba(255,159,10,.16); }
+    .badge.unhealthy::before { background: var(--orange); }
+    .badge.dead { color: var(--red); background: rgba(255,69,58,.16); }
+    .badge.dead::before { background: var(--red); }
+    .badge.draining { color: var(--purple); background: rgba(191,90,242,.16); }
+    .badge.draining::before { background: var(--purple); }
+    .top-sub { font-size: 13px; color: var(--text3); margin-left: auto; }
+
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; margin-bottom: 24px; }
+    .metric-card { background: var(--card); border-radius: var(--r); padding: 16px 20px; border: 1px solid var(--border); }
+    .metric-card.metric-warning { border-color: rgba(255,159,10,.42); background: rgba(255,159,10,.06); }
+    .metric-card.metric-warning .metric-val { color: #cc6a00; }
+    .metric-card.metric-critical { border-color: rgba(255,69,58,.42); background: rgba(255,69,58,.06); }
+    .metric-card.metric-critical .metric-val { color: var(--red); }
+    .metric-label { font-size: 11px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: .04em; margin-bottom: 6px; }
+    .metric-val { font-size: 22px; font-weight: 700; }
+    .metric-sub { font-size: 11px; color: var(--text3); margin-top: 4px; }
+
+    .load-alert {
+      border-radius: var(--r); padding: 14px 18px; margin: -8px 0 20px;
+      border: 1px solid var(--border); background: var(--card);
+    }
+    .load-alert:empty { display: none; }
+    .load-alert.warning { color: #8a4a00; background: rgba(255,159,10,.09); border-color: rgba(255,159,10,.28); }
+    .load-alert.critical { color: #b42318; background: rgba(255,69,58,.09); border-color: rgba(255,69,58,.28); }
+    .load-alert.stale { color: var(--text2); background: rgba(0,0,0,.04); }
+    .load-alert-title { font-size: 13px; font-weight: 800; margin-bottom: 4px; }
+    .load-alert-reasons { font-size: 12px; line-height: 1.45; }
+
+    .section { background: var(--card); border-radius: var(--r); border: 1px solid var(--border); margin-bottom: 20px; overflow: hidden; }
+    .section-head { padding: 14px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .section-title { font-size: 15px; font-weight: 700; }
+    .section-badge { font-size: 12px; color: var(--text3); background: var(--bg); padding: 3px 10px; border-radius: 99px; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th { text-align: left; padding: 10px 16px; font-size: 11px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: .04em; border-bottom: 1px solid var(--border); }
+    td { padding: 10px 16px; border-bottom: 1px solid var(--border); }
+    tr:last-child td { border-bottom: none; }
+    .mono { font-family: 'SF Mono', ui-monospace, Menlo, monospace; font-size: 12px; }
+    .empty { padding: 32px; text-align: center; color: var(--text3); }
+
+    .acts { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+    .btn { display: inline-flex; align-items: center; height: 28px; padding: 0 12px; border-radius: 8px; font-size: 12px; font-weight: 600; border: none; cursor: pointer; }
+    .b-blue { background: rgba(10,132,255,.14); color: var(--blue); }
+    .b-orange { background: rgba(255,159,10,.14); color: var(--orange); }
+    .b-red { background: rgba(255,69,58,.14); color: var(--red); }
+    .b-green { background: rgba(48,209,88,.14); color: var(--green); }
+    .b-gray { background: var(--bg); color: var(--text2); }
+    .ipt { height: 28px; width: 60px; border: 1px solid var(--border); border-radius: 6px; padding: 0 8px; font-size: 12px; }
+    .fi { height: 32px; border: 1px solid var(--border); border-radius: 8px; padding: 0 10px; font-size: 13px; }
+
+    .cap-bar { height: 8px; border-radius: 4px; background: var(--bg); margin-top: 8px; overflow: hidden; }
+    .cap-fill { height: 100%; border-radius: 4px; background: linear-gradient(90deg, var(--teal), var(--blue)); transition: width .3s; }
+  </style>
+</head>
+<body>
+<div class="shell">
+  <div class="top">
+    <a class="back" href="/">&larr; Dashboard</a>
+    <div class="top-title" id="node-title">--</div>
+    <span class="badge" id="node-badge">--</span>
+    <div class="top-sub" id="node-sub">--</div>
+  </div>
+
+  <div id="load-alert"></div>
+
+  <!-- Resource Metrics -->
+  <div class="grid" id="metrics-grid"></div>
+
+  <!-- Capacity + Actions -->
+  <div class="section">
+    <div class="section-head">
+      <div class="section-title">Capacity</div>
+      <div class="acts" id="node-actions"></div>
+    </div>
+    <div style="padding:16px 20px">
+      <div style="display:flex;gap:24px;align-items:center;flex-wrap:wrap">
+        <div><span style="font-size:13px;color:var(--text3)">Busy</span> <span style="font-size:18px;font-weight:700;margin-left:6px" id="cap-busy">0</span></div>
+        <div><span style="font-size:13px;color:var(--text3)">Idle</span> <span style="font-size:18px;font-weight:700;margin-left:6px" id="cap-idle">0</span></div>
+        <div><span style="font-size:13px;color:var(--text3)">Max</span> <span style="font-size:18px;font-weight:700;margin-left:6px" id="cap-max">0</span></div>
+      </div>
+      <div class="cap-bar"><div class="cap-fill" id="cap-bar-fill" style="width:0%"></div></div>
+    </div>
+  </div>
+
+  <!-- Environments Table -->
+  <div class="section">
+    <div class="section-head">
+      <div class="section-title">Environments</div>
+      <div class="section-badge" id="envs-count">0 envs</div>
+    </div>
+    <table>
+      <thead><tr><th>Env</th><th>Status</th><th>Lease</th><th>Ports</th><th>Container</th><th>Age</th><th>Actions</th></tr></thead>
+      <tbody id="envs-body"></tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+/*__INJECT__*/
+const d = window.__NODE__;
+if (d) {
+  const $ = id => document.getElementById(id);
+  const esc = v => String(v ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  const fmt = v => Number(v || 0).toLocaleString();
+  const pct = (v, t) => t > 0 ? Math.max(0, Math.min(100, (v / t) * 100)) : 0;
+  const sec = v => { if (v == null || Number.isNaN(Number(v))) return "--"; const n = Number(v); return n < 60 ? `${Math.round(n)}s` : n < 3600 ? `${Math.round(n / 60)}m` : `${Math.round(n / 3600)}h`; };
+  const metric = v => {
+    const n = loadNumber(v);
+    return n == null ? "--" : `${n.toFixed(0)}%`;
+  };
+  const numberMetric = (v, digits = 2) => {
+    const n = loadNumber(v);
+    return n == null ? "--" : n.toFixed(digits);
+  };
+  const LOAD_WARNING_THRESHOLDS = {
+    cpu: { warning: 90, critical: 95 },
+    mem: { warning: 90, critical: 95 },
+    load: { warning: 1.5, critical: 2.0 },
+    swap: { warning: 50, critical: 70 },
+    disk: { warning: 90, critical: 95 },
+  };
+
+  function loadNumber(v){
+    if(v == null) return null;
+    const n = Number(v);
+    return Number.isFinite(n) && n >= 0 ? n : null;
+  }
+
+  function getNodeLoadWarnings(resources){
+    const r = resources || {};
+    const sampleKeys = ["cpu_percent", "mem_percent", "load_per_core", "swap_percent", "disk_root_percent", "qemu_d_state_count"];
+    const hasSample = sampleKeys.some(k => loadNumber(r[k]) !== null);
+    if(r.stale === true || !hasSample){
+      return { level: "stale", reasons: ["No recent sample"], marks: {} };
+    }
+
+    const issues = [];
+    const marks = {};
+    const addIssue = (key, level, reason) => {
+      issues.push({ key, level, reason });
+      marks[key] = marks[key] === "critical" || level === "critical" ? "critical" : "warning";
+    };
+    const checkPct = (key, label, value, thresholds) => {
+      const n = loadNumber(value);
+      if(n == null) return;
+      if(n >= thresholds.critical) addIssue(key, "critical", `${label} ${Math.round(n)}%`);
+      else if(n >= thresholds.warning) addIssue(key, "warning", `${label} ${Math.round(n)}%`);
+    };
+
+    checkPct("cpu", "CPU", r.cpu_percent, LOAD_WARNING_THRESHOLDS.cpu);
+    checkPct("mem", "Memory", r.mem_percent, LOAD_WARNING_THRESHOLDS.mem);
+    const loadPerCore = loadNumber(r.load_per_core);
+    if(loadPerCore != null){
+      if(loadPerCore >= LOAD_WARNING_THRESHOLDS.load.critical) addIssue("load", "critical", `Load/core ${loadPerCore.toFixed(1)}`);
+      else if(loadPerCore >= LOAD_WARNING_THRESHOLDS.load.warning) addIssue("load", "warning", `Load/core ${loadPerCore.toFixed(1)}`);
+    }
+    checkPct("swap", "Swap", r.swap_percent, LOAD_WARNING_THRESHOLDS.swap);
+    checkPct("disk", "Disk", r.disk_root_percent, LOAD_WARNING_THRESHOLDS.disk);
+    const qemuD = loadNumber(r.qemu_d_state_count);
+    if(qemuD != null && qemuD > 0) addIssue("qemu", "critical", `QEMU D-state ${Math.round(qemuD)}`);
+
+    if(!issues.length) return { level: "ok", reasons: [], marks: {} };
+    const level = issues.some(i => i.level === "critical") ? "critical" : "warning";
+    return { level, reasons: issues.map(i => i.reason), marks };
+  }
+
+  function renderLoadAlert(load){
+    if(load.level === "ok") return "";
+    const titles = {
+      warning: "High node load",
+      critical: "Critical node load",
+      stale: "No recent resource sample",
+    };
+    const reasons = load.reasons && load.reasons.length ? load.reasons.join(", ") : "No recent sample";
+    return `<div class="load-alert ${esc(load.level)}"><div class="load-alert-title">${esc(titles[load.level] || titles.stale)}</div><div class="load-alert-reasons">${esc(reasons)}</div></div>`;
+  }
+
+  const node = d.node || {};
+  const res = d.resources || {};
+  const emus = d.emulators || [];
+  const nid = node.node_id || "--";
+  const load = getNodeLoadWarnings(res);
+  const loadPerCoreMetric = loadNumber(res.load_per_core);
+  const qemuCount = loadNumber(res.qemu_count);
+  const qemuDState = loadNumber(res.qemu_d_state_count);
+
+  // Top bar
+  $("node-title").textContent = nid;
+  const draining = node.draining;
+  const statusClass = draining ? "draining" : (node.status || "");
+  const statusText = draining ? `${node.status} (draining)` : (node.status || "unknown");
+  const badge = $("node-badge");
+  badge.textContent = statusText;
+  badge.className = "badge " + statusClass;
+  $("node-sub").textContent = `${node.provider_name || "unknown"} · ${node.os_type || "Ubuntu"} · Heartbeat ${sec(node.heartbeat_age_seconds)} ago`;
+  $("load-alert").innerHTML = renderLoadAlert(load);
+
+  // Metrics
+  const metrics = [
+    { label: "CPU", value: metric(res.cpu_percent), alert: load.marks.cpu },
+    { label: "Memory", value: metric(res.mem_percent), alert: load.marks.mem },
+    { label: "Load (1m)", value: numberMetric(res.load1), sub: loadPerCoreMetric != null ? `per core: ${loadPerCoreMetric.toFixed(2)}` : null, alert: load.marks.load },
+    { label: "Load (5m)", value: numberMetric(res.load5), alert: load.marks.load },
+    { label: "Load (15m)", value: numberMetric(res.load15), alert: load.marks.load },
+    { label: "Swap", value: metric(res.swap_percent), alert: load.marks.swap },
+    { label: "Disk", value: metric(res.disk_root_percent), alert: load.marks.disk },
+    { label: "QEMU", value: qemuCount != null ? fmt(qemuCount) : "--", sub: qemuDState > 0 ? `D-state: ${fmt(qemuDState)}` : null, alert: load.marks.qemu },
+  ];
+  $("metrics-grid").innerHTML = metrics.map(m =>
+    `<div class="metric-card ${m.alert ? `metric-${esc(m.alert)}` : ""}"><div class="metric-label">${esc(m.label)}</div><div class="metric-val">${esc(m.value)}</div>${m.sub ? `<div class="metric-sub">${esc(m.sub)}</div>` : ""}</div>`
+  ).join("");
+
+  // Capacity
+  const busy = Number(node.busy_envs || 0);
+  const idle = Number(node.idle_envs || 0);
+  const maxE = Number(node.max_envs || 0);
+  const total = Math.max(busy + idle, Number(node.total_envs || 0));
+  $("cap-busy").textContent = fmt(busy);
+  $("cap-idle").textContent = fmt(idle);
+  $("cap-max").textContent = fmt(maxE);
+  $("cap-bar-fill").style.width = `${pct(busy, Math.max(maxE, total)).toFixed(1)}%`;
+
+  // Actions
+  $("node-actions").innerHTML = `
+    <form action="/" method="POST" style="display:inline-flex;gap:4px;align-items:center">
+      <input type="hidden" name="action" value="set_max_envs">
+      <input type="hidden" name="node_id" value="${esc(nid)}">
+      <input class="ipt" type="number" min="0" name="max_envs" value="${maxE}">
+      <button type="submit" class="btn b-gray">Set Max</button>
+    </form>
+    ${draining
+      ? `<form action="/" method="POST" style="display:inline"><input type="hidden" name="action" value="undrain_node"><input type="hidden" name="node_id" value="${esc(nid)}"><button type="submit" class="btn b-green">Undrain</button></form>`
+      : `<form action="/" method="POST" style="display:inline"><input type="hidden" name="action" value="drain_node"><input type="hidden" name="node_id" value="${esc(nid)}"><button type="submit" class="btn b-orange">Drain</button></form>`
+    }`;
+
+  // Environments table
+  $("envs-count").textContent = `${fmt(emus.length)} envs`;
+  $("envs-body").innerHTML = emus.map(e => {
+    const eid = esc(e.env_id || "-");
+    const st = e.busy ? "busy" : "idle";
+    const stCls = e.busy ? "unhealthy" : "healthy";
+    const eidRaw = String(e.env_id || e.id || "");
+    const lv=e.live_view||(e.vnc_port?{protocol:"vnc",port:e.vnc_port}:null);
+    const ports = [e.server_port&&`srv:${e.server_port}`,e.chromium_port&&`chr:${e.chromium_port}`,lv&&`view:${lv.port}`].filter(Boolean).join(" ");
+    let viewBtn="";
+    if(lv&&eidRaw){
+      if(lv.protocol==="vnc"){
+        const wsPath=`ws/view/${encodeURIComponent(eidRaw)}`;
+        viewBtn=`<a class="btn b-blue" href="/view/${encodeURIComponent(eidRaw)}/vnc.html?autoconnect=true&resize=remote&path=${encodeURIComponent(wsPath)}" target="_blank" style="text-decoration:none">View</a>`;
+      }else if(lv.protocol==="http"){
+        viewBtn=`<a class="btn b-blue" href="/view/${encodeURIComponent(eidRaw)}/" target="_blank" style="text-decoration:none">View</a>`;
+      }
+    }
+    return `<tr>
+      <td class="mono" style="font-weight:600">${eid}</td>
+      <td><span class="badge ${stCls}">${st}</span></td>
+      <td class="mono" style="font-size:11px">${esc(e.lease_id || "-")}</td>
+      <td class="mono" style="font-size:11px">${ports || "-"}</td>
+      <td class="mono" style="font-size:11px">${esc(e.container_id || "-")}</td>
+      <td>${sec(e.age_seconds)}</td>
+      <td><div class="acts">
+        ${viewBtn}
+        <form action="/" method="POST" style="display:inline"><input type="hidden" name="action" value="env_restart"><input type="hidden" name="node_id" value="${esc(nid)}"><input type="hidden" name="env_id" value="${eid}"><button type="submit" class="btn b-orange">Restart</button></form>
+        <form action="/" method="POST" style="display:inline"><input type="hidden" name="action" value="env_delete"><input type="hidden" name="node_id" value="${esc(nid)}"><input type="hidden" name="env_id" value="${eid}"><button type="submit" class="btn b-red">Delete</button></form>
+      </div></td>
+    </tr>`;
+  }).join("") || `<tr><td colspan="7"><div class="empty">No environments</div></td></tr>`;
+
+  // Auto-refresh every 180s
+  setTimeout(() => location.reload(), 180000);
+}
+</script>
+</body>
+</html>

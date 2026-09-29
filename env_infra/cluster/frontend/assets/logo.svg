@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <defs>
+    <linearGradient id="logoG" x1="6" y1="6" x2="58" y2="58" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#00f0ff"/>
+      <stop offset=".5" stop-color="#ff2d9b"/>
+      <stop offset="1" stop-color="#b14bff"/>
+    </linearGradient>
+    <filter id="logoGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="1.8" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <g filter="url(#logoGlow)" stroke="url(#logoG)" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round" fill="none">
+    <path d="M32 5l23 13v28L32 59 9 46V18z" fill="rgba(0,240,255,.05)"/>
+    <path d="M32 5v18M32 59V41M9 18l16 9M55 18l-16 9M9 46l16-9M55 46l-16-9"/>
+    <circle cx="32" cy="32" r="8" fill="rgba(255,45,155,.12)"/>
+    <circle cx="32" cy="32" r="2.6" fill="#39ff14" stroke="none"/>
+  </g>
+</svg>

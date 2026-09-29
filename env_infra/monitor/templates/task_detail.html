@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Task Detail: {{ task_id }}</title>
+    <link rel="icon" href="/static/favicon.png" type="image/x-icon">
+    <link rel="shortcut icon" href="/static/favicon.png" type="image/x-icon">
+    <link rel="apple-touch-icon" href="/static/favicon.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="/static/task_detail.css">
+</head>
+<body>
+    <div class="container">
+        <div class="detail-nav">
+            <a href="/?{{ back_query }}" class="back-link"><i class="fas fa-arrow-left"></i> Back to Home</a>
+        </div>
+        <h1>Task Detail <span class="task-id">{{ task_id }}</span></h1>
+
+        {# Shared facts once — the task is the same on both sides; only the run differs. #}
+        <div class="task-info">
+            <h2><i class="fas fa-info-circle"></i> Basic Information</h2>
+            <dl>
+                <dt>Task ID</dt>
+                <dd>{{ task_id }}</dd>
+                <dt>Task Type</dt>
+                <dd>{{ task_type }}</dd>
+                <dt>Instruction</dt>
+                <dd>{{ task_info.instruction }}</dd>
+            </dl>
+        </div>
+
+        {# One summary card per run, side by side when comparing. #}
+        <div class="run-summaries{% if compare %} comparing{% endif %}">
+            {% for entry in runs %}
+            {% set st = entry.run.status %}
+            <div class="run-summary{% if entry.label %} side-{{ entry.label|lower }}{% endif %}">
+                <div class="run-summary-head">
+                    {% if entry.label %}<span class="run-tag">{{ entry.label }}</span>{% endif %}
+                    <span class="status status-{{ st.status|lower|replace(' ', '-')|replace('(', '')|replace(')', '') }}">{{ st.status }}</span>
+                    <span class="run-score">score {{ st.result if st.result is not none else '—' }}</span>
+                </div>
+                <div class="run-summary-path" title="{{ entry.run.path }}">{{ entry.run.path }}</div>
+                <dl class="run-summary-facts">
+                    <dt>Steps</dt><dd>{{ st.progress }}{% if st.max_steps %} / {{ st.max_steps }}{% endif %}</dd>
+                    <dt>Last Update</dt><dd>{{ st.last_update or 'None' }}</dd>
+                    {% if st.log_data and st.log_data.exit_condition %}
+                    <dt>Exit Condition</dt><dd class="exit-condition">{{ st.log_data.exit_condition }}</dd>
+                    {% endif %}
+                    {% if st.status == 'Done (Message Exit)' and st.log_data and st.log_data.last_message %}
+                    <dt>Exit Message</dt><dd class="exit-message">{{ st.log_data.last_message }}</dd>
+                    {% endif %}
+                </dl>
+                {% if st.status.startswith('Done') %}
+                <div class="video-player">
+                    <video controls playsinline webkit-playsinline preload="metadata"
+                           width="100%" controlslist="nodownload">
+                        <source src="/task/{{ task_type }}/{{ task_id }}/recording?path={{ entry.run.path | urlencode }}" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="task-steps">
+            <h2 class="steps-heading">
+                <span><i class="fas fa-list-ol"></i> Execution Steps</span>
+                <label class="steps-control">
+                    Per row:
+                    <input type="number" id="steps-per-row" min="1" max="10"
+                           value="{{ 1 if compare else 2 }}">
+                </label>
+            </h2>
+            {# Comparing puts the two runs in parallel columns, each scrolling its
+               own steps, so step N of A sits beside step N of B. #}
+            <div class="run-steps{% if compare %} comparing{% endif %}">
+                {% for entry in runs %}
+                <div class="run-steps-column{% if entry.label %} side-{{ entry.label|lower }}{% endif %}">
+                    {% if entry.label %}
+                    <div class="run-steps-head">
+                        <span class="run-tag">{{ entry.label }}</span>
+                        <span class="run-steps-count">{{ entry.run.status.steps|length }} step(s)</span>
+                    </div>
+                    {% endif %}
+                    <div class="steps-grid" data-actions="{{ entry.run.actions | tojson | forceescape }}">
+                        {% if entry.run.status.steps %}
+                            {% for step in entry.run.status.steps %}
+                                <div class="step-card" data-step-index="{{ loop.index0 }}">
+                                    <div class="step-header">
+                                        <div class="step-title"><i class="fas fa-check-circle"></i> Step {{ step.step_num }}</div>
+                                        <div class="step-time"><i class="far fa-clock"></i> {{ step.action_timestamp }}</div>
+                                    </div>
+                                    {% if step.image_file %}
+                                        <div class="step-image-wrap" title="Click to enlarge">
+                                            <img src="/task/{{ task_type }}/{{ task_id }}/screenshot/{{ step.image_file }}?path={{ entry.run.path | urlencode }}"
+                                                 alt="Step {{ step.step_num }} screenshot" class="step-image" loading="lazy">
+                                            <svg class="step-overlay" preserveAspectRatio="none"></svg>
+                                        </div>
+                                    {% endif %}
+                                    <pre>{%- if step.Error -%}
+Error: {{ step.Error }}
+{%- else -%}
+{{ step | pretty_json }}
+{%- endif -%}</pre>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="no-steps"><i class="far fa-frown"></i> No step data available</div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <div id="zoom-modal" class="zoom-modal" role="dialog" aria-label="Screenshot viewer">
+        <button type="button" class="zoom-close" aria-label="Close">×</button>
+        <div class="zoom-content">
+            <img id="zoom-image" alt="Zoomed screenshot">
+            <svg id="zoom-overlay" preserveAspectRatio="none"></svg>
+        </div>
+    </div>
+
+    <script src="/static/task_detail.js"></script>
+    <button class="fab fab-refresh" onclick="refreshPage()" title="Refresh"><i class="fas fa-sync-alt"></i></button>
+    <script>
+        function refreshPage() {
+            window.location.reload();
+        }
+        
+        // Handle video player with enhanced mobile support
+        document.addEventListener('DOMContentLoaded', function() {
+            const videoElement = document.getElementById('task-recording');
+            const videoStatus = document.getElementById('video-status');
+            
+            if (videoElement) {
+                // Function to update status on successful video load
+                function updateSuccessStatus() {
+                    videoStatus.textContent = 'Recording available';
+                    videoStatus.className = 'video-status video-success';
+                }
+                
+                // Multiple event listeners for different browser implementations
+                // The 'loadeddata' event might not fire on all mobile browsers
+                videoElement.addEventListener('loadeddata', updateSuccessStatus);
+                videoElement.addEventListener('loadedmetadata', updateSuccessStatus);
+                videoElement.addEventListener('canplay', updateSuccessStatus);
+                
+                // Error handling for video
+                videoElement.addEventListener('error', function(e) {
+                    console.error('Video error:', e);
+                    videoStatus.textContent = 'Recording not available';
+                    videoStatus.className = 'video-status video-error';
+                });
+                
+                // Timeout for slow connections or browser issues
+                setTimeout(function() {
+                    // If video is playable but events didn't fire correctly
+                    if (videoElement.readyState >= 2 && videoStatus.textContent === 'Loading video...') {
+                        updateSuccessStatus();
+                    }
+                }, 2000);
+                
+                // Directly check video source availability with fetch API
+                fetch('/task/{{ task_type }}/{{ task_id }}/recording?path={{ results_base_path | urlencode }}', {method: 'HEAD'})
+                    .then(function(response) {
+                        if (response.ok && videoStatus.textContent === 'Loading video...') {
+                            // If HEAD request succeeds but video events haven't fired
+                            setTimeout(updateSuccessStatus, 500);
+                        }
+                    })
+                    .catch(function() {
+                        // Network error or CORS issue
+                        if (videoStatus.textContent === 'Loading video...') {
+                            videoStatus.textContent = 'Recording check failed';
+                            videoStatus.className = 'video-status video-error';
+                        }
+                    });
+            }
+        });
+    </script>
+</body>
+</html>

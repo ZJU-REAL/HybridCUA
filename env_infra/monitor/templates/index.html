@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>OSWorld Monitor</title>
+    <link rel="icon" href="/static/favicon.png" type="image/x-icon">
+    <link rel="shortcut icon" href="/static/favicon.png" type="image/x-icon">
+    <link rel="apple-touch-icon" href="/static/favicon.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="/static/index.css">
+    <script>
+        // Apply persisted chrome state before first paint to avoid a flash. The
+        // mode also comes from the URL, which wins so a shared compare link
+        // opens in compare mode regardless of what this browser last used.
+        try {
+            if (localStorage.getItem('osworld.monitor.sidebar-collapsed') === 'true') {
+                document.documentElement.classList.add('sidebar-collapsed');
+            }
+            const urlMode = new URLSearchParams(location.search).get('mode');
+            const stored = JSON.parse(localStorage.getItem('osworld.monitor.settings') || '{}');
+            if ((urlMode || stored.mode) === 'compare') {
+                document.documentElement.classList.add('compare-mode');
+            }
+        } catch (e) { /* ignore */ }
+    </script>
+</head>
+<body>
+    <div class="layout-container">
+        <!-- Persistent Config Sidebar -->
+        <div class="config-sidebar" id="config-sidebar">
+            <div class="config-toggle-btn" onclick="toggleSidebar()" title="Toggle configuration panel" role="button" aria-label="Toggle configuration panel">
+                <i class="fas fa-chevron-left"></i>
+            </div>
+            <div class="config-panel">
+                <div class="config-header">
+                    <i class="fas fa-cogs"></i>
+                    <span>Configuration</span>
+                </div>
+                <div class="config-content">
+                    <form id="settings-form" class="settings-form" onsubmit="event.preventDefault(); applySettings();">
+                        <div class="mode-switch" role="group" aria-label="View mode">
+                            <button type="button" class="mode-btn" data-mode="single" onclick="setViewMode('single')">
+                                <i class="fas fa-file-alt"></i> Single
+                            </button>
+                            <button type="button" class="mode-btn" data-mode="compare" onclick="setViewMode('compare')">
+                                <i class="fas fa-columns"></i> Compare
+                            </button>
+                        </div>
+
+                        <div class="settings-field primary">
+                            <label for="field-path">Experiment Path <span class="required">*</span>
+                                <span class="side-tag side-tag-a compare-only">A</span></label>
+                            <input type="text" id="field-path" name="path"
+                                placeholder="/path/to/experiment (e.g. .../pyautogui/screenshot/Model)"
+                                autocomplete="off" spellcheck="false">
+                            <small class="settings-hint">The only thing you need. Everything else is read from <code>args.json</code> inside it.</small>
+                        </div>
+
+                        <div class="settings-field primary compare-only">
+                            <label for="field-path-b">Compare Against <span class="required">*</span>
+                                <span class="side-tag side-tag-b">B</span></label>
+                            <input type="text" id="field-path-b" name="path_b"
+                                placeholder="/path/to/the/other/experiment"
+                                autocomplete="off" spellcheck="false">
+                            <small class="settings-hint">Scored against A per task. Its own <code>args.json</code> is read independently.</small>
+                        </div>
+
+                        <div class="settings-actions">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-check"></i> Load
+                            </button>
+                            <button type="button" class="btn btn-secondary" onclick="resetSettings()">
+                                <i class="fas fa-undo"></i> Clear
+                            </button>
+                        </div>
+                    </form>
+
+                    <div id="derived-warnings" class="derived-warnings" style="display: none;"></div>
+
+                    <div class="settings-summary" id="settings-summary">
+                        <div id="derived-fields"></div>
+                        <div id="model-args" class="settings-summary-args" style="display: none;"></div>
+                    </div>
+
+                    <!-- Deleting is single-mode only: with two experiments open,
+                         "which side?" has no safe default. -->
+                    <div class="settings-actions">
+                        <button id="clear-cache-btn" class="btn btn-warning" onclick="clearCacheAndRefresh()">
+                            <i class="fas fa-broom"></i> Clear Cache
+                        </button>
+                        <button id="cleanup-btn" class="btn btn-danger single-only" onclick="openCleanupModal()">
+                            <i class="fas fa-trash-alt"></i> Clean Unfinished
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <h1><span class="single-only">OSWorld Monitor</span><span class="compare-only">OSWorld Compare</span>
+                <span class="system-status online">System Online</span></h1>
+
+            <!-- Score Display Banner -->
+            <div class="score-banner">
+                <div class="score-content">
+                    <i class="fas fa-star"></i>
+                    <span class="score-label">Score:</span>
+                    <span id="score-display" class="score-value">—</span>
+                </div>
+            </div>
+
+            <div class="dashboard-stats single-only">
+                <div class="stat-card">
+                    <i class="fas fa-running"></i>
+                    <span id="active-tasks">—</span>
+                    <div class="stat-label">Active</div>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-check-circle"></i>
+                    <span id="completed-tasks">—</span>
+                    <div class="stat-label">Completed</div>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <span id="error-tasks">—</span>
+                    <div class="stat-label">Error</div>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-tasks"></i>
+                    <span id="total-tasks">—</span>
+                    <div class="stat-label">Total Tasks</div>
+                </div>
+            </div>
+            <!-- Verdict cards, populated by compare.js; each one filters the list. -->
+            <div id="compare-stats" class="dashboard-stats compare-stats compare-only"></div>
+            <div id="scan-progress" class="scan-progress" style="display: none;">
+                <i class="fas fa-spinner fa-spin"></i>
+                <span id="scan-progress-text">Scanning…</span>
+            </div>
+            <div id="task-container">
+                <div class="empty-state" id="empty-state">
+                    <i class="fas fa-folder-open"></i>
+                    <div class="empty-state-title">No experiment selected</div>
+                    <div class="empty-state-hint">Open the configuration panel on the left and set an <strong>Experiment Path</strong> to load data.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="cleanup-modal" class="app-modal" role="dialog" aria-label="Cleanup preview">
+        <div class="app-modal-content">
+            <div class="app-modal-header">
+                <h3><i class="fas fa-trash-alt"></i> Clean up unfinished directories</h3>
+                <button type="button" class="app-modal-close" onclick="closeCleanupModal()" aria-label="Close">×</button>
+            </div>
+            <div class="app-modal-body" id="cleanup-body">
+                <!-- populated by JS -->
+            </div>
+            <div class="app-modal-footer">
+                <button class="btn btn-secondary" onclick="closeCleanupModal()">Cancel</button>
+                <button id="cleanup-confirm-btn" class="btn btn-danger" onclick="executeCleanup()" disabled>
+                    <i class="fas fa-trash-alt"></i> Delete selected
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/index.js"></script>
+    <script src="/static/compare.js"></script>
+</body>
+</html>

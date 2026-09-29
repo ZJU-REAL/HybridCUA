@@ -1,0 +1,79 @@
+world_id: osworld
+version: 1
+display_name: OSWorld
+adapter: cluster.worlds.osworld.adapter:OSWorldWorldAdapter
+
+driver:
+  kind: in_process
+  image: happysixd/osworld-docker
+  command: ["python", "-m", "cluster.worlds.osworld.sidecar"]
+  port_fields:        # container_port -> named host-port field (docker-ps scan)
+    5000: server_port
+    9222: chromium_port
+    8006: vnc_port
+    8080: vlc_port
+
+resources:
+  cpu_cores: 4
+  memory_gb: 8
+  gpu: false
+  kvm: true
+
+capabilities:
+  environment: desktop
+  os: ubuntu
+  observation:
+    - screenshot
+    - accessibility_tree
+    - terminal
+  action:
+    - pyautogui
+    - computer_13
+    - claude_computer_use
+    - control
+  evaluation:
+    - scalar_score
+    - success
+  artifacts:
+    - recording
+    - screenshots
+    - logs
+  live_view:
+    protocol: vnc
+    port_key: vnc_port
+
+config_schema:
+  provider_name:
+    type: string
+    default: docker_fast
+  path_to_vm:
+    type: string
+    default: cua_gym_data/Ubuntu-cua-gym.qcow2
+  cache_dir:
+    type: string
+    default: OSWorld/cache
+  snapshot_name:
+    type: string
+    default: init_state
+  screen_size:
+    type: array
+    default: [1920, 1080]
+  action_space:
+    type: string
+    default: pyautogui
+    enum: [pyautogui, computer_13, claude_computer_use]
+  headless:
+    type: boolean
+    default: true
+  os_type:
+    type: string
+    default: Ubuntu
+  enable_proxy:
+    type: boolean
+    default: true
+  require_a11y_tree:
+    type: boolean
+    default: false   # heavy per-step AT-SPI walk; enable only for a11y/som obs
+  require_terminal:
+    type: boolean
+    default: false

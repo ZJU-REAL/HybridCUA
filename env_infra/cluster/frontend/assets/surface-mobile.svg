@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <defs>
+    <linearGradient id="mobG" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#39ff14"/>
+      <stop offset="1" stop-color="#00f0ff"/>
+    </linearGradient>
+    <filter id="mobGlow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="1.6" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <g filter="url(#mobGlow)" stroke="url(#mobG)" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round">
+    <rect x="18" y="6" width="28" height="52" rx="6" fill="rgba(57,255,20,.06)"/>
+    <path d="M27 11h10" stroke-width="2" opacity=".85"/>
+    <circle cx="32" cy="50" r="2.4" fill="#ff2d9b" stroke="none"/>
+    <path d="M24 18h16M24 24h11M24 30h16M24 36h8" stroke-width="1.8" opacity=".7"/>
+  </g>
+</svg>

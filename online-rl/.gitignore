@@ -1,0 +1,53 @@
+# ========= 大文件 / 运行产物:绝不进 git =========
+# (注意:.gitignore 不支持行尾注释,模式必须独占一行)
+# ckpt 5.3T / venvs 16G / wandb logs
+ckpt/
+venvs/
+wandb/
+install.log
+
+# gui-rl 下的运行产物(TB 级:截图 / 轨迹 / 结果)
+gui-rl/results/
+gui-rl/wandb/
+gui-rl/**/screenshot/
+gui-rl/**/*.png
+gui-rl/**/*.jpg
+gui-rl/**/*.mp4
+
+# gui-rl 内部调试文档:不纳入 git
+gui-rl/docs/
+
+# ========= 第三方库:不纳入(README 写 clone 命令) =========
+sglang/
+# DeepEP:MoE 专家并行通信库,应 clone+build(见 Megatron-LM/docker/Dockerfile.ci.dev),
+# 且含 31MB 本机编译 .so + 自带嵌套 .git,不入仓库。
+DeepEP/
+
+# ========= vendored 运行时依赖:不纳入 =========
+# libnuma:多节点 sglang(sgl_kernel)运行时依赖,worker 常缺 → 脚本会 apt 装或从共享盘取。
+vendor_libs/
+
+# ========= Python 常规忽略 =========
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+.ipynb_checkpoints/
+*.so
+build/
+dist/
+.DS_Store
+
+# 模型权重 / 大数据(防误加)
+*.bin
+*.safetensors
+*.pt
+*.pth
+*.ckpt
+
+# Claude 调度锁(运行时产物,无需纳入)
+.claude/*.lock
+
+# ARIS / 研究规划产物(本地工作流,无需纳入)
+.aris/
+refine-logs/

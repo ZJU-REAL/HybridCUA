@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Job Log</title>
+  <style>
+    :root { --bg: #f2f2f7; --surface: #fff; --text: #1c1c1e; --muted: #8e8e93; --border: rgba(0,0,0,.06); --blue: #0a84ff; --green: #30d158; --red: #ff453a; --orange: #ff9f0a; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif; }
+    .top {
+      position: sticky; top: 0; z-index: 10;
+      padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; gap: 16px;
+      background: var(--surface); border-bottom: 1px solid var(--border);
+    }
+    .top-left { display: flex; align-items: center; gap: 12px; }
+    .back { color: var(--blue); text-decoration: none; font-size: 14px; font-weight: 600; }
+    .back:hover { text-decoration: underline; }
+    .info { font-size: 13px; color: var(--muted); }
+    .info b { color: var(--text); }
+    .badge {
+      display: inline-flex; align-items: center; gap: 5px;
+      height: 24px; padding: 0 10px; border-radius: 99px;
+      font-size: 11px; font-weight: 700;
+    }
+    .badge::before { content:''; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+    .badge.running { color: var(--blue); background: rgba(10,132,255,.14); }
+    .badge.done { color: #1da64a; background: rgba(48,209,88,.16); }
+    .badge.failed, .badge.killed { color: var(--red); background: rgba(255,69,58,.14); }
+    .log {
+      padding: 16px 24px; font-family: 'SF Mono', ui-monospace, Menlo, Consolas, monospace;
+      font-size: 12px; line-height: 1.6; white-space: pre-wrap; word-break: break-all;
+      min-height: calc(100vh - 60px);
+    }
+    .line-no { color: rgba(0,0,0,.25); user-select: none; display: inline-block; width: 50px; text-align: right; margin-right: 16px; }
+  </style>
+</head>
+<body>
+  <div class="top">
+    <div class="top-left">
+      <a class="back" href="/">Dashboard</a>
+      <span class="info"><b id="job-id">--</b> &middot; <span id="node-id">--</span> &middot; <span id="script-name">--</span> &middot; <span id="user-id">--</span></span>
+    </div>
+    <div>
+      <span class="badge" id="status-badge">--</span>
+    </div>
+  </div>
+  <pre class="log" id="log-output"></pre>
+  <script>
+    /*__INJECT__*/
+    const d = window.__LOG__;
+    if (d) {
+      document.getElementById("job-id").textContent = d.job_id;
+      document.getElementById("node-id").textContent = d.node_id;
+      document.getElementById("script-name").textContent = d.script_name;
+      document.getElementById("user-id").textContent = d.user_id;
+      const badge = document.getElementById("status-badge");
+      badge.textContent = d.status;
+      badge.className = "badge " + d.status;
+      const log = document.getElementById("log-output");
+      log.innerHTML = d.lines.map((line, i) => {
+        const num = String(i + 1).padStart(5, " ");
+        const escaped = line.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+        return `<span class="line-no">${num}</span>${escaped}`;
+      }).join("\n");
+      window.scrollTo(0, document.body.scrollHeight);
+      if (d.status === "running") {
+        setTimeout(() => location.reload(), 10000);
+      }
+    }
+  </script>
+</body>
+</html>

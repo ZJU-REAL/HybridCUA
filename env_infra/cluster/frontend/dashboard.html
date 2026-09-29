@@ -1,0 +1,1329 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>OSWorld Cluster</title>
+  <style>
+    :root {
+      /* ── Apple-style light palette — brightened & enriched (shared across all cluster pages) ── */
+      --bg: #f2f2f7;
+      --card: #fff;
+      --text: #1c1c1e;
+      --text2: #48484a;
+      --text3: #8e8e93;
+      --border: rgba(0,0,0,.06);
+      /* vivid accent set */
+      --blue: #0a84ff;
+      --indigo: #5e5ce6;
+      --green: #30d158;
+      --orange: #ff9f0a;
+      --red: #ff453a;
+      --pink: #ff375f;
+      --teal: #40c8e0;
+      --purple: #bf5af2;
+      /* soft tinted gradients for color blocks */
+      --grad-banner: linear-gradient(135deg, #e8f0ff 0%, #f3eaff 48%, #e6f7ff 100%);
+      --grad-blue: linear-gradient(135deg, #0a84ff, #5e5ce6);
+      --grad-green: linear-gradient(135deg, #30d158, #40c8e0);
+      --grad-purple: linear-gradient(135deg, #bf5af2, #ff375f);
+      --r: 16px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .shell { max-width: 1400px; margin: 0 auto; padding: 32px 24px 56px; }
+
+    /* ── Header ── */
+    header { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; margin-bottom: 28px; }
+    h1 { font-size: 34px; font-weight: 700; letter-spacing: -.02em; }
+    .sub { font-size: 13px; color: var(--text3); margin-top: 4px; }
+    .hdr-r { display: flex; gap: 8px; align-items: center; }
+    .pill {
+      height: 32px; padding: 0 14px; border-radius: 999px; font-size: 13px; font-weight: 500;
+      display: inline-flex; align-items: center; gap: 6px;
+      background: var(--card); border: 1px solid var(--border); color: var(--text2);
+      cursor: pointer; transition: .15s;
+    }
+    .pill:hover { border-color: var(--blue); color: var(--blue); }
+    .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); box-shadow: 0 0 6px rgba(48,209,88,.6); animation: pulse 2s infinite; }
+    @keyframes pulse { 50%{opacity:.4} }
+
+    /* ── Cards ── */
+    .g { display: grid; grid-template-columns: repeat(12,1fr); gap: 14px; }
+    .c {
+      background: var(--card); border-radius: var(--r); overflow: hidden;
+      box-shadow: 0 1px 3px rgba(0,0,0,.04), 0 4px 24px rgba(0,0,0,.03);
+    }
+    .c-head {
+      padding: 14px 20px; display: flex; align-items: center; justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+    }
+    .c-title { font-size: 15px; font-weight: 600; }
+    .c-badge { font-size: 12px; color: var(--text3); font-weight: 500; }
+
+    /* ── Hero banner ── */
+    .banner {
+      grid-column: span 12; border-radius: var(--r); overflow: hidden;
+      background: var(--grad-banner);
+      border: 1px solid rgba(94,92,230,.12);
+      box-shadow: 0 6px 28px rgba(94,92,230,.10);
+      color: var(--text); padding: 36px 40px;
+      display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 32px; align-items: center;
+    }
+    .b-label { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--indigo); margin-bottom: 6px; }
+    .b-num {
+      font-size: 80px; font-weight: 800; letter-spacing: -.04em; line-height: .9;
+      background: linear-gradient(135deg, var(--blue), var(--indigo) 55%, var(--purple));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .b-sub { margin-top: 10px; font-size: 14px; color: var(--text3); }
+
+    .b-center { display: flex; align-items: center; gap: 24px; justify-content: center; }
+    .ring-box { position: relative; width: 130px; height: 130px; }
+    .ring-svg { width: 130px; height: 130px; transform: rotate(-90deg); }
+    .ring-bg { fill: none; stroke: rgba(0,0,0,.06); stroke-width: 10; }
+    .ring-fg { fill: none; stroke: url(#ringGrad); stroke-width: 10; stroke-linecap: round; transition: stroke-dashoffset .6s; }
+    .ring-text {
+      position: absolute; inset: 0; display: grid; place-items: center; text-align: center;
+    }
+    .ring-val { font-size: 26px; font-weight: 700; color: var(--text); }
+    .ring-lbl { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: .05em; }
+
+    .b-bars { display: grid; gap: 14px; }
+    .bb-row { display: flex; justify-content: space-between; font-size: 13px; color: var(--text3); font-weight: 500; }
+    .bb-val { color: var(--text); font-weight: 600; }
+    .bb-track { height: 6px; border-radius: 99px; background: rgba(0,0,0,.06); margin-top: 6px; overflow: hidden; }
+    .bb-fill { height: 100%; border-radius: inherit; transition: width .4s; }
+
+    /* ── Stat cards row ── */
+    .stat {
+      grid-column: span 2; padding: 20px; min-height: 100px;
+      display: flex; flex-direction: column; justify-content: space-between;
+      border-left: 3px solid var(--border);
+    }
+    .stat-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--text3); }
+    .stat-val { font-size: 34px; font-weight: 700; letter-spacing: -.02em; margin-top: 4px; }
+    .stat-foot { font-size: 11px; color: var(--text3); margin-top: 4px; }
+
+    /* ── Colored stat cards: left bar + faint same-hue tinted block ── */
+    .stat.s-orange { border-color: var(--orange); background: linear-gradient(135deg, rgba(255,159,10,.10), rgba(255,159,10,.02) 60%, var(--card)); }
+    .stat.s-orange .stat-val { color: var(--orange); }
+    .stat.s-blue { border-color: var(--blue); background: linear-gradient(135deg, rgba(10,132,255,.10), rgba(10,132,255,.02) 60%, var(--card)); }
+    .stat.s-blue .stat-val { color: var(--blue); }
+    .stat.s-purple { border-color: var(--purple); background: linear-gradient(135deg, rgba(191,90,242,.10), rgba(191,90,242,.02) 60%, var(--card)); }
+    .stat.s-purple .stat-val { color: var(--purple); }
+    .stat.s-green { border-color: var(--green); background: linear-gradient(135deg, rgba(48,209,88,.10), rgba(48,209,88,.02) 60%, var(--card)); }
+    .stat.s-green .stat-val { color: var(--green); }
+    .stat.s-teal { border-color: var(--teal); background: linear-gradient(135deg, rgba(64,200,224,.10), rgba(64,200,224,.02) 60%, var(--card)); }
+    .stat.s-teal .stat-val { color: var(--teal); }
+    .stat.s-pink { border-color: var(--pink); background: linear-gradient(135deg, rgba(255,55,95,.10), rgba(255,55,95,.02) 60%, var(--card)); }
+    .stat.s-pink .stat-val { color: var(--pink); }
+
+    /* ── Tables ── */
+    .s12 { grid-column: span 12; }
+    .s8 { grid-column: span 8; }
+    .s4 { grid-column: span 4; }
+    .tw { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 11px 20px; text-align: left; font-size: 13px; }
+    th { font-size: 11px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: .04em; border-bottom: 1px solid var(--border); }
+    td { border-bottom: 1px solid var(--border); }
+    tbody tr { transition: background .12s; }
+    tbody tr:hover { background: rgba(10,132,255,.05); }
+    .mono { font-family: 'SF Mono', ui-monospace, Menlo, monospace; font-size: 12px; }
+
+    /* ── Badges ── */
+    .badge {
+      display: inline-flex; align-items: center; gap: 5px;
+      height: 24px; padding: 0 10px; border-radius: 99px;
+      font-size: 11px; font-weight: 600;
+    }
+    .badge::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+    .badge.healthy { color: #1da64a; background: rgba(48,209,88,.16); }
+    .badge.unhealthy { color: #cc6a00; background: rgba(255,159,10,.16); }
+    .badge.dead { color: var(--red); background: rgba(255,69,58,.14); }
+    .badge.draining { color: #cc6a00; background: rgba(255,159,10,.16); }
+    .badge.load-ok { color: #1da64a; background: rgba(48,209,88,.16); }
+    .badge.load-warning { color: #cc6a00; background: rgba(255,159,10,.16); }
+    .badge.load-critical { color: var(--red); background: rgba(255,69,58,.14); }
+    .badge.load-stale { color: var(--text3); background: rgba(0,0,0,.05); }
+    .badge.running { color: var(--blue); background: rgba(10,132,255,.14); }
+    .badge.done { color: #1da64a; background: rgba(48,209,88,.16); }
+    .badge.failed, .badge.killed { color: var(--red); background: rgba(255,69,58,.14); }
+    .badge.exception, .badge.timeout, .badge.lease_error, .badge.envpool_error { color: var(--red); background: rgba(255,69,58,.14); }
+    .badge.http_non_2xx { color: #cc6a00; background: rgba(255,159,10,.16); }
+    .load-detail {
+      margin-top: 4px; font-size: 11px; line-height: 1.25;
+      color: var(--text3); max-width: 180px; white-space: normal;
+    }
+    .status-stack { display: grid; gap: 5px; align-items: start; }
+
+    .tag { display: inline-block; height: 22px; line-height: 22px; padding: 0 8px; border-radius: 6px; font-size: 11px; font-weight: 600; }
+    .tag.training { color: #cc6a00; background: rgba(255,159,10,.14); }
+    .tag.evaluation { color: var(--blue); background: rgba(10,132,255,.12); }
+
+    /* ── Buttons ── */
+    .btn {
+      height: 28px; padding: 0 12px; font-size: 12px; font-weight: 600;
+      border: none; border-radius: 8px; cursor: pointer; transition: .12s; white-space: nowrap;
+    }
+    .btn.b-blue { background: var(--grad-blue); color: #fff; box-shadow: 0 2px 8px rgba(10,132,255,.30); }
+    .btn.b-blue:hover { filter: brightness(1.06); box-shadow: 0 3px 12px rgba(10,132,255,.42); }
+    .btn.b-gray { background: rgba(0,0,0,.05); color: var(--text2); }
+    .btn.b-gray:hover { background: rgba(0,0,0,.08); }
+    .btn.b-red { background: rgba(255,69,58,.12); color: var(--red); }
+    .btn.b-red:hover { background: rgba(255,69,58,.18); }
+    .btn.b-orange { background: rgba(255,159,10,.12); color: #cc6a00; }
+    .btn.b-orange:hover { background: rgba(255,159,10,.18); }
+    .btn.b-green { background: rgba(48,209,88,.12); color: #1da64a; }
+    .btn.b-green:hover { background: rgba(48,209,88,.18); }
+    .btn:disabled { opacity: .45; cursor: not-allowed; }
+
+    .ipt {
+      width: 52px; height: 28px; padding: 0 6px; font-size: 12px; font-weight: 600;
+      border: 1px solid var(--border); border-radius: 8px;
+      background: var(--bg); color: var(--text); text-align: center;
+    }
+    .ipt:focus { border-color: var(--blue); outline: none; box-shadow: 0 0 0 3px rgba(10,132,255,.18); }
+
+    .pm { height: 5px; border-radius: 99px; background: rgba(0,0,0,.04); overflow: hidden; margin-top: 4px; }
+    .pm>span { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg,var(--blue),var(--teal)); }
+
+    .acts { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+
+    /* ── Users ── */
+    .u-row {
+      display: flex; align-items: center; gap: 14px;
+      padding: 14px 20px; border-bottom: 1px solid var(--border);
+    }
+    .u-row:last-child { border-bottom: none; }
+    .u-name { font-size: 14px; font-weight: 600; min-width: 100px; }
+    .u-bar { flex: 1; height: 12px; border-radius: 99px; background: rgba(0,0,0,.04); overflow: hidden; display: flex; }
+    .u-seg { height: 100%; transition: width .3s; }
+    .u-seg.t { background: linear-gradient(90deg,var(--orange),var(--purple)); }
+    .u-seg.e { background: linear-gradient(90deg,var(--blue),var(--purple)); }
+    .u-info { font-size: 12px; color: var(--text3); white-space: nowrap; min-width: 90px; text-align: right; }
+
+    /* ── List / Form ── */
+    .ls { max-height: 420px; overflow: auto; }
+    .li { padding: 14px 20px; border-bottom: 1px solid var(--border); display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: center; }
+    .li:last-child { border-bottom: none; }
+    .li-t { font-size: 13px; font-weight: 600; }
+    .li-s { font-size: 12px; color: var(--text3); margin-top: 2px; }
+    .empty { padding: 36px 20px; text-align: center; color: var(--text3); font-size: 14px; }
+    .fb {
+      display: flex; gap: 8px; align-items: center; padding: 14px 20px;
+      border-top: 1px solid var(--border);
+    }
+    .fi {
+      height: 32px; padding: 0 10px; font-size: 13px;
+      border: 1px solid var(--border); border-radius: 10px;
+      background: var(--bg); color: var(--text);
+    }
+    .fi:focus { border-color: var(--blue); outline: none; box-shadow: 0 0 0 3px rgba(10,132,255,.18); }
+
+    .footer { margin-top: 20px; font-size: 11px; color: var(--text3); display: flex; justify-content: space-between; }
+    #error-line:not(:empty) { color: var(--red); font-weight: 600; }
+    .debug-filters { padding: 12px 20px; border-bottom: 1px solid var(--border); display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    .debug-row { cursor: pointer; }
+    .debug-detail td { background: rgba(0,0,0,.02); padding-top: 0; }
+    .debug-pre { white-space: pre-wrap; font-size: 11px; line-height: 1.45; color: var(--text2); max-height: 260px; overflow: auto; padding: 12px 0; }
+
+    .flash {
+      padding: 12px 20px; border-radius: 12px; font-size: 13px; font-weight: 600;
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+      margin-bottom: 16px; animation: flashIn .3s;
+    }
+    .flash.flash-ok { background: rgba(48,209,88,.16); color: #1da64a; }
+    .flash.flash-err { background: rgba(255,69,58,.14); color: var(--red); }
+    .flash button { background: none; border: none; cursor: pointer; font-size: 18px; color: inherit; opacity: .6; }
+    .flash button:hover { opacity: 1; }
+    @keyframes flashIn { from{opacity:0;transform:translateY(-8px)} to{opacity:1;transform:none} }
+
+    @media(max-width:1100px) {
+      .banner { grid-template-columns: 1fr; }
+      .s12,.s8,.s4 { grid-column: span 12; }
+      .stat { grid-column: span 4; }
+    }
+    @media(max-width:700px) {
+      .shell { padding: 16px 12px 40px; }
+      header { flex-direction: column; align-items: flex-start; }
+      .stat { grid-column: span 6; }
+      .b-num { font-size: 56px; }
+      h1 { font-size: 26px; }
+    }
+
+    /* ── Header ── */
+    h1 { display: flex; align-items: center; gap: 12px; }
+    h1 .logo-mark { width: 34px; height: 34px; }
+    .sub { color: var(--text3); }
+    .sub span { color: var(--blue); }
+
+    .c-head { border-bottom: 1px solid var(--border); }
+    .c-title { color: var(--text); display: inline-flex; align-items: center; gap: 9px; }
+    .c-title::before {
+      content: ''; display: inline-block; width: 4px; height: 16px;
+      background: var(--blue); border-radius: 2px; flex: none;
+    }
+    .c-badge { color: var(--text3); }
+
+    /* ── inline icon system (small line icons) ── */
+    .ic { width: 14px; height: 14px; flex: none; color: var(--blue);
+          opacity: .9; vertical-align: -2px; stroke-width: 1.6; }
+    .ic svg, svg.ic { width: 100%; height: 100%; display: block; }
+    .ic [stroke], .stat-ico [stroke] { stroke-width: 1.6; }
+    .c-title .ic { color: var(--blue); width: 15px; height: 15px; }
+    .stat-ico { width: 13px; height: 13px; flex: none; opacity: .92; }
+    .stat-label { display: inline-flex; align-items: center; gap: 6px; }
+    .pill .ic { width: 13px; height: 13px; }
+    /* tint each stat card's icon to its accent color */
+    .stat.s-orange .stat-ico { color: var(--orange); }
+    .stat.s-blue   .stat-ico { color: var(--blue); }
+    .stat.s-purple .stat-ico { color: var(--purple); }
+    .stat.s-green  .stat-ico { color: var(--green); }
+    .stat.s-teal   .stat-ico { color: var(--teal); }
+    .stat.s-pink   .stat-ico { color: var(--pink); }
+
+    /* ── Surfaces panel (multi-world view) ── */
+    .surfaces { grid-column: span 12; display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+    @media(max-width:1100px){ .surfaces { grid-template-columns: repeat(2,1fr); } }
+    @media(max-width:560px){ .surfaces { grid-template-columns: 1fr; } }
+    .surf {
+      position: relative; overflow: hidden; border-radius: var(--r); padding: 18px 20px;
+      border: 1px solid var(--border); transition: .2s;
+      background:
+        linear-gradient(135deg, color-mix(in srgb, var(--sc, var(--blue)) 12%, transparent), transparent 55%),
+        var(--card);
+      box-shadow: 0 1px 3px rgba(0,0,0,.04), 0 4px 24px rgba(0,0,0,.03);
+    }
+    .surf:hover { transform: translateY(-3px); border-color: var(--sc, var(--blue)); box-shadow: 0 8px 26px color-mix(in srgb, var(--sc, var(--blue)) 28%, transparent); }
+    .surf::after { content:''; position:absolute; inset:0 auto 0 0; width:3px; background: var(--sc, var(--blue)); }
+    .surf-top { display: flex; align-items: center; gap: 12px; }
+    .surf-ico { width: 38px; height: 38px; flex: none; color: var(--sc, var(--blue)); }
+    .surf-name { font-size: 14px; font-weight: 700; letter-spacing: .02em; color: var(--text); }
+    .surf-tag { font-size: 10.5px; color: var(--text3); letter-spacing: .02em; }
+    .surf-num { font-size: 46px; font-weight: 800; line-height: 1; margin: 12px 0 2px; color: var(--sc, var(--blue)); letter-spacing: -.02em; }
+    .surf-num .tot { font-size: 26px; font-weight: 700; color: var(--text3); letter-spacing: -.01em; }
+    .surf.off .surf-num .tot { color: var(--text3); }
+    .surf-foot { font-size: 11px; color: var(--text3); display:flex; gap:10px; flex-wrap:wrap; }
+    .surf-foot b { color: var(--text2); font-weight: 700; }
+    /* offline surface: dim only the icon + number, keep labels fully legible */
+    .surf.off { opacity: 1; }
+    .surf.off .surf-ico { opacity: .4; }
+    .surf.off .surf-num { color: var(--text3); }
+    .surf.off .surf-name, .surf.off .surf-tag, .surf.off .surf-foot { opacity: 1; }
+    .surf-worlds { margin-top: 8px; display: flex; gap: 6px; flex-wrap: wrap; }
+    .surf-chip { font-size: 10px; padding: 2px 8px; border-radius: 99px; border: 1px solid color-mix(in srgb, var(--sc, var(--blue)) 26%, transparent); color: var(--text2); background: color-mix(in srgb, var(--sc, var(--blue)) 9%, transparent); }
+  </style>
+</head>
+<body>
+<svg style="position:absolute;width:0;height:0">
+  <defs>
+    <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#0a84ff"/>
+      <stop offset="50%" stop-color="#5e5ce6"/>
+      <stop offset="100%" stop-color="#bf5af2"/>
+    </linearGradient>
+  </defs>
+</svg>
+
+<main class="shell">
+  <div id="flash-bar"></div>
+  <header>
+    <div>
+      <h1>
+        <svg class="logo-mark" viewBox="0 0 64 64" fill="none" aria-hidden="true">
+          <g stroke="url(#ringGrad)" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round" fill="none">
+            <path d="M32 5l23 13v28L32 59 9 46V18z" fill="rgba(10,132,255,.06)"/>
+            <path d="M32 5v18M32 59V41M9 18l16 9M55 18l-16 9M9 46l16-9M55 46l-16-9"/>
+            <circle cx="32" cy="32" r="8" fill="rgba(191,90,242,.14)"/>
+            <circle cx="32" cy="32" r="2.6" fill="#30d158" stroke="none"/>
+          </g>
+        </svg>
+        GUI&middot;WORLD CLUSTER
+      </h1>
+      <p class="sub">multi-world rollout grid &middot; scheduler: <span id="scheduler">least-loaded</span> &middot; refresh: <span id="refresh-rate">2s</span></p>
+    </div>
+    <div class="hdr-r">
+      <div class="pill" style="cursor:default"><span class="dot"></span><span id="connection">connecting</span></div>
+      <button class="pill" id="refresh-now"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 1 0-.6 4M20 5v6h-6"/></svg>Refresh</button>
+      <button class="pill" id="pause-toggle"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5v14M15 5v14"/></svg>Pause</button>
+    </div>
+  </header>
+
+  <section class="g">
+    <!-- Banner -->
+    <div class="banner">
+      <div>
+        <div class="b-label">Healthy Nodes</div>
+        <div class="b-num" id="healthy-nodes">0</div>
+        <div class="b-sub"><span id="total-nodes">0</span> registered &middot; <span id="active-sessions">0</span> active sessions</div>
+      </div>
+      <div class="b-center">
+        <div class="ring-box">
+          <svg class="ring-svg" viewBox="0 0 130 130">
+            <circle class="ring-bg" cx="65" cy="65" r="55"/>
+            <circle class="ring-fg" id="ring-circle" cx="65" cy="65" r="55" stroke-dasharray="345.58" stroke-dashoffset="345.58"/>
+          </svg>
+          <div class="ring-text"><div><div class="ring-val" id="busy-percent">0%</div><div class="ring-lbl">utilization</div></div></div>
+        </div>
+      </div>
+      <div class="b-bars">
+        <div>
+          <div class="bb-row"><span>Busy Envs</span><span class="bb-val" id="busy-envs">0</span></div>
+          <div class="bb-track"><div class="bb-fill" id="busy-bar" style="width:0%;background:linear-gradient(90deg,var(--teal),var(--blue))"></div></div>
+        </div>
+        <div>
+          <div class="bb-row"><span>Idle Envs</span><span class="bb-val" id="idle-envs">0</span></div>
+          <div class="bb-track"><div class="bb-fill" id="idle-bar" style="width:0%;background:linear-gradient(90deg,var(--green),var(--teal))"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Surfaces (multi-world view): Desktop / Mobile / Web / Others -->
+    <div class="surfaces" id="surfaces"></div>
+
+    <!-- Stats -->
+    <div class="c stat s-orange"><div class="stat-label"><svg class="stat-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v4M12 21a6 6 0 0 0 6-6c0-4-6-9-6-9s-6 5-6 9a6 6 0 0 0 6 6z"/></svg>Training</div><div class="stat-val" id="training-sessions">0</div><div class="stat-foot">active sessions</div></div>
+    <div class="c stat s-blue"><div class="stat-label"><svg class="stat-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>Evaluation</div><div class="stat-val" id="evaluation-sessions">0</div><div class="stat-foot">active sessions</div></div>
+    <div class="c stat s-purple"><div class="stat-label"><svg class="stat-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="7" height="7" rx="1"/><rect x="13" y="4" width="7" height="7" rx="1"/><rect x="4" y="13" width="7" height="7" rx="1"/><rect x="13" y="13" width="7" height="7" rx="1"/></svg>Max Slots</div><div class="stat-val" id="max-envs-card">0</div><div class="stat-foot">cluster ceiling</div></div>
+    <div class="c stat s-green"><div class="stat-label"><svg class="stat-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L4.5 13H11l-1 9 8.5-11H12z"/></svg>Active Sessions</div><div class="stat-val" id="lease-count">0</div><div class="stat-foot">in-flight episodes</div></div>
+    <div class="c stat s-teal"><div class="stat-label"><svg class="stat-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0"/><path d="M16 6.2a3 3 0 0 1 0 5.6M18 19a5 5 0 0 0-3-4.6"/></svg>Active Users</div><div class="stat-val" id="user-count">0</div><div class="stat-foot">using the cluster</div></div>
+    <div class="c stat s-pink"><div class="stat-label"><svg class="stat-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a9 9 0 1 0 9 9"/><path d="M12 3v9l6.4 6.4"/><path d="M12 3a9 9 0 0 1 9 9h-9z"/></svg>Quota Rules</div><div class="stat-val" id="quota-count">0</div><div class="stat-foot">configured limits</div></div>
+
+    <!-- Users -->
+    <div class="c s12">
+      <div class="c-head"><div class="c-title"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0"/><path d="M16 6.2a3 3 0 0 1 0 5.6M18 19a5 5 0 0 0-3-4.6"/></svg>Users</div><div class="c-badge" id="users-meta">0 active</div></div>
+      <div id="users-body" class="ls"></div>
+    </div>
+
+    <!-- Jobs -->
+    <div class="c s12">
+      <div class="c-head" style="cursor:pointer" onclick="toggleJobsPanel()">
+        <div style="display:flex;align-items:center;gap:8px">
+          <span id="jobs-toggle-icon" style="font-size:12px;color:var(--text3);transition:transform .2s;display:inline-block;transform:rotate(90deg)">&#9654;</span>
+          <div class="c-title"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5.5A1.5 1.5 0 0 1 9.5 4h5A1.5 1.5 0 0 1 16 5.5V7M3 12h18"/></svg>Jobs</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap" onclick="event.stopPropagation()">
+          <div class="c-badge" id="jobs-meta">0 jobs</div>
+          <form action="/" method="POST" style="display:inline" onsubmit="return confirmForm('Clear finished jobs?')">
+            <input type="hidden" name="action" value="jobs_clear">
+            <input type="hidden" name="scope" value="finished">
+            <button type="submit" class="btn b-gray" id="jobs-clear-finished">Clear Finished</button>
+          </form>
+        </div>
+      </div>
+      <div id="jobs-panel" style="display:block">
+        <form id="jobs-form" action="/" method="POST" style="padding:16px 20px;border-bottom:1px solid var(--border);display:flex;gap:10px;align-items:flex-start;flex-wrap:wrap" onsubmit="mergeScriptParams()">
+          <input type="hidden" name="action" value="jobs_start">
+          <div style="display:grid;gap:6px">
+            <label style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase">Node</label>
+            <select name="node_id" class="fi" id="job-node-select" required style="width:200px"></select>
+          </div>
+          <div style="display:grid;gap:6px">
+            <label style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase">Script</label>
+            <select name="script_select" class="fi" id="job-script-select" style="width:240px" onchange="onScriptChange(this)"></select>
+          </div>
+          <div style="display:grid;gap:6px">
+            <label style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase">User</label>
+            <input name="user_id" class="fi" value="anonymous" style="width:110px">
+          </div>
+          <div style="display:grid;gap:6px">
+            <label style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase">Extra Env Vars</label>
+            <textarea name="env_vars" class="fi" rows="2" placeholder="KEY=VALUE (one per line)" style="width:240px;height:auto;resize:vertical;font-family:monospace;font-size:11px"></textarea>
+          </div>
+          <div style="display:grid;gap:6px">
+            <label style="font-size:11px;visibility:hidden">_</label>
+            <button type="submit" class="btn b-blue" style="height:32px;padding:0 20px;font-size:13px">Start Job</button>
+          </div>
+          <div id="script-params-area" style="display:none;width:100%;margin-top:4px;border-top:1px solid var(--border);padding-top:12px">
+            <div style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;margin-bottom:8px">Script Parameters</div>
+            <div id="script-params-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px"></div>
+          </div>
+          <div id="custom-script-area" style="display:none;width:100%;margin-top:4px">
+            <textarea name="script_content" class="fi" rows="6" placeholder="#!/usr/bin/env bash&#10;set -euo pipefail&#10;&#10;echo 'hello world'" style="width:100%;height:auto;resize:vertical;font-family:monospace;font-size:12px"></textarea>
+          </div>
+        </form>
+        <div class="tw"><table>
+          <thead><tr><th>Job</th><th>User</th><th>Script</th><th>Node</th><th>Status</th><th>Age</th><th>Actions</th></tr></thead>
+          <tbody id="jobs-body"></tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <!-- Debug Events -->
+    <div class="c s12">
+      <div class="c-head" style="cursor:pointer" onclick="toggleDebugEventsPanel()">
+        <div style="display:flex;align-items:center;gap:8px">
+          <span id="debug-events-toggle-icon" style="font-size:12px;color:var(--text3);transition:transform .2s;display:inline-block">&#9654;</span>
+          <div class="c-title"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4l1.5 2.5h3L15 4M12 7v13M6 11H3M6 16H4M21 11h-3M20 16h-2"/><rect x="7" y="7" width="10" height="11" rx="5"/></svg>Debug Events</div>
+        </div>
+        <div class="c-badge" id="debug-events-meta">0 events</div>
+      </div>
+      <div id="debug-events-panel" style="display:none">
+        <div class="debug-filters">
+          <select id="debug-event-type-filter" class="fi" style="width:150px" onchange="filterDebugEvents()">
+            <option value="">All types</option>
+            <option value="exception">exception</option>
+            <option value="http_non_2xx">http_non_2xx</option>
+            <option value="timeout">timeout</option>
+            <option value="lease_error">lease_error</option>
+            <option value="envpool_error">envpool_error</option>
+          </select>
+          <input id="debug-event-lease-filter" class="fi" placeholder="session_id" style="width:170px" oninput="filterDebugEvents()">
+          <input id="debug-event-node-filter" class="fi" placeholder="node_id" style="width:130px" oninput="filterDebugEvents()">
+          <input id="debug-event-path-filter" class="fi" placeholder="path" style="width:120px" oninput="filterDebugEvents()">
+        </div>
+        <div class="tw"><table>
+          <thead><tr><th>Time</th><th>Type</th><th>Service</th><th>Path</th><th>Status</th><th>Session</th><th>Env</th><th>Node</th><th>Source</th><th>Origin</th><th>Message</th></tr></thead>
+          <tbody id="debug-events-body"></tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <!-- Nodes -->
+    <div class="c s12">
+      <div class="c-head" style="cursor:pointer" onclick="toggleNodesPanel()">
+        <div style="display:flex;align-items:center;gap:8px">
+          <span id="nodes-toggle-icon" style="font-size:12px;color:var(--text3);transition:transform .2s;display:inline-block">&#9654;</span>
+          <div class="c-title"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="6" rx="1.5"/><rect x="3" y="14" width="18" height="6" rx="1.5"/><path d="M7 7h.01M7 17h.01"/></svg>Nodes</div>
+        </div>
+        <div class="c-badge" id="nodes-meta">0 healthy</div>
+      </div>
+      <div id="nodes-panel" style="display:none">
+        <div class="tw"><table>
+          <thead><tr><th>Status</th><th>Node</th><th>URL</th><th>Capacity</th><th>Heartbeat</th><th>Actions</th></tr></thead>
+          <tbody id="nodes-body"></tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <!-- Environments -->
+    <div class="c s12">
+      <div class="c-head" style="cursor:pointer" onclick="toggleEnvPanel()">
+        <div style="display:flex;align-items:center;gap:8px">
+          <span id="env-toggle-icon" style="font-size:12px;color:var(--text3);transition:transform .2s;display:inline-block">&#9654;</span>
+          <div class="c-title"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9z"/><path d="M12 3v18M4 7.5l8 4.5 8-4.5"/></svg>Environments</div>
+        </div>
+        <div class="c-badge" id="envs-meta">0 envs</div>
+      </div>
+      <div id="env-panel" style="display:none">
+        <div style="padding:12px 20px;border-bottom:1px solid var(--border);display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+          <select id="env-node-filter" class="fi" style="width:220px" onchange="filterEnvs()">
+            <option value="__all__">All Nodes</option>
+          </select>
+          <form action="/" method="POST" style="display:inline-flex;gap:6px;align-items:center" onsubmit="return syncEnvCreateWorld()">
+            <input type="hidden" name="action" value="env_create">
+            <input type="hidden" name="node_id" id="env-create-node">
+            <input type="hidden" name="runtime" id="env-create-world-hidden">
+            <span style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.04em">World</span>
+            <select id="env-create-world" class="fi" style="width:150px"></select>
+            <input name="count" class="fi" type="number" min="1" max="50" value="1" style="width:52px" title="how many envs to create">
+            <button type="submit" class="btn b-blue">Create</button>
+          </form>
+          <form action="/" method="POST" style="display:inline" onsubmit="return confirmForm('Delete ALL ' + (document.getElementById('env-create-world')?.value || 'osworld') + ' envs on this node?')">
+            <input type="hidden" name="action" value="env_delete_all">
+            <input type="hidden" name="node_id" id="env-deleteall-node">
+            <input type="hidden" name="runtime" id="env-deleteall-world-hidden">
+            <button type="submit" class="btn b-red">Delete All</button>
+          </form>
+        </div>
+        <div class="tw"><table>
+          <thead><tr><th>Env</th><th>World</th><th>Node</th><th>Status</th><th>Docker</th><th>Session</th><th>Ports</th><th>Container</th><th>Age</th><th>Actions</th></tr></thead>
+          <tbody id="envs-body"></tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <!-- Sessions (Quotas stacked below) -->
+    <div class="c s12">
+      <div class="c-head" style="cursor:pointer" onclick="toggleLeasePanel()">
+        <div style="display:flex;align-items:center;gap:8px">
+          <span id="lease-toggle-icon" style="font-size:12px;color:var(--text3);transition:transform .2s;display:inline-block">&#9654;</span>
+          <div class="c-title"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 7l3-3 3 3-3 3M16 5l-9 9"/><circle cx="6" cy="15" r="3.2"/><path d="M8 17l2 2"/></svg>Sessions</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <div class="c-badge" id="sessions-meta">0 active</div>
+        </div>
+      </div>
+      <div id="lease-panel" style="display:none">
+        <div style="padding:10px 20px;border-bottom:1px solid var(--border);display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+          <form action="/" method="POST" style="display:inline" onsubmit="return confirmForm('Release ALL sessions?')">
+            <input type="hidden" name="action" value="release_all_sessions">
+            <button type="submit" class="btn b-red">Release All</button>
+          </form>
+          <form id="lease-filter-form" action="/" method="POST" style="display:inline-flex;gap:6px;align-items:center;flex-wrap:wrap" onsubmit="return confirmReleaseMatching(event)">
+            <input type="hidden" name="action" value="release_sessions">
+            <input name="user_id" data-lease-filter class="fi" placeholder="user" style="width:100px" oninput="renderLeases(window.__DATA__)">
+            <select name="task_type" data-lease-filter class="fi" style="width:112px" onchange="renderLeases(window.__DATA__)">
+              <option value="__all__">All types</option>
+              <option value="evaluation">evaluation</option>
+              <option value="training">training</option>
+            </select>
+            <input name="job_script" data-lease-filter class="fi" placeholder="script" style="width:170px" oninput="renderLeases(window.__DATA__)">
+            <input name="job_id" data-lease-filter class="fi" placeholder="job id" style="width:130px" oninput="renderLeases(window.__DATA__)">
+            <button type="submit" class="btn b-red">Release Matching</button>
+          </form>
+        </div>
+        <div class="tw"><table>
+          <thead><tr><th>Session</th><th>User</th><th>Type</th><th>Job</th><th>Source</th><th>Node</th><th>Env</th><th>Age</th><th></th></tr></thead>
+          <tbody id="sessions-body"></tbody>
+        </table></div>
+      </div>
+    </div>
+    <div class="c s12">
+      <div class="c-head"><div class="c-title"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a9 9 0 1 0 9 9"/><path d="M12 3v9l6.4 6.4"/><path d="M12 3a9 9 0 0 1 9 9h-9z"/></svg>Quotas</div><div class="c-badge" id="quotas-meta">0 rules</div></div>
+      <div id="quotas-list" class="ls"></div>
+      <form action="/" method="POST" class="fb">
+        <input type="hidden" name="action" value="set_quota">
+        <input name="user_id" class="fi" placeholder="user_id" style="width:80px" required>
+        <input name="max_envs" class="fi" placeholder="max" style="width:48px" type="number" min="0" value="0">
+        <input name="max_training_envs" class="fi" placeholder="train" style="width:48px" type="number" min="0" value="0">
+        <button type="submit" class="btn b-blue">Add</button>
+      </form>
+    </div>
+
+  </section>
+
+  <footer class="footer">
+    <span id="last-updated">Last update: --</span>
+    <span id="error-line"></span>
+  </footer>
+</main>
+
+<script>
+const CIRC = 2 * Math.PI * 55; // ring circumference
+const refreshMs = 180000;
+let paused = false;
+
+const $=id=>document.getElementById(id);
+const fmt=v=>Number(v||0).toLocaleString();
+const fmtMaybe=v=>(v==null||Number(v)<0||Number.isNaN(Number(v)))?"--":fmt(v);
+const pct=(v,t)=>t>0?Math.max(0,Math.min(100,(v/t)*100)):0;
+const sec=v=>{if(v==null||Number.isNaN(Number(v)))return"--";const n=Number(v);return n<60?`${Math.round(n)}s`:n<3600?`${Math.round(n/60)}m`:`${Math.round(n/3600)}h`;};
+const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const txt=(id,v)=>{const el=$(id);if(el)el.textContent=v;};
+const metric=(v,suffix="%",digits=0)=>(v==null||Number(v)<0||Number.isNaN(Number(v)))?"--":`${Number(v).toFixed(digits)}${suffix}`;
+const LOAD_WARNING_THRESHOLDS = {
+  cpu: { warning: 90, critical: 95 },
+  mem: { warning: 90, critical: 95 },
+  load: { warning: 1.5, critical: 2.0 },
+  swap: { warning: 50, critical: 70 },
+  disk: { warning: 90, critical: 95 },
+};
+
+function loadNumber(v){
+  if(v == null) return null;
+  const n = Number(v);
+  return Number.isFinite(n) && n >= 0 ? n : null;
+}
+
+function getNodeLoadWarnings(resources){
+  const r = resources || {};
+  const sampleKeys = ["cpu_percent", "mem_percent", "load_per_core", "swap_percent", "disk_root_percent", "qemu_d_state_count"];
+  const hasSample = sampleKeys.some(k => loadNumber(r[k]) !== null);
+  if(r.stale === true || !hasSample){
+    return { level: "stale", reasons: ["No recent sample"], marks: {} };
+  }
+
+  const issues = [];
+  const marks = {};
+  const addIssue = (key, level, reason) => {
+    issues.push({ key, level, reason });
+    marks[key] = marks[key] === "critical" || level === "critical" ? "critical" : "warning";
+  };
+  const checkPct = (key, label, value, thresholds) => {
+    const n = loadNumber(value);
+    if(n == null) return;
+    if(n >= thresholds.critical) addIssue(key, "critical", `${label} ${Math.round(n)}%`);
+    else if(n >= thresholds.warning) addIssue(key, "warning", `${label} ${Math.round(n)}%`);
+  };
+
+  checkPct("cpu", "CPU", r.cpu_percent, LOAD_WARNING_THRESHOLDS.cpu);
+  checkPct("mem", "Memory", r.mem_percent, LOAD_WARNING_THRESHOLDS.mem);
+  const loadPerCore = loadNumber(r.load_per_core);
+  if(loadPerCore != null){
+    if(loadPerCore >= LOAD_WARNING_THRESHOLDS.load.critical) addIssue("load", "critical", `Load/core ${loadPerCore.toFixed(1)}`);
+    else if(loadPerCore >= LOAD_WARNING_THRESHOLDS.load.warning) addIssue("load", "warning", `Load/core ${loadPerCore.toFixed(1)}`);
+  }
+  checkPct("swap", "Swap", r.swap_percent, LOAD_WARNING_THRESHOLDS.swap);
+  checkPct("disk", "Disk", r.disk_root_percent, LOAD_WARNING_THRESHOLDS.disk);
+  const qemuD = loadNumber(r.qemu_d_state_count);
+  if(qemuD != null && qemuD > 0) addIssue("qemu", "critical", `QEMU D-state ${Math.round(qemuD)}`);
+
+  if(!issues.length) return { level: "ok", reasons: [], marks: {} };
+  const level = issues.some(i => i.level === "critical") ? "critical" : "warning";
+  return { level, reasons: issues.map(i => i.reason), marks };
+}
+
+function renderInlineLoadBadge(load){
+  if(!load || (load.level !== "warning" && load.level !== "critical")) return "";
+  const labels = { ok: "OK", warning: "High load", critical: "Critical", stale: "No sample" };
+  const level = load.level;
+  const reasons = load.reasons || [];
+  const shown = reasons.slice(0, 2);
+  const rest = reasons.length - shown.length;
+  const detail = shown.length ? `<div class="load-detail">${shown.map(esc).join(", ")}${rest > 0 ? ` +${rest}` : ""}</div>` : "";
+  return `<div><span class="badge load-${esc(level)}">${esc(labels[level] || labels.stale)}</span>${detail}</div>`;
+}
+
+function confirmForm(msg,form){if(!confirm(msg)){event.preventDefault();return false;}return true;}
+
+
+function renderStatus(data){
+  const c=data.cluster||{},ns=data.nodes||[];
+  const loadStates = ns.map(n => getNodeLoadWarnings(n.resources || {}));
+  const warningNodes = loadStates.filter(l => l.level === "warning").length;
+  const criticalNodes = loadStates.filter(l => l.level === "critical").length;
+  const tn=c.total_nodes||ns.length||0,hn=c.healthy_nodes||0;
+  const me=c.max_envs||0,te=c.total_envs||0,be=c.busy_envs||0,ie=c.idle_envs||0,al=c.active_sessions||0;
+  const bp=pct(be,Math.max(me,te));
+  const ages=ns.filter(n=>n.status==="healthy").map(n=>Number(n.heartbeat_age_seconds||0));
+
+  txt("healthy-nodes",fmt(hn));txt("scheduler",c.scheduler||"least-loaded");
+  txt("total-nodes",fmt(tn));txt("active-sessions",fmt(al));
+  txt("busy-percent",`${Math.round(bp)}%`);
+  txt("busy-envs",fmt(be));txt("idle-envs",fmt(ie));
+  txt("training-sessions",fmt(c.training_sessions||0));txt("evaluation-sessions",fmt(c.evaluation_sessions||0));
+  txt("max-envs-card",fmt(me));txt("lease-count",fmt(al));
+  txt("nodes-meta",`${fmt(hn)} healthy${criticalNodes ? ` · ${fmt(criticalNodes)} critical` : ""}${warningNodes ? ` · ${fmt(warningNodes)} warning` : ""}`);
+
+  // ring
+  const offset = CIRC - (CIRC * bp / 100);
+  $("ring-circle").style.strokeDashoffset = offset;
+
+  const cap=Math.max(me,te);
+  $("busy-bar").style.width=`${pct(be,cap).toFixed(1)}%`;
+  $("idle-bar").style.width=`${pct(ie,cap).toFixed(1)}%`;
+
+  $("nodes-body").innerHTML=ns.map(n=>{
+    const u=Number(n.busy_envs||0),cp=Math.max(Number(n.max_envs||0),Number(n.total_envs||0));
+    const d=n.draining,sc=d?"draining":(n.status||""),st=d?`${n.status} (draining)`:(n.status||"unknown");
+    const load=getNodeLoadWarnings(n.resources||{});
+    const loadBadge=renderInlineLoadBadge(load);
+    const nid=esc(n.node_id);
+    const drainForm=d
+      ?`<form action="/" method="POST" style="display:inline"><input type="hidden" name="action" value="undrain_node"><input type="hidden" name="node_id" value="${nid}"><button type="submit" class="btn b-green">Undrain</button></form>`
+      :`<form action="/" method="POST" style="display:inline" onsubmit="return confirmForm('Drain ${nid}?')"><input type="hidden" name="action" value="drain_node"><input type="hidden" name="node_id" value="${nid}"><button type="submit" class="btn b-orange">Drain</button></form>`;
+    return `<tr>
+      <td><div class="status-stack"><span class="badge ${esc(sc)}">${esc(st)}</span>${loadBadge}</div></td>
+      <td><a href="/node/${nid}" style="text-decoration:none;color:inherit"><div class="mono" style="font-weight:600;color:var(--blue)">${nid}</div><div style="font-size:11px;color:var(--text3);margin-top:2px">${esc(n.provider_name)} &middot; ${esc(n.os_type)}</div></a></td>
+      <td class="mono">${esc(n.node_url)}</td>
+      <td style="width:130px"><div style="font-size:12px">${fmt(u)} / ${fmt(cp)}</div><div class="pm"><span style="width:${pct(u,cp).toFixed(1)}%"></span></div></td>
+      <td>${sec(n.heartbeat_age_seconds)}</td>
+      <td><div class="acts">
+        <form action="/" method="POST" style="display:inline-flex;gap:4px;align-items:center"><input type="hidden" name="action" value="set_max_envs"><input type="hidden" name="node_id" value="${nid}"><input class="ipt" type="number" min="0" name="max_envs" value="${n.max_envs}"><button type="submit" class="btn b-gray">Set</button></form>
+        ${drainForm}
+      </div></td>
+    </tr>`;
+  }).join("")||`<tr><td colspan="6"><div class="empty">No registered nodes</div></td></tr>`;
+}
+
+function getLeaseFilters(){
+  const form=$("lease-filter-form");
+  if(!form) return {};
+  const filters={};
+  ["user_id","task_type","job_script","job_id"].forEach(k=>{
+    const v=(form.elements[k]?.value||"").trim();
+    if(v && v!=="__all__") filters[k]=v;
+  });
+  return filters;
+}
+
+function hasLeaseFilters(filters){
+  return Object.keys(filters||{}).length>0;
+}
+
+function leaseMatchesFilters(l,filters){
+  for(const [k,v] of Object.entries(filters||{})){
+    const actual=k==="user_id" ? (l.user_id||"anonymous")
+      : k==="task_type" ? (l.task_type||"evaluation")
+      : (l[k]||"");
+    if(String(actual)!==v) return false;
+  }
+  return true;
+}
+
+function filteredLeases(data){
+  const all=data?.sessions||[];
+  const filters=getLeaseFilters();
+  return { all, filters, leases: all.filter(l=>leaseMatchesFilters(l,filters)) };
+}
+
+function confirmReleaseMatching(ev){
+  const {filters,leases}=filteredLeases(window.__DATA__||{});
+  if(!hasLeaseFilters(filters)){
+    ev?.preventDefault();
+    alert("Set at least one session filter before releasing matching sessions.");
+    return false;
+  }
+  if(!leases.length){
+    ev?.preventDefault();
+    alert("No sessions match the current filters.");
+    return false;
+  }
+  const ok=confirm(`Release ${leases.length} matching session(s)?`);
+  if(!ok) ev?.preventDefault();
+  return ok;
+}
+
+function renderLeases(data){
+  if(!data) return;
+  const {all,filters,leases:ls}=filteredLeases(data);
+  txt("sessions-meta",`${fmt(ls.length)} / ${fmt(all.length)} active`);
+  $("sessions-body").innerHTML=ls.map(l=>{
+    const job=(l.job_script||l.job_id)
+      ?`<div class="mono" style="font-size:11px">${esc(l.job_script||"-")}<br><span style="color:var(--text3)">${esc(l.job_id||"-")}</span></div>`
+      :`<span style="color:var(--text3)">-</span>`;
+    return `<tr>
+      <td class="mono" style="font-weight:600">${esc(l.session_id)}</td>
+      <td>${esc(l.user_id||"anonymous")}</td>
+      <td><span class="tag ${esc(l.task_type||"evaluation")}">${esc(l.task_type||"evaluation")}</span></td>
+      <td>${job}</td>
+      <td class="mono" style="font-size:11px">${esc(l.source_addr||"-")}</td>
+      <td class="mono">${esc(l.node_id)}</td><td class="mono">${esc(l.env_id)}</td>
+      <td>${sec(l.age_seconds)}</td>
+      <td><form action="/" method="POST" style="display:inline" onsubmit="return confirmForm('Release this session?')"><input type="hidden" name="action" value="release_session"><input type="hidden" name="session_id" value="${esc(l.session_id)}"><button type="submit" class="btn b-red">Release</button></form></td>
+    </tr>`;
+  }).join("")||`<tr><td colspan="9"><div class="empty">${hasLeaseFilters(filters)&&all.length?"No sessions match filters":"No active sessions"}</div></td></tr>`;
+}
+
+function renderUsers(data){
+  const us=data.users||[];
+  txt("users-meta",`${fmt(us.length)} active`);txt("user-count",fmt(us.length));
+  if(!us.length){$("users-body").innerHTML=`<div class="empty">No active users</div>`;return;}
+  const mx=Math.max(...us.map(u=>u.total_sessions),1);
+  $("users-body").innerHTML=us.map(u=>{
+    const q=u.quota,lim=q&&q.max_envs>0?q.max_envs:mx;
+    const tp=pct(u.training_sessions,lim).toFixed(1),ep=pct(u.evaluation_sessions,lim).toFixed(1);
+    const qt=q?`${q.max_envs||"∞"} max (${q.max_training_envs||"∞"} train)`:"no quota";
+    return `<div class="u-row">
+      <div class="u-name">${esc(u.user_id)}</div>
+      <div class="u-bar"><div class="u-seg t" style="width:${tp}%"></div><div class="u-seg e" style="width:${ep}%"></div></div>
+      <div class="u-info">${u.training_sessions}T + ${u.evaluation_sessions}E &middot; ${qt}</div>
+    </div>`;
+  }).join("");
+}
+
+function renderQuotas(data){
+  const qs=data.quotas||[];
+  txt("quotas-meta",`${fmt(qs.length)} rules`);txt("quota-count",fmt(qs.length));
+  $("quotas-list").innerHTML=qs.length?qs.map(q=>`<div class="li">
+    <div><div class="li-t">${esc(q.user_id)}</div><div class="li-s">max: ${q.max_envs||"∞"} &middot; train: ${q.max_training_envs||"∞"} &middot; using: ${q.current_envs} (${q.current_training_envs}T)</div></div>
+    <form action="/" method="POST" style="display:inline" onsubmit="return confirmForm('Remove quota for ${esc(q.user_id)}?')"><input type="hidden" name="action" value="delete_quota"><input type="hidden" name="user_id" value="${esc(q.user_id)}"><button type="submit" class="btn b-red">Remove</button></form>
+  </div>`).join(""):`<div class="empty">No quota rules</div>`;
+}
+
+let _scriptParams = {};
+
+const MONITOR_BASE = "http://10.189.149.105:53002/";
+
+function buildMonitorUrl(job) {
+  const params = _scriptParams[job.script_name] || [];
+  const ev = job.env_vars || {};
+  const get = (name, fallback) => ev[name] || (params.find(x => x.name === name) || {}).default || fallback;
+
+  const resultDir = get("RESULT_DIR", "");
+  const model = get("MODEL", "");
+  if (!resultDir || !model) return "";
+
+  const REPO_ROOT = window.__REPO_ROOT__ || "";
+  const actionSpace = get("ACTION_SPACE", "pyautogui");
+  const obsType = get("OBSERVATION_TYPE", "screenshot");
+  const maxSteps = get("MAX_STEPS", "15");
+  const testMeta = get("TEST_META_PATH", "evaluation_examples/test_all.json");
+  const configBaseDir = get("TEST_CONFIG_BASE_DIR", "evaluation_examples");
+  const examplesSubdir = get("EXAMPLES_SUBDIR", "examples");
+
+  const absResultDir = resultDir.startsWith("/") ? resultDir : `${REPO_ROOT}/${resultDir.replace(/^\.\//, "")}`;
+  const qs = new URLSearchParams({
+    results_base_path: `${absResultDir}/${actionSpace}/${obsType}/${model}`,
+    task_config_path: `../${testMeta}`,
+    examples_base_path: `../${configBaseDir}/${examplesSubdir}`,
+    action_space: actionSpace,
+    observation_type: obsType,
+    model_name: model,
+    max_steps: maxSteps,
+  });
+  return `${MONITOR_BASE}?${qs.toString()}`;
+}
+
+function onScriptChange(sel){
+  $("custom-script-area").style.display = sel.value==="__custom__" ? "block" : "none";
+  const params = _scriptParams[sel.value] || [];
+  const area = $("script-params-area");
+  const grid = $("script-params-grid");
+  if(!params.length || sel.value==="__custom__"){
+    area.style.display = "none";
+    grid.innerHTML = "";
+    return;
+  }
+  area.style.display = "block";
+  grid.innerHTML = params.map(p => `<div style="display:grid;gap:3px">
+    <label style="font-size:11px;font-weight:500;color:var(--text2)">${esc(p.name)}</label>
+    <input class="fi script-param-input" data-param="${esc(p.name)}" value="${esc(p.default)}" style="width:100%;font-family:monospace;font-size:12px">
+  </div>`).join("");
+}
+
+function mergeScriptParams(){
+  const inputs = document.querySelectorAll(".script-param-input");
+  if(!inputs.length) return;
+  const ta = document.querySelector('[name="env_vars"]');
+  const existing = ta.value.trim();
+  const lines = existing ? existing.split("\n") : [];
+  const existingKeys = new Set(lines.map(l => l.split("=")[0].trim()));
+  inputs.forEach(inp => {
+    const name = inp.dataset.param;
+    const val = inp.value;
+    if(val && !existingKeys.has(name)){
+      lines.push(`${name}=${val}`);
+    }
+  });
+  ta.value = lines.join("\n");
+}
+
+function jobIsActive(job){
+  const status = String(job.status || "").toLowerCase();
+  return status === "running" || status === "pending";
+}
+
+function jobStatusClass(status){
+  const s = String(status || "").toLowerCase();
+  if(s === "running" || s === "pending") return "running";
+  if(s === "done") return "done";
+  if(s === "killed") return "killed";
+  return "failed";
+}
+
+function renderJobs(data){
+  const jobs=data.jobs||[];
+  const nodes=data.nodes||[];
+  const scripts=data.available_scripts||[];
+  _scriptParams = data.script_params||{};
+  const runningCount=jobs.filter(jobIsActive).length;
+  const finishedCount=jobs.length-runningCount;
+  txt("jobs-meta",`${fmt(jobs.length)} jobs · ${fmt(runningCount)} running · ${fmt(finishedCount)} finished`);
+  const clearFinishedBtn=$("jobs-clear-finished");
+  if(clearFinishedBtn){
+    clearFinishedBtn.disabled = finishedCount === 0;
+    clearFinishedBtn.textContent = finishedCount ? `Clear Finished (${fmt(finishedCount)})` : "Clear Finished";
+  }
+
+  const sel=$("job-node-select");
+  if(sel && sel.options.length<=1){
+    sel.innerHTML=`<option value="__master__">master (local)</option>`
+      + nodes.map(n=>`<option value="${esc(n.node_id)}">${esc(n.node_id)}</option>`).join("");
+  }
+  const ssel=$("job-script-select");
+  if(ssel && ssel.options.length<=1){
+    ssel.innerHTML=scripts.map(s=>`<option value="${esc(s)}">${esc(s)}</option>`).join("")
+      +`<option value="__custom__">Custom script...</option>`;
+    if(scripts.length) onScriptChange(ssel);
+  }
+
+  $("jobs-body").innerHTML=jobs.map(j=>{
+    const sc=jobStatusClass(j.status);
+    const killBtn=jobIsActive(j)
+      ?`<form action="/" method="POST" style="display:inline" onsubmit="return confirmForm('Kill this job?')"><input type="hidden" name="action" value="jobs_kill"><input type="hidden" name="job_id" value="${esc(j.job_id)}"><button type="submit" class="btn b-red">Kill</button></form>`
+      :"";
+    const clearJobBtn=!jobIsActive(j)
+      ?`<form action="/" method="POST" style="display:inline" onsubmit="return confirmForm('Clear this job from dashboard?')"><input type="hidden" name="action" value="jobs_clear"><input type="hidden" name="job_id" value="${esc(j.job_id)}"><button type="submit" class="btn b-gray">Clear</button></form>`
+      :"";
+    const logBtn=`<a class="btn ${jobIsActive(j)?"b-blue":"b-gray"}" href="/jobs/${esc(j.job_id)}/log" target="_blank" style="text-decoration:none;display:inline-flex;align-items:center">Logs</a>`;
+    const monitorUrl=buildMonitorUrl(j);
+    const resultsBtn=monitorUrl?`<a class="btn b-green" href="${esc(monitorUrl)}" target="_blank" style="text-decoration:none;display:inline-flex;align-items:center">Results</a>`:"";
+    return `<tr>
+      <td class="mono" style="font-weight:600">${esc(j.job_id)}</td>
+      <td>${esc(j.user_id)}</td>
+      <td>${esc(j.script_name)}</td>
+      <td class="mono">${esc(j.node_id)}</td>
+      <td><span class="badge ${sc}">${esc(j.status)}</span></td>
+      <td>${sec(j.age_seconds)}</td>
+      <td><div class="acts">${killBtn} ${logBtn} ${resultsBtn} ${clearJobBtn}</div></td>
+    </tr>`;
+  }).join("")||`<tr><td colspan="7"><div class="empty">No jobs</div></td></tr>`;
+}
+
+let _debugEvents = [];
+
+function debugSourceLabel(src){
+  if(!src) return "-";
+  const file = src.file || "-";
+  const line = src.line ? `:${src.line}` : "";
+  const fn = src.function ? ` ${src.function}()` : "";
+  return `${file}${line}${fn}`;
+}
+
+function debugTime(ts){
+  if(!ts) return "-";
+  const d = new Date(ts);
+  return Number.isNaN(d.getTime()) ? String(ts) : d.toLocaleString();
+}
+
+function debugShort(v, max=120){
+  const s = String(v ?? "");
+  return s.length > max ? `${s.slice(0, max)}...` : s;
+}
+
+function debugMatches(e){
+  const type = $("debug-event-type-filter")?.value || "";
+  const lease = ($("debug-event-lease-filter")?.value || "").trim();
+  const node = ($("debug-event-node-filter")?.value || "").trim();
+  const path = ($("debug-event-path-filter")?.value || "").trim();
+  if(type && e.type !== type) return false;
+  if(lease && !String(e.session_id || "").includes(lease)) return false;
+  if(node && !String(e.node_id || "").includes(node)) return false;
+  if(path && !String(e.path || "").includes(path)) return false;
+  return true;
+}
+
+function debugDetail(e){
+  const lines = [];
+  if(e.response_excerpt) lines.push(`response_excerpt:\n${e.response_excerpt}`);
+  if(e.traceback_excerpt) lines.push(`traceback_excerpt:\n${e.traceback_excerpt}`);
+  if(!lines.length) lines.push(JSON.stringify(e, null, 2));
+  return lines.join("\n\n");
+}
+
+function toggleDebugDetail(idx){
+  const row = $(`debug-event-detail-${idx}`);
+  if(row) row.style.display = row.style.display === "none" ? "table-row" : "none";
+}
+
+function filterDebugEvents(){
+  renderDebugEvents({ debug_events: _debugEvents });
+}
+
+function renderDebugEvents(data){
+  _debugEvents = data.debug_events || [];
+  const events = _debugEvents.filter(debugMatches).slice(-100).reverse();
+  txt("debug-events-meta",`${fmt(events.length)} events`);
+  $("debug-events-body").innerHTML = events.map((e,i)=>{
+    const typeRaw = String(e.type || "exception");
+    const typeClass = typeRaw.replace(/[^a-zA-Z0-9_-]/g, "_");
+    const source = debugSourceLabel(e.event_source);
+    const origin = debugSourceLabel(e.error_origin);
+    const msg = debugShort(e.message || e.error_type || e.response_excerpt || "-", 140);
+    return `<tr class="debug-row" onclick="toggleDebugDetail(${i})">
+      <td class="mono" style="font-size:11px">${esc(debugTime(e.ts))}</td>
+      <td><span class="badge ${esc(typeClass)}">${esc(typeRaw)}</span></td>
+      <td>${esc(e.service || "-")}</td>
+      <td class="mono">${esc(e.path || "-")}</td>
+      <td class="mono">${esc(e.status_code ?? "-")}</td>
+      <td class="mono" style="font-size:11px">${esc(e.session_id || "-")}</td>
+      <td class="mono" style="font-size:11px">${esc(e.env_id || "-")}</td>
+      <td class="mono" style="font-size:11px">${esc(e.node_id || "-")}</td>
+      <td class="mono" style="font-size:10px">${esc(source)}</td>
+      <td class="mono" style="font-size:10px">${esc(origin)}</td>
+      <td>${esc(msg)}</td>
+    </tr>
+    <tr class="debug-detail" id="debug-event-detail-${i}" style="display:none">
+      <td colspan="11"><pre class="debug-pre">${esc(debugDetail(e))}</pre></td>
+    </tr>`;
+  }).join("")||`<tr><td colspan="11"><div class="empty">No debug events</div></td></tr>`;
+}
+
+let _debugEventsPanelOpen = false;
+function toggleDebugEventsPanel(){
+  _debugEventsPanelOpen = !_debugEventsPanelOpen;
+  $("debug-events-panel").style.display = _debugEventsPanelOpen ? "block" : "none";
+  $("debug-events-toggle-icon").style.transform = _debugEventsPanelOpen ? "rotate(90deg)" : "";
+}
+
+let _jobsPanelOpen = true;
+function toggleJobsPanel(){
+  _jobsPanelOpen = !_jobsPanelOpen;
+  $("jobs-panel").style.display = _jobsPanelOpen ? "block" : "none";
+  $("jobs-toggle-icon").style.transform = _jobsPanelOpen ? "rotate(90deg)" : "";
+}
+
+let _nodesPanelOpen = false;
+function toggleNodesPanel(){
+  _nodesPanelOpen = !_nodesPanelOpen;
+  $("nodes-panel").style.display = _nodesPanelOpen ? "block" : "none";
+  $("nodes-toggle-icon").style.transform = _nodesPanelOpen ? "rotate(90deg)" : "";
+}
+
+let _envPanelOpen = false;
+function toggleEnvPanel(){
+  _envPanelOpen = !_envPanelOpen;
+  $("env-panel").style.display = _envPanelOpen ? "block" : "none";
+  $("env-toggle-icon").style.transform = _envPanelOpen ? "rotate(90deg)" : "";
+}
+
+let _leasePanelOpen = false;
+function toggleLeasePanel(){
+  _leasePanelOpen = !_leasePanelOpen;
+  $("lease-panel").style.display = _leasePanelOpen ? "block" : "none";
+  $("lease-toggle-icon").style.transform = _leasePanelOpen ? "rotate(90deg)" : "";
+}
+
+let _allEmulators = [];
+let _envNodeFilter = "__all__";
+
+function filterEnvs(){
+  const sel=$("env-node-filter");
+  _envNodeFilter = sel ? sel.value : "__all__";
+  $("env-create-node").value = _envNodeFilter === "__all__" ? "" : _envNodeFilter;
+  $("env-deleteall-node").value = _envNodeFilter === "__all__" ? "" : _envNodeFilter;
+  _renderEnvTable();
+}
+
+function _renderEnvTable(){
+  const filtered = _envNodeFilter === "__all__" ? _allEmulators : _allEmulators.filter(e=>e.node_id===_envNodeFilter);
+  txt("envs-meta",`${fmt(filtered.length)} envs`);
+
+  $("envs-body").innerHTML = filtered.map(e=>{
+    const nid=esc(e.node_id), eid=esc(e.env_id||e.id||"-");
+    // slot status: busy (has a session) vs idle. No orphan/managed classes — the
+    // master no longer synthesizes orphan-container rows.
+    const st=e.busy?"busy":"idle";
+    const stCls=e.busy?"unhealthy":"healthy";
+    // Per-slot container state is whatever the adapter self-reported (docker_state),
+    // passed through untouched; absent for non-docker worlds.
+    const dockerState=String(e.docker_state||"").toLowerCase();
+    // running=healthy(green), exited/gone=dead(red), unhealthy/other=unhealthy(yellow)
+    const dCls=e.session?"healthy":(dockerState==="running"?"healthy":(dockerState==="exited"||dockerState==="gone")?"dead":"unhealthy");
+    const dockerText=e.session?"session":(dockerState||"-");
+    const eidRaw=String(e.env_id||e.id||"");
+    const lv=e.live_view||(e.vnc_port?{protocol:"vnc",port:e.vnc_port}:null);
+    let viewBtn="";
+    if(lv&&eidRaw){
+      if(lv.protocol==="vnc"){
+        const wsPath=`ws/view/${encodeURIComponent(eidRaw)}`;
+        viewBtn=`<a class="btn b-blue" href="/view/${encodeURIComponent(eidRaw)}/vnc.html?autoconnect=true&resize=remote&path=${encodeURIComponent(wsPath)}" target="_blank" style="text-decoration:none;display:inline-flex;align-items:center;padding:0 8px;height:24px;font-size:11px">View</a>`;
+      }else if(lv.protocol==="http"){
+        viewBtn=`<a class="btn b-blue" href="/view/${encodeURIComponent(eidRaw)}/${lv.path||''}" target="_blank" style="text-decoration:none;display:inline-flex;align-items:center;padding:0 8px;height:24px;font-size:11px">View</a>`;
+      }
+    }
+    const ports=[e.server_port&&`srv:${e.server_port}`,e.chromium_port&&`chr:${e.chromium_port}`,lv&&`view:${lv.port}`].filter(Boolean).join(" ") || "";
+    const container=[e.container_id,e.container_name].filter(Boolean).join(" ");
+    const canManage=true;
+    const actions=canManage?`${viewBtn}
+        <form action="/" method="POST" style="display:inline" onsubmit="return confirmForm('Restart ${eid}?')"><input type="hidden" name="action" value="env_restart"><input type="hidden" name="node_id" value="${nid}"><input type="hidden" name="env_id" value="${eid}"><button type="submit" class="btn b-orange" style="padding:0 8px;height:24px;font-size:11px">Restart</button></form>
+        <form action="/" method="POST" style="display:inline" onsubmit="return confirmForm('Delete ${eid}?')"><input type="hidden" name="action" value="env_delete"><input type="hidden" name="node_id" value="${nid}"><input type="hidden" name="env_id" value="${eid}"><button type="submit" class="btn b-red" style="padding:0 8px;height:24px;font-size:11px">Delete</button></form>`:`<span style="font-size:11px;color:var(--text3)">unmanaged</span>`;
+    const worldLabel = envWorldLabel(e);
+    return `<tr>
+      <td class="mono" style="font-weight:600">${eid}</td>
+      <td>${worldLabel}</td>
+      <td class="mono" style="font-size:11px">${nid}</td>
+      <td><span class="badge ${stCls}">${st}</span></td>
+      <td><span class="badge ${dCls}">${esc(dockerText)}</span></td>
+      <td class="mono" style="font-size:11px">${esc(e.session_id||"-")}</td>
+      <td class="mono" style="font-size:11px">${esc(ports||"-")}</td>
+      <td class="mono" style="font-size:11px">${esc(container||"-")}</td>
+      <td>${sec(e.age_seconds)}</td>
+      <td><div class="acts">
+        ${actions}
+      </div></td>
+    </tr>`;
+  }).join("")||`<tr><td colspan="10"><div class="empty">No environments</div></td></tr>`;
+}
+
+// node_id -> [world ids it hosts]; built from each node's runtimes/capabilities.
+let _nodeWorlds = {};
+function buildNodeWorlds(nodes){
+  _nodeWorlds = {};
+  (nodes||[]).forEach(n=>{
+    let ws = Array.isArray(n.runtimes) ? n.runtimes.slice() : [];
+    if(ws.length===0 && n.capabilities) ws = Object.keys(n.capabilities);
+    if(ws.length===0) ws = ["osworld"];   // legacy OSWorld-only node
+    _nodeWorlds[n.node_id] = ws;
+  });
+}
+// surface (desktop/mobile/web/others) for a world id, read from node capabilities
+function worldSurface(wid){
+  const nodes=(window.__DATA__||{}).nodes||[];
+  for(const n of nodes){ const c=(n.capabilities||{})[wid]; if(c&&c.environment) return c.environment; }
+  return "";
+}
+function envWorldLabel(e){
+  // env carries world/runtime if present; else infer from its node (single-world node)
+  let wid = e.world_id || e.runtime || e.world;
+  if(!wid){ const ws=_nodeWorlds[e.node_id]||[]; wid = ws.length===1 ? ws[0] : (ws.length?ws.join("/"):"osworld"); }
+  const surf = worldSurface(wid);
+  const colors={desktop:"#0a84ff",mobile:"#30d158",web:"#bf5af2",others:"#40c8e0"};
+  const c=colors[surf]||"#8e8e93";
+  return `<span class="surf-chip" style="border-color:${c}55;color:${c}">${esc(wid)}</span>`;
+}
+function populateEnvWorldSelect(nodes){
+  const sel=$("env-create-world"); if(!sel) return;
+  // union of all worlds across nodes (so user picks which kind to create)
+  const all=new Set();
+  Object.values(_nodeWorlds).forEach(ws=>ws.forEach(w=>all.add(w)));
+  if(all.size===0) all.add("osworld");
+  const prev=sel.value;
+  sel.innerHTML=[...all].sort().map(w=>`<option value="${esc(w)}">${esc(w)}</option>`).join("");
+  if(prev && all.has(prev)) sel.value=prev;
+}
+function syncEnvCreateWorld(){
+  const w=($("env-create-world")||{}).value||"osworld";
+  const h=$("env-create-world-hidden"); if(h) h.value=w;
+  return true;
+}
+
+function renderEnvs(data){
+  _allEmulators = data.emulators||[];
+  const nodes = data.nodes||[];
+  buildNodeWorlds(nodes);
+  populateEnvWorldSelect(nodes);
+  const sel=$("env-node-filter");
+  if(sel){
+    const prev=sel.value;
+    sel.innerHTML=`<option value="__all__">All Nodes (${_allEmulators.length})</option>`
+      +nodes.map(n=>{
+        const cnt=_allEmulators.filter(e=>e.node_id===n.node_id).length;
+        return `<option value="${esc(n.node_id)}">${esc(n.node_id)} (${cnt})</option>`;
+      }).join("");
+    sel.value=prev||"__all__";
+    _envNodeFilter=sel.value;
+  }
+  $("env-create-node").value = _envNodeFilter==="__all__"?"":_envNodeFilter;
+  $("env-deleteall-node").value = _envNodeFilter==="__all__"?"":_envNodeFilter;
+  // keep the delete-all world in sync with the create-world selector
+  const dw=$("env-deleteall-world-hidden"); const cw=$("env-create-world");
+  if(dw && cw) dw.value=cw.value||"";
+  _renderEnvTable();
+}
+
+/*__INJECT__*/
+
+(function showFlash(){
+  const msg = window.__FLASH_MSG__, err = window.__FLASH_ERR__;
+  if(!msg && !err) return;
+  const bar=$("flash-bar");
+  if(!bar) return;
+  const cls = err ? "flash flash-err" : "flash flash-ok";
+  const text = err || msg;
+  bar.innerHTML=`<div class="${cls}"><span>${esc(text)}</span><button onclick="this.parentNode.remove()">&times;</button></div>`;
+  if(!err) setTimeout(()=>{const f=bar.querySelector(".flash");if(f)f.remove();},5000);
+  history.replaceState(null,"",location.pathname);
+})();
+
+/* ── Multi-world (surface) panel ─────────────────────────────────────────
+   Aggregates live nodes by surface (capabilities.environment) so the grid
+   shows Desktop / Mobile / Web / Others capacity at a glance. Falls back to
+   "desktop" for legacy OSWorld-only nodes that don't advertise capabilities. */
+const SURFACE_DEFS = [
+  { key:"desktop", name:"Desktop", color:"#0a84ff", tag:"pyautogui · a11y",
+    ico:`<svg viewBox="0 0 64 64" fill="none"><g stroke="currentColor" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"><rect x="8" y="12" width="48" height="32" rx="3.5"/><path d="M24 44l-2 8M40 44l2 8M18 52h28"/></g></svg>` },
+  { key:"mobile", name:"Mobile", color:"#30d158", tag:"tap · swipe · adb",
+    ico:`<svg viewBox="0 0 64 64" fill="none"><g stroke="currentColor" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"><rect x="18" y="6" width="28" height="52" rx="6"/><path d="M27 11h10"/><circle cx="32" cy="50" r="2.4" fill="currentColor" stroke="none"/></g></svg>` },
+  { key:"web", name:"Web", color:"#bf5af2", tag:"dom · browser",
+    ico:`<svg viewBox="0 0 64 64" fill="none"><g stroke="currentColor" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"><circle cx="32" cy="32" r="23"/><ellipse cx="32" cy="32" rx="10" ry="23"/><path d="M9 32h46M13 21h38M13 43h38"/></g></svg>` },
+  { key:"others", name:"Others", color:"#40c8e0", tag:"remote · api · mcp",
+    ico:`<svg viewBox="0 0 64 64" fill="none"><g stroke="currentColor" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"><circle cx="32" cy="14" r="5"/><circle cx="15" cy="44" r="5"/><circle cx="49" cy="44" r="5"/><path d="M32 19v9m0 0l-13 11m13-11l13 11"/></g></svg>` },
+];
+
+function nodeSurfaces(n){
+  // collect surfaces this node advertises; default to desktop for legacy nodes
+  const caps = n.capabilities || {};
+  const envs = new Set();
+  for(const wid in caps){ const e=(caps[wid]||{}).environment; if(e) envs.add(String(e)); }
+  if(envs.size===0){
+    const rts = n.runtimes || [];
+    if(rts.length===0) envs.add("desktop");           // legacy OSWorld node
+    else rts.forEach(()=>envs.add("desktop"));
+  }
+  return envs;
+}
+
+function renderSurfaces(data){
+  const ns = data.nodes || [];
+  const emus = data.emulators || [];
+  const agg = {}; SURFACE_DEFS.forEach(s=>agg[s.key]={nodes:0,busy:0,total:0,worlds:new Set()});
+
+  // Build a world_id -> surface mapping from node capabilities
+  const worldToSurface = {};
+  ns.forEach(n=>{
+    const caps = n.capabilities || {};
+    for(const wid in caps){
+      const env = (caps[wid]||{}).environment;
+      if(env) worldToSurface[wid] = env;
+    }
+  });
+  // Fallback: osworld=desktop if not declared
+  if(!worldToSurface["osworld"]) worldToSurface["osworld"] = "desktop";
+
+  // Count nodes per surface
+  ns.forEach(n=>{
+    if(String(n.status)==="dead") return;
+    const surfs = nodeSurfaces(n);
+    surfs.forEach(sk=>{
+      if(!agg[sk]) agg[sk] = {nodes:0,busy:0,total:0,worlds:new Set()};
+      agg[sk].nodes += 1;
+    });
+    const caps = n.capabilities || {};
+    for(const wid in caps){
+      const env = (caps[wid]||{}).environment;
+      if(env && agg[env]) agg[env].worlds.add(wid);
+    }
+    if(Object.keys(caps).length===0){
+      const rts = n.runtimes || [];
+      (rts.length?rts:["osworld"]).forEach(w=>{
+        if(agg["desktop"]) agg["desktop"].worlds.add(w);
+      });
+    }
+  });
+
+  // Count slots per surface from emulators (slot-level, accurate)
+  emus.forEach(emu=>{
+    const wid = emu.world_id || emu.runtime || "osworld";
+    const sk = worldToSurface[wid] || "desktop";
+    if(!agg[sk]) agg[sk] = {nodes:0,busy:0,total:0,worlds:new Set()};
+    agg[sk].total += 1;
+    if(emu.busy) agg[sk].busy += 1;
+    agg[sk].worlds.add(wid);
+  });
+
+  const host = $("surfaces"); if(!host) return;
+  host.innerHTML = SURFACE_DEFS.map(s=>{
+    const a = agg[s.key] || {nodes:0,busy:0,total:0,worlds:new Set()};
+    const online = a.nodes>0;
+    const worlds = [...a.worlds];
+    const chips = worlds.length ? worlds.map(w=>`<span class="surf-chip">${esc(w)}</span>`).join("") : `<span class="surf-chip" style="opacity:.6">no world</span>`;
+    return `<div class="surf ${online?'':'off'}" style="--sc:${s.color}">
+      <div class="surf-top">
+        <div class="surf-ico" style="color:${s.color}">${s.ico}</div>
+        <div><div class="surf-name">${s.name}</div><div class="surf-tag">${s.tag}</div></div>
+      </div>
+      <div class="surf-num">${fmt(a.busy)}<span class="tot">/${fmt(a.total)}</span></div>
+      <div class="surf-foot"><span>busy / total</span><span><b>${fmt(a.nodes)}</b> nodes</span></div>
+      <div class="surf-worlds">${chips}</div>
+    </div>`;
+  }).join("");
+}
+
+function render(){
+  const d = window.__DATA__;
+  if(!d) return;
+  renderStatus(d);
+  renderSurfaces(d);
+  renderJobs(d);
+  renderDebugEvents(d);
+  renderEnvs(d);
+  renderLeases(d);
+  renderUsers(d);
+  renderQuotas(d);
+  txt("connection","live");txt("error-line","");
+  txt("last-updated",`Last update: ${new Date().toLocaleTimeString()}`);
+}
+
+function reload(){ if(!paused) location.reload(); }
+
+$("refresh-now").addEventListener("click",()=>location.reload());
+$("pause-toggle").addEventListener("click",()=>{paused=!paused;$("pause-toggle").textContent=paused?"Resume":"Pause";$("connection").textContent=paused?"paused":"live";});
+txt("refresh-rate",`${refreshMs/1000}s`);
+render();
+setInterval(reload, refreshMs);
+</script>
+</body>
+</html>

@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <defs>
+    <linearGradient id="dskG" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#00f0ff"/>
+      <stop offset="1" stop-color="#7b5cff"/>
+    </linearGradient>
+    <filter id="dskGlow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="1.6" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <g filter="url(#dskGlow)" stroke="url(#dskG)" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round">
+    <rect x="8" y="12" width="48" height="32" rx="3.5" fill="rgba(0,240,255,.06)"/>
+    <path d="M14 19h22M14 25h14" stroke-width="2" opacity=".8"/>
+    <circle cx="48" cy="20" r="2.2" fill="#ff2d9b" stroke="none"/>
+    <path d="M24 44l-2 8M40 44l2 8M18 52h28" />
+  </g>
+</svg>

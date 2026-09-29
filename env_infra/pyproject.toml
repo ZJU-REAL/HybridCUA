@@ -1,0 +1,126 @@
+[project]
+name = "osworld"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "numpy",
+    "backoff",
+    "pandas",
+    "openai",
+    "anthropic",
+    "fastapi",
+    "filelock",
+    "zhipuai",
+    "groq",
+    "boto3",
+    "uvicorn",
+    "paddleocr",
+    "paddlepaddle",
+    "together>=2.0.0a1",
+    "scikit-learn",
+    "websockets",
+    "tiktoken",
+    "pyautogui~=0.9.54",
+    "toml",
+    "exa_py",
+    "black",
+    "certifi",
+    "pytesseract",
+    "google-genai>=1.68.0",
+    "python-dotenv",
+    "Pillow~=11.0.0",
+    "fabric",
+    "gymnasium~=0.28.1",
+    "requests~=2.31.0",
+    "aiohttp",
+    "pytz~=2024.1",
+    "transformers~=4.35.2",
+    "torch~=2.5.0",
+    "accelerate",
+    "opencv-python~=4.8.1.78",
+    "matplotlib~=3.7.4",
+    "psutil~=5.9.6",
+    "tqdm>=4.65.0",
+    "flask~=3.0.0",
+    "requests-toolbelt~=1.0.0",
+    "lxml",
+    "cssselect",
+    "xmltodict",
+    "openpyxl",
+    "python-docx",
+    "python-pptx",
+    "pypdf",
+    "PyGetWindow",
+    "rapidfuzz",
+    "pyacoustid",
+    "pygame",
+    "ImageHash",
+    "scikit-image",
+    "librosa",
+    "pymupdf",
+    "chardet",
+    "playwright",
+    "formulas",
+    "pydrive",
+    "fastdtw",
+    "odfpy",
+    "func-timeout",
+    "beautifulsoup4",
+    "dashscope",
+    "google-generativeai",
+    "PyYaml",
+    "mutagen",
+    "easyocr",
+    "borb==2.1.25",
+    "pypdf2",
+    "pdfplumber",
+    "wandb",
+    "wrapt_timeout_decorator",
+    "gdown",
+    "azure-identity",
+    "azure-mgmt-compute",
+    "azure-mgmt-network",
+    "docker",
+    "loguru",
+    "dotenv",
+    "volcengine-python-sdk[ark]",
+    'pyobjc; platform_system == "Darwin"',
+    'pywinauto; platform_system == "Windows"',
+    'pywin32; platform_system == "Windows"',
+    "tldextract>=5.3.0",
+    "agp-client",
+]
+
+[tool.uv.sources]
+agp-client = { path = "OSWorld/mm_agents/surferH/agp_client", editable = true }
+
+# ---------------------------------------------------------------------------
+# Package layout after the multi-world refactor.
+#
+# OSWorld benchmark code lives under OSWorld/ (vendored, top-level peer of
+# cluster/). The bare-name imports it relies on (``import desktop_env``,
+# ``import mm_agents``, ``import server``/``run``/``lib_run_single``/...) keep
+# resolving because OSWorld/ is registered as a package-discovery root here, so
+# the ~84 importing files need no edits. The benchmark-neutral platform stays at
+# cluster/ (its own discovery root). Install with `uv pip install -e .` (or
+# `pip install -e .`) so both roots are on sys.path regardless of cwd.
+# ---------------------------------------------------------------------------
+[tool.setuptools]
+py-modules = [
+    "server",
+    "run",
+    "lib_run_single",
+    "lib_results_logger",
+    "quickstart",
+    "show_result",
+]
+
+[tool.setuptools.package-dir]
+"" = "OSWorld"
+cluster = "cluster"
+
+[tool.setuptools.packages.find]
+where = ["OSWorld", "."]
+include = ["desktop_env*", "mm_agents*", "cluster*"]

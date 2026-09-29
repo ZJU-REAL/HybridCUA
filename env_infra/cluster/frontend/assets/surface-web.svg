@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <defs>
+    <linearGradient id="webG" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#ff2d9b"/>
+      <stop offset="1" stop-color="#ffb300"/>
+    </linearGradient>
+    <filter id="webGlow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="1.6" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <g filter="url(#webGlow)" stroke="url(#webG)" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round">
+    <circle cx="32" cy="32" r="23" fill="rgba(255,45,155,.06)"/>
+    <ellipse cx="32" cy="32" rx="10" ry="23"/>
+    <path d="M9 32h46M13 21h38M13 43h38" stroke-width="1.8" opacity=".8"/>
+  </g>
+</svg>

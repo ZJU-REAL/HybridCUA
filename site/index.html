@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HybridCUA: Online RL for Hybrid Computer-Use Agents</title>
+    <meta name="description" content="HybridCUA: Online RL for Hybrid Computer-Use Agents">
+    <meta name="keywords" content="Computer Use Agent, GUI Agent, Online RL, GRPO, RLVR">
+
+    <!-- Bulma CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Academicons (arXiv / HuggingFace badges) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Noto+Serif:ital,wght@0,400;0,600;0,700;1,400&display=swap"
+        rel="stylesheet">
+    <!-- Highlight.js -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <!-- ==================== NAV ==================== -->
+    <nav class="navbar is-fixed-top" role="navigation" aria-label="main navigation">
+        <div class="navbar-brand">
+            <a class="navbar-item navbar-title" href="#">
+                <strong>HybridCUA</strong>
+            </a>
+            <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" id="navbar-burger">
+                <span aria-hidden="true"></span>
+                <span aria-hidden="true"></span>
+                <span aria-hidden="true"></span>
+            </a>
+        </div>
+        <div class="navbar-menu" id="navbar-menu">
+            <div class="navbar-end">
+                <a class="navbar-item" href="#overview">Overview</a>
+                <a class="navbar-item" href="#method">Method</a>
+                <a class="navbar-item" href="#leaderboard">Leaderboard</a>
+                <a class="navbar-item" href="#getting-started">Getting Started</a>
+                <a class="navbar-item" href="#citation">Citation</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ==================== HERO ==================== -->
+    <section class="section hero-section">
+        <div class="container is-max-desktop">
+            <h1 class="title is-2 has-text-centered publication-title">
+                HybridCUA: Online RL for Hybrid Computer-Use Agents
+            </h1>
+
+            <!-- TODO: authors + affiliations -->
+            <p class="has-text-centered authors">
+                <span class="author-block">Author One<sup>1</sup>,</span>
+                <span class="author-block">Author Two<sup>1,2</sup>,</span>
+                <span class="author-block">Author Three<sup>2</sup></span>
+            </p>
+            <p class="has-text-centered affiliations">
+                <sup>1</sup>Affiliation One &nbsp;&nbsp; <sup>2</sup>Affiliation Two
+            </p>
+
+            <!-- Link badges -->
+            <div class="has-text-centered link-buttons">
+                <a class="button is-dark is-rounded" href="https://arxiv.org/abs/TODO">
+                    <span class="icon"><i class="ai ai-arxiv"></i></span>
+                    <span>arXiv</span>
+                </a>
+                <a class="button is-dark is-rounded" href="TODO">
+                    <span class="icon"><i class="fas fa-file-pdf"></i></span>
+                    <span>Paper</span>
+                </a>
+                <a class="button is-dark is-rounded" href="https://github.com/TODO/HybridCUA">
+                    <span class="icon"><i class="fab fa-github"></i></span>
+                    <span>Code</span>
+                </a>
+                <a class="button is-dark is-rounded" href="https://huggingface.co/TODO">
+                    <span class="icon"><i class="fas fa-database"></i></span>
+                    <span>Data &amp; Models</span>
+                </a>
+            </div>
+
+            <!-- Teaser figure -->
+            <figure class="image teaser">
+                <img src="assets/teaser.png" alt="HybridCUA overview">
+                <figcaption>
+                    <b>Figure 1.</b> TODO: one-sentence teaser caption.
+                </figcaption>
+            </figure>
+        </div>
+    </section>
+
+    <!-- ==================== ABSTRACT / OVERVIEW ==================== -->
+    <section class="section" id="overview">
+        <div class="container is-max-desktop">
+            <h2 class="title is-3 has-text-centered">Abstract</h2>
+            <div class="content abstract">
+                <p>
+                    TODO: abstract. We train multimodal computer-use agents with online RL (GRPO)
+                    against live desktop environments, combining GUI actions with CLI tool use.
+                </p>
+            </div>
+
+            <h2 class="title is-3 has-text-centered">Highlights</h2>
+            <div class="columns is-multiline highlights">
+                <div class="column is-one-third">
+                    <div class="box highlight-box">
+                        <span class="icon is-large has-text-link"><i class="fas fa-bolt fa-2x"></i></span>
+                        <h3 class="title is-5">Fully-async rollout</h3>
+                        <p>TODO: a fixed in-flight trajectory pool spans rollout boundaries, so a
+                            training step never waits on the slowest episode.</p>
+                    </div>
+                </div>
+                <div class="column is-one-third">
+                    <div class="box highlight-box">
+                        <span class="icon is-large has-text-link"><i class="fas fa-check-double fa-2x"></i></span>
+                        <h3 class="title is-5">Verifiable rewards</h3>
+                        <p>TODO: RLVR task bundles carry executable checkers, giving dense
+                            outcome signal without a learned reward model.</p>
+                    </div>
+                </div>
+                <div class="column is-one-third">
+                    <div class="box highlight-box">
+                        <span class="icon is-large has-text-link"><i class="fas fa-layer-group fa-2x"></i></span>
+                        <h3 class="title is-5">Hybrid action space</h3>
+                        <p>TODO: the agent interleaves GUI actions with shell/CLI calls,
+                            shortening long clerical trajectories.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== METHOD ==================== -->
+    <section class="section has-background-light" id="method">
+        <div class="container is-max-desktop">
+            <h2 class="title is-3 has-text-centered">Method</h2>
+
+            <figure class="image">
+                <img src="assets/pipeline.png" alt="Training pipeline">
+                <figcaption><b>Figure 2.</b> TODO: training pipeline caption.</figcaption>
+            </figure>
+
+            <div class="content">
+                <h3 class="title is-4">Training stack</h3>
+                <p>TODO: trainer, rollout engine, and environment platform in one paragraph.</p>
+
+                <h3 class="title is-4">Environments</h3>
+                <p>TODO: which worlds are served, how sessions are allocated, task counts.</p>
+
+                <h3 class="title is-4">Reward</h3>
+                <p>TODO: outcome reward composition, optional process signals.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== RESULTS / LEADERBOARD ==================== -->
+    <section class="section" id="leaderboard">
+        <div class="container is-max-desktop">
+            <h2 class="title is-3 has-text-centered">Results</h2>
+            <p class="has-text-centered subtitle is-6">
+                Success rate (%). Sorted by overall; click a column header to re-sort.
+            </p>
+
+            <div class="table-container">
+                <table class="table is-fullwidth is-hoverable leaderboard-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th data-sort="model">Model</th>
+                            <th data-sort="size">Size</th>
+                            <th data-sort="overall">Overall</th>
+                            <th data-sort="office">Office</th>
+                            <th data-sort="os">OS</th>
+                            <th data-sort="web">Web</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leaderboard-body">
+                        <!-- Loaded from leaderboard.json -->
+                        <tr>
+                            <td colspan="7" class="has-text-centered has-text-grey">Loading…</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3 class="title is-4 has-text-centered" style="margin-top: 3rem;">Training curve</h3>
+            <div class="chart-wrapper">
+                <canvas id="training-chart"></canvas>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== GETTING STARTED ==================== -->
+    <section class="section has-background-light" id="getting-started">
+        <div class="container is-max-desktop">
+            <h2 class="title is-3 has-text-centered">Getting Started</h2>
+            <div class="content">
+                <p>Launch a run on the head node (the one holding the actor GPUs):</p>
+                <pre><code class="language-bash">git clone https://github.com/TODO/HybridCUA.git
+cd HybridCUA
+
+# 1. build the training venv (needs a GPU node with nvcc)
+bash online-rl/install_env.sh
+
+# 2. start the environment platform, then point the trainer at it
+WANDB_API_KEY=&lt;your-key&gt; \
+HF_CKPT=/path/to/checkpoint \
+GUI_ENV_SERVER_URL=http://127.0.0.1:19000 \
+  bash online-rl/gui-rl/scripts/HybridCUA-9B_16gpu_fully_async.sh</code></pre>
+                <p>Each additional worker node joins the same Ray cluster:</p>
+                <pre><code class="language-bash">RAY_HEAD_ADDR=&lt;head-ip&gt; WORKER_NUM_GPUS=8 \
+  bash online-rl/gui-rl/scripts/gpu_worker_join_ray.sh</code></pre>
+                <p>TODO: link to the full docs once they are published.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== CITATION ==================== -->
+    <section class="section" id="citation">
+        <div class="container is-max-desktop">
+            <h2 class="title is-3 has-text-centered">Citation</h2>
+            <pre><code class="language-bibtex">@article{TODO2026hybridcua,
+  title   = {HybridCUA: Online RL for Hybrid Computer-Use Agents},
+  author  = {TODO},
+  journal = {arXiv preprint arXiv:TODO},
+  year    = {2026}
+}</code></pre>
+        </div>
+    </section>
+
+    <!-- ==================== FOOTER ==================== -->
+    <footer class="footer">
+        <div class="content has-text-centered">
+            <p>
+                Questions and issues:
+                <a href="https://github.com/TODO/HybridCUA/issues">open a GitHub issue</a>.
+            </p>
+            <p class="is-size-7 has-text-grey">
+                Page layout adapted from the Bulma-based academic project page template.
+                Released under a
+                <a href="http://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a> license.
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        // ---------- mobile nav ----------
+        const burger = document.getElementById('navbar-burger');
+        const menu = document.getElementById('navbar-menu');
+        burger.addEventListener('click', () => {
+            burger.classList.toggle('is-active');
+            menu.classList.toggle('is-active');
+        });
+
+        // ---------- code highlighting ----------
+        hljs.highlightAll();
+
+        // ---------- leaderboard ----------
+        const NUMERIC_COLS = ['overall', 'office', 'os', 'web'];
+        let rows = [];
+        let sortKey = 'overall';
+        let sortAsc = false;
+
+        function render() {
+            const body = document.getElementById('leaderboard-body');
+            if (!rows.length) {
+                body.innerHTML = '<tr><td colspan="7" class="has-text-centered has-text-grey">No entries yet.</td></tr>';
+                return;
+            }
+
+            const sorted = [...rows].sort((a, b) => {
+                const x = a[sortKey], y = b[sortKey];
+                const cmp = (typeof x === 'number' && typeof y === 'number')
+                    ? x - y
+                    : String(x).localeCompare(String(y));
+                return sortAsc ? cmp : -cmp;
+            });
+
+            // Best value per numeric column gets bolded.
+            const best = {};
+            for (const col of NUMERIC_COLS) {
+                best[col] = Math.max(...rows.map(r => Number(r[col]) || -Infinity));
+            }
+
+            body.innerHTML = sorted.map((r, i) => {
+                const cell = col => {
+                    const v = r[col];
+                    if (v === null || v === undefined || v === '') return '<td>–</td>';
+                    const isBest = Number(v) === best[col];
+                    return `<td>${isBest ? `<b>${v}</b>` : v}</td>`;
+                };
+                const name = r.url
+                    ? `<a href="${r.url}" target="_blank" rel="noopener">${r.model}</a>`
+                    : r.model;
+                return `<tr${r.highlight ? ' class="is-selected-row"' : ''}>
+                    <td>${i + 1}</td>
+                    <td>${name}</td>
+                    <td>${r.size ?? '–'}</td>
+                    ${NUMERIC_COLS.map(cell).join('')}
+                </tr>`;
+            }).join('');
+        }
+
+        document.querySelectorAll('.leaderboard-table th[data-sort]').forEach(th => {
+            th.style.cursor = 'pointer';
+            th.addEventListener('click', () => {
+                const key = th.dataset.sort;
+                sortAsc = (key === sortKey) ? !sortAsc : false;
+                sortKey = key;
+                render();
+            });
+        });
+
+        // ---------- training curve ----------
+        function drawChart(curve) {
+            const canvas = document.getElementById('training-chart');
+            if (!canvas || !curve || !curve.steps) return;
+            new Chart(canvas, {
+                type: 'line',
+                data: {
+                    labels: curve.steps,
+                    datasets: (curve.series || []).map((s, i) => ({
+                        label: s.label,
+                        data: s.values,
+                        borderWidth: 2,
+                        tension: 0.3,
+                        pointRadius: 0,
+                        borderColor: ['#3273dc', '#ff3860', '#23d160', '#ffdd57'][i % 4],
+                    })),
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: { mode: 'index', intersect: false },
+                    scales: {
+                        x: { title: { display: true, text: 'training step' } },
+                        y: { title: { display: true, text: 'success rate (%)' }, beginAtZero: true },
+                    },
+                },
+            });
+        }
+
+        (async () => {
+            try {
+                const resp = await fetch('leaderboard.json');
+                const data = await resp.json();
+                rows = data.entries || [];
+                render();
+                drawChart(data.training_curve);
+            } catch (e) {
+                console.error('failed to load leaderboard.json', e);
+                document.getElementById('leaderboard-body').innerHTML =
+                    '<tr><td colspan="7" class="has-text-centered has-text-danger">Failed to load leaderboard.json</td></tr>';
+            }
+        })();
+    </script>
+</body>
+
+</html>

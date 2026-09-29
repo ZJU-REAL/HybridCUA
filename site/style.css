@@ -1,0 +1,209 @@
+/* HybridCUA project page — custom layer on top of Bulma 0.9.4. */
+
+:root {
+    --hc-accent: #3273dc;
+    --hc-ink: #1f2430;
+    --hc-muted: #6b7280;
+}
+
+html {
+    scroll-behavior: smooth;
+    /* fixed navbar is 3.25rem; keep anchor targets clear of it */
+    scroll-padding-top: 4.5rem;
+}
+
+body {
+    font-family: 'Noto Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    color: var(--hc-ink);
+    padding-top: 3.25rem;
+}
+
+.title,
+.publication-title {
+    font-family: 'Noto Serif', Georgia, serif;
+}
+
+/* ---------- navbar ---------- */
+
+.navbar.is-fixed-top {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, .08);
+    background: rgba(255, 255, 255, .95);
+    backdrop-filter: saturate(180%) blur(8px);
+}
+
+.navbar-title {
+    font-family: 'Noto Serif', Georgia, serif;
+    font-size: 1.15rem;
+    letter-spacing: .01em;
+}
+
+/* ---------- hero ---------- */
+
+.hero-section {
+    padding-top: 3rem;
+    padding-bottom: 1.5rem;
+}
+
+.publication-title {
+    line-height: 1.25;
+    margin-bottom: 1.75rem !important;
+}
+
+.authors {
+    font-size: 1.05rem;
+    margin-bottom: .35rem;
+}
+
+.author-block {
+    margin-right: .35rem;
+    white-space: nowrap;
+}
+
+.affiliations {
+    color: var(--hc-muted);
+    font-size: .95rem;
+    margin-bottom: 1.75rem;
+}
+
+.link-buttons {
+    margin-bottom: 2.5rem;
+}
+
+.link-buttons .button {
+    margin: .25rem .3rem;
+}
+
+/* ---------- figures ---------- */
+
+figure.image {
+    margin: 2rem 0;
+}
+
+figure.image img {
+    border-radius: 6px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, .1);
+}
+
+figcaption {
+    margin-top: .85rem;
+    font-size: .9rem;
+    color: var(--hc-muted);
+    text-align: center;
+    line-height: 1.5;
+}
+
+.teaser {
+    margin-top: 1rem;
+}
+
+/* ---------- content ---------- */
+
+.abstract {
+    font-size: 1.05rem;
+    line-height: 1.75;
+    text-align: justify;
+    margin-bottom: 3rem;
+}
+
+.section .title.is-3 {
+    margin-bottom: 2rem;
+}
+
+.content h3.title.is-4 {
+    margin-top: 2rem;
+}
+
+/* ---------- highlight cards ---------- */
+
+.highlights {
+    margin-top: 1rem;
+}
+
+.highlight-box {
+    height: 100%;
+    text-align: center;
+    box-shadow: none;
+    border: 1px solid #e6e8ec;
+    transition: transform .15s ease, box-shadow .15s ease;
+}
+
+.highlight-box:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, .08);
+}
+
+.highlight-box .icon {
+    margin-bottom: .75rem;
+}
+
+.highlight-box p {
+    color: var(--hc-muted);
+    font-size: .95rem;
+    line-height: 1.6;
+}
+
+/* ---------- leaderboard ---------- */
+
+.leaderboard-table thead th {
+    white-space: nowrap;
+    border-bottom-width: 2px;
+    user-select: none;
+}
+
+.leaderboard-table thead th[data-sort]:hover {
+    color: var(--hc-accent);
+}
+
+.leaderboard-table td,
+.leaderboard-table th {
+    vertical-align: middle;
+}
+
+.leaderboard-table tr.is-selected-row {
+    background: #eef4ff;
+}
+
+.chart-wrapper {
+    position: relative;
+    height: 360px;
+    margin-top: 1.5rem;
+}
+
+/* ---------- code ---------- */
+
+pre {
+    border-radius: 6px;
+    font-size: .875rem;
+    line-height: 1.6;
+}
+
+pre code {
+    background: transparent;
+    padding: 0;
+}
+
+/* ---------- footer ---------- */
+
+.footer {
+    padding: 2.5rem 1.5rem 3rem;
+}
+
+/* ---------- responsive ---------- */
+
+@media screen and (max-width: 768px) {
+    .publication-title {
+        font-size: 1.6rem !important;
+    }
+
+    .author-block {
+        white-space: normal;
+    }
+
+    .abstract {
+        text-align: left;
+    }
+
+    .chart-wrapper {
+        height: 280px;
+    }
+}

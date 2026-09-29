@@ -1,0 +1,9 @@
+[
+  {
+    "host": "127.0.0.1",
+    "port": 3128,
+    "protocol": "http",
+    "provider": "local",
+    "note": "Configure a local proxy on port 3128 or override this file."
+  }
+]
