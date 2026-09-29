@@ -1,41 +1,152 @@
 {
-  "_comment": "TODO: replace placeholder numbers with real results. `highlight: true` tints the row; `url` is optional and links the model name.",
-  "updated": "2026-09-29",
-  "entries": [
-    {
-      "model": "HybridCUA-9B",
-      "size": "9B",
-      "overall": 0.0,
-      "office": 0.0,
-      "os": 0.0,
-      "web": 0.0,
-      "url": null,
-      "highlight": true
-    },
-    {
-      "model": "Baseline A",
-      "size": "8B",
-      "overall": 0.0,
-      "office": 0.0,
-      "os": 0.0,
-      "web": 0.0,
-      "url": null
-    },
-    {
-      "model": "Baseline B",
-      "size": "35B-A3B",
-      "overall": 0.0,
-      "office": 0.0,
-      "os": 0.0,
-      "web": 0.0,
-      "url": null
-    }
-  ],
-  "training_curve": {
-    "steps": [0, 20, 40, 60, 80, 100],
-    "series": [
-      { "label": "train success rate", "values": [0, 0, 0, 0, 0, 0] },
-      { "label": "eval success rate", "values": [0, 0, 0, 0, 0, 0] }
+  "_comment": "All numbers transcribed from the HybridCUA paper (tables/ and figures/). Edit here only — index.html hardcodes no results.",
+  "updated": "2026-09-30",
+
+  "headline": {
+    "osworld_acc": 53.6,
+    "osworld_gain": 14.8,
+    "avg_steps": 14.0,
+    "cli_step_share": 64.0,
+    "sft_trajectories": 5023,
+    "rlvr_tasks": 3000
+  },
+
+  "main_results": {
+    "caption": "Main results on OSWorld (361 tasks, 50-step budget). Accuracy is the mean evaluator score in percent; average steps are computed over all tasks.",
+    "groups": [
+      {
+        "name": "General Models",
+        "rows": [
+          { "model": "Qwen3.5-27B", "space": "GUI", "acc": 51.4, "steps": 25.7 },
+          { "model": "Qwen3.5-35B-A3B", "space": "GUI", "acc": 50.4, "steps": 26.3 }
+        ]
+      },
+      {
+        "name": "Specialized CUA Models",
+        "rows": [
+          { "model": "OpenCUA-7B", "space": "GUI", "acc": 28.1, "steps": 19.8 },
+          { "model": "OpenCUA-32B", "space": "GUI", "acc": 34.1, "steps": 18.7 },
+          { "model": "EvoCUA-8B", "space": "GUI", "acc": 46.1, "steps": 31.1 },
+          { "model": "EvoCUA-32B", "space": "GUI", "acc": 56.7, "steps": 25.0 },
+          { "model": "ToolCUA-8B", "space": "GUI+API", "acc": 46.8, "steps": 14.9 },
+          { "model": "AutoGLM-OS-9B", "space": "GUI+API", "acc": 48.9, "steps": null },
+          { "model": "UltraCUA-32B", "space": "GUI+API", "acc": 43.7, "steps": null }
+        ]
+      },
+      {
+        "name": "Ours",
+        "rows": [
+          { "model": "Qwen3.5-9B", "space": "GUI", "acc": 38.8, "steps": 31.6 },
+          { "model": "+ SFT", "space": "GUI", "acc": 44.2, "acc_delta": 5.4, "steps": 26.3, "steps_delta": -5.3, "indent": true },
+          { "model": "+ SFT + RL", "space": "GUI", "acc": 50.4, "acc_delta": 11.6, "steps": 22.1, "steps_delta": -9.5, "indent": true },
+          { "model": "Qwen3.5-9B", "space": "GUI+CLI", "acc": 18.4, "acc_delta": -20.4, "steps": 22.1, "steps_delta": -9.5, "rule": true },
+          { "model": "+ SFT", "space": "GUI+CLI", "acc": 46.0, "acc_delta": 7.2, "steps": 19.8, "steps_delta": -11.8, "indent": true },
+          { "model": "HybridCUA-9B", "space": "GUI+CLI", "acc": 53.6, "acc_delta": 14.8, "steps": 14.0, "steps_delta": -17.6, "indent": true, "highlight": true }
+        ]
+      }
+    ]
+  },
+
+  "ood_results": {
+    "caption": "Out-of-distribution transfer. OSWorld-MCP (361 tasks) varies the tool interface; WindowsAgentArena (154 tasks) varies the operating system.",
+    "rows": [
+      { "model": "Qwen3-VL-8B-Instruct", "space": "GUI", "mcp": 28.2, "waa": 26.4 },
+      { "model": "Qwen3-VL-235B-A22B", "space": "GUI", "mcp": 38.1, "waa": 32.1 },
+      { "model": "Qwen3.5-9B", "space": "GUI", "mcp": 38.0, "waa": 32.0 },
+      { "model": "ToolCUA-8B", "space": "GUI+API", "mcp": 46.8, "waa": 33.8 },
+      { "model": "HybridCUA-9B", "space": "GUI+CLI", "mcp": 47.1, "waa": 36.0, "highlight": true }
+    ]
+  },
+
+  "sft_ablation": {
+    "caption": "SFT data composition on OSWorld.",
+    "rows": [
+      { "config": "Qwen3.5-9B", "acc": 38.8, "steps": 31.6 },
+      { "config": "w/ CLI only", "acc": 31.7, "steps": 19.1, "indent": true },
+      { "config": "w/ GUI only", "acc": 43.2, "steps": 29.5, "indent": true },
+      { "config": "w/ Hybrid only", "acc": 41.0, "steps": 22.6, "indent": true },
+      { "config": "HybridCUA-9B-SFT (mixed)", "acc": 46.0, "steps": 19.8, "highlight": true }
+    ]
+  },
+
+  "schema_ablation": {
+    "caption": "Effect of the action schema on OSWorld, same base model and trajectories.",
+    "rows": [
+      { "config": "Qwen3.5-9B (GUI only)", "acc": 38.8, "steps": 31.6 },
+      { "config": "Separate GUI / CLI tools", "acc": 38.8, "steps": 16.8 },
+      { "config": "Unified bash action (ours)", "acc": 46.0, "steps": 19.8, "highlight": true }
+    ]
+  },
+
+  "cli_exposure": {
+    "caption": "Exposing a shell to an untrained agent costs accuracy on OSWorld; only HybridCUA gains from it. CLI step share is the pooled fraction of executable steps issued as direct commands.",
+    "rows": [
+      { "model": "Qwen3.5-27B", "gui": 51.4, "hybrid": 48.9, "cli_share": 15.0 },
+      { "model": "EvoCUA-32B", "gui": 56.7, "hybrid": 53.0, "cli_share": 0.15 },
+      { "model": "Kimi-K3", "gui": 84.8, "hybrid": 73.3, "cli_share": 59.0 },
+      { "model": "Claude-Opus5", "gui": 83.4, "hybrid": 76.8, "cli_share": 67.0 },
+      { "model": "HybridCUA-9B", "gui": 38.8, "hybrid": 53.6, "cli_share": 64.0, "highlight": true }
+    ]
+  },
+
+  "domain_results": {
+    "caption": "Per-domain accuracy of HybridCUA-9B against its GUI-only counterpart, with the GUI/CLI split of its executable steps.",
+    "rows": [
+      { "domain": "OS", "before": 60.9, "after": 79.2, "cli": 84, "gui": 16 },
+      { "domain": "VS Code", "before": 52.2, "after": 68.2, "cli": 78, "gui": 22 },
+      { "domain": "LibreOffice Writer", "before": 52.2, "after": 65.9, "cli": 67, "gui": 33 },
+      { "domain": "VLC", "before": 34.7, "after": 59.7, "cli": 44, "gui": 56 },
+      { "domain": "GIMP", "before": 50.0, "after": 57.7, "cli": 34, "gui": 66 },
+      { "domain": "LibreOffice Calc", "before": 28.3, "after": 57.4, "cli": 82, "gui": 18 },
+      { "domain": "Thunderbird", "before": 66.7, "after": 57.1, "cli": 41, "gui": 59 },
+      { "domain": "LibreOffice Impress", "before": 48.8, "after": 53.0, "cli": 68, "gui": 32 },
+      { "domain": "Chrome", "before": 43.1, "after": 52.4, "cli": 26, "gui": 74 },
+      { "domain": "Multi-apps", "before": 19.9, "after": 36.8, "cli": 80, "gui": 20 }
+    ]
+  },
+
+  "operation_share": {
+    "caption": "Interface choice by what the step is trying to do.",
+    "rows": [
+      { "operation": "Information Gathering", "cli": 36.1, "gui": 63.9 },
+      { "operation": "Content Editing", "cli": 85.8, "gui": 14.2 },
+      { "operation": "Spatial Adjustment", "cli": 41.6, "gui": 58.4 },
+      { "operation": "Result Verification", "cli": 98.4, "gui": 1.6 }
+    ]
+  },
+
+  "corpus": {
+    "caption": "HybridCUA-8K: 5,023 supervised trajectories across 11 application domains, plus 3,000 verified RLVR tasks.",
+    "modality": [
+      { "label": "CLI only", "count": 3155, "pct": 62.8 },
+      { "label": "Hybrid GUI–CLI", "count": 998, "pct": 19.9 },
+      { "label": "GUI only", "count": 870, "pct": 17.3 }
+    ],
+    "domains": [
+      { "label": "LibreOffice Impress", "count": 866 },
+      { "label": "LibreOffice Writer", "count": 818 },
+      { "label": "LibreOffice Calc", "count": 811 },
+      { "label": "Multi-app", "count": 786 },
+      { "label": "VS Code", "count": 619 },
+      { "label": "PDF", "count": 490 },
+      { "label": "VLC", "count": 179 },
+      { "label": "GIMP", "count": 158 },
+      { "label": "Chrome", "count": 150 },
+      { "label": "Thunderbird", "count": 123 },
+      { "label": "OS", "count": 23 }
+    ],
+    "rlvr_domains": [
+      { "label": "libreoffice_calc", "pct": 26.8 },
+      { "label": "libreoffice_writer", "pct": 14.4 },
+      { "label": "libreoffice_impress", "pct": 13.3 },
+      { "label": "multi_apps", "pct": 12.9 },
+      { "label": "os", "pct": 8.9 },
+      { "label": "chrome", "pct": 5.4 },
+      { "label": "vs_code", "pct": 4.4 },
+      { "label": "pdf", "pct": 4.3 },
+      { "label": "vlc", "pct": 3.6 },
+      { "label": "gimp", "pct": 3.1 },
+      { "label": "thunderbird", "pct": 2.9 }
     ]
   }
 }
