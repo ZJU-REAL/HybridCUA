@@ -4,14 +4,14 @@
 
 **Learning to Orchestrate GUI and CLI for Computer-Use Agents**
 
-📄 [Paper](https://arxiv.org/abs/2604.00000) |
+📄 [Paper](https://arxiv.org/pdf/2609.38008) |
 🌐 [Project Page](https://zjureal.com/HybridCUA/) |
 🤗 [Dataset](https://huggingface.co/collections/077lukamagic/hybridcua) |
-🤖 [Models](https://huggingface.co/collections/077lukamagic/hybridcua)
+🤖 Models (coming soon)
 
-[![arXiv](https://img.shields.io/badge/arXiv-2604.00000-b31b1b.svg)](https://arxiv.org/abs/2604.00000)
+[![arXiv](https://img.shields.io/badge/arXiv-2609.38008-b31b1b.svg)](https://arxiv.org/pdf/2609.38008)
 [![Dataset](https://img.shields.io/badge/%F0%9F%A4%97%20Dataset-HybridCUA--8K-ffc107.svg)](https://huggingface.co/collections/077lukamagic/hybridcua)
-[![Models](https://img.shields.io/badge/%F0%9F%A4%97%20Models-HybridCUA--9B-ff9800.svg)](https://huggingface.co/collections/077lukamagic/hybridcua)
+![Models](https://img.shields.io/badge/%F0%9F%A4%97%20Models-coming%20soon-9e9e9e.svg)
 [![License](https://img.shields.io/badge/License-Apache%202.0-4caf50.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/Python-3.12-3776ab.svg)](https://www.python.org/downloads/)
 
@@ -92,8 +92,9 @@ Full tables, per-domain results and step-by-step rollouts are on the
 
 ## Release
 
-Trajectories, RLVR tasks, the data-generation and training pipelines, and the
-HybridCUA-9B model. See the [Hugging Face collection](https://huggingface.co/collections/077lukamagic/hybridcua).
+Trajectories, RLVR tasks, and the data-generation and training pipelines. See the
+[Hugging Face collection](https://huggingface.co/collections/077lukamagic/hybridcua).
+The HybridCUA-9B model is coming soon.
 
 ## Safety
 
@@ -111,7 +112,7 @@ safeguards, and human oversight.
   author  = {Chen, Tongbo and Niu, Junbo and Lu, Zhengxi and Lian, Niu and
              Tang, Fei and Yan, Yuchen and Hong, Yike and Du, Yong and
              Liu, Yizhou and Chen, Bofan and Shen, Yongliang},
-  journal = {arXiv preprint},
+  journal = {arXiv preprint arXiv:2609.38008},
   year    = {2026}
 }
 ```
