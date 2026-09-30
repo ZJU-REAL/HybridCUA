@@ -48,7 +48,35 @@ trainer never launches VMs or containers itself.
 | `online-rl/` | [`online-rl/CLAUDE.md`](online-rl/CLAUDE.md) — rollout pipeline, the two layers of asynchrony, every `GUI_*` variable |
 | `site/` | [`site/README.md`](site/README.md) — preview and deploy the project page |
 
+## Quick start
+
+```bash
+# build the training venv — needs a GPU node with nvcc
+git clone https://github.com/ZJU-REAL/HybridCUA.git && cd HybridCUA
+bash online-rl/install_env.sh
+
+# start an env server from env_infra, then launch on the head node
+WANDB_API_KEY=<key> HF_CKPT=/path/to/sft/ckpt \
+GUI_ENV_SERVER_URL=http://127.0.0.1:19000 \
+  bash online-rl/gui-rl/scripts/HybridCUA-9B_16gpu_fully_async.sh
+
+# each additional worker node joins the same Ray cluster
+RAY_HEAD_ADDR=<head-ip> WORKER_NUM_GPUS=8 \
+  bash online-rl/gui-rl/scripts/gpu_worker_join_ray.sh
+```
+
+Keep the three concurrency knobs aligned — the ceiling is their minimum:
+`SGLANG_SERVER_CONCURRENCY × num_engines` (in-flight pool),
+`GUI_FAST_ROLLOUT_PROCS` (worker pool), and `GUI_TRAJECTORY_CONCURRENCY`
+(env sessions), all defaulting to 64. `online-rl/gui-rl/config.py` is the single
+source of truth for every `GUI_*` variable.
+
 ## Method in brief
+
+<p align="center">
+  <img src="site/assets/pipeline.png" width="90%" alt="HybridCUA pipeline: (a) scalable generation of GUI-only, CLI-only and interleaved trajectories plus annotated RLVR tasks; (b) supervised fine-tuning; (c) online agentic RL with CLI-aware rewards.">
+</p>
+<p align="center"><em>(a) Generation of GUI-only, CLI-only and interleaved trajectories, plus annotated RL tasks. (b) Supervised fine-tuning. (c) Online agentic RL with CLI-aware reward signals.</em></p>
 
 **One action space.** Every executable interaction goes through the same
 `bash` action — a direct shell command, or a quoted Python heredoc of
@@ -87,7 +115,7 @@ Out-of-distribution: **47.1%** on OSWorld-MCP (+9.1 over the base model) and
 **36.0%** on WindowsAgentArena (+4.0) — issuing PowerShell commands despite
 training only on Linux shells.
 
-Full tables, per-domain results and step-by-step rollouts are on the
+Full tables, per-domain results and step-by-step case studies are on the
 [project page](https://zjureal.com/HybridCUA/).
 
 ## Release
