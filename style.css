@@ -486,6 +486,18 @@ h3.sub {
     stroke-linejoin: round;
 }
 
+.btn-disabled {
+    color: var(--text-muted);
+    border-style: dashed;
+    box-shadow: none;
+    cursor: default;
+}
+
+.btn-disabled:hover {
+    transform: none;
+    box-shadow: none;
+}
+
 .btn-primary {
     color: #fff;
     background: var(--accent-ink);

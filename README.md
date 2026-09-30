@@ -119,8 +119,9 @@ The `site/` prefix is stripped on publish, so keep every internal path
 
 ## Before publishing
 
-- [ ] Replace the placeholder arXiv ID `2604.00000` (hero button and footer link)
-      once the paper is posted, and add the ID to the BibTeX `journal` field.
+- [x] arXiv ID `2609.38008` in the hero button, footer link and BibTeX.
+- [ ] Model weights: replace the "Models (coming soon)" placeholder in the hero
+      with a link once HybridCUA-9B is published.
 - [ ] Confirm the Hugging Face collection URL resolves publicly.
 - [ ] Re-check for internal hostnames and IPs:
 
