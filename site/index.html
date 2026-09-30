@@ -83,7 +83,7 @@
             </p>
 
             <div class="links">
-                <a class="btn btn-primary" href="https://arxiv.org/abs/2604.00000" rel="noopener">
+                <a class="btn btn-primary" href="https://arxiv.org/pdf/2609.38008" rel="noopener">
                     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3h9l5 5v13H5z" /><path d="M14 3v5h5" /><path d="M8.5 13h7M8.5 16.5h5" /></svg>
                     <span>arXiv</span>
                 </a>
@@ -93,8 +93,12 @@
                 </a>
                 <a class="btn" href="https://huggingface.co/collections/077lukamagic/hybridcua" rel="noopener">
                     <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M8.6 10.3h.01M15.4 10.3h.01" stroke-width="2.4" /><path d="M8.4 14.6a4.4 4.4 0 0 0 7.2 0" /></svg>
-                    <span>Data &amp; Models</span>
+                    <span>Dataset</span>
                 </a>
+                <span class="btn btn-disabled" aria-disabled="true" title="Model weights coming soon">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="8" width="14" height="11" rx="2.5" /><path d="M12 4.5V8M9.5 12.5h.01M14.5 12.5h.01" stroke-width="2" /><path d="M9.5 16h5" /></svg>
+                    <span>Models (coming soon)</span>
+                </span>
             </div>
 
             <div class="kpis" id="kpis" aria-label="Headline results"></div>
@@ -517,13 +521,16 @@ RAY_HEAD_ADDR=<span class="v">&lt;head-ip&gt;</span> WORKER_NUM_GPUS=8 \
                 <h2>BibTeX</h2>
                 <div class="bibtex">
                     <button class="copy-btn" id="copy-bib" type="button">Copy</button>
-                    <pre class="code"><code id="bib">@article{chen2026hybridcua,
-  title   = {HybridCUA: Learning to Orchestrate GUI and CLI for Computer-Use Agents},
-  author  = {Chen, Tongbo and Niu, Junbo and Lu, Zhengxi and Lian, Niu and
-             Tang, Fei and Yan, Yuchen and Hong, Yike and Du, Yong and
-             Liu, Yizhou and Chen, Bofan and Shen, Yongliang},
-  journal = {arXiv preprint},
-  year    = {2026}
+                    <pre class="code"><code id="bib">@misc{chen2026hybridcua,
+  title         = {HybridCUA: Learning to Orchestrate GUI and CLI for Computer-Use Agents},
+  author        = {Chen, Tongbo and Niu, Junbo and Lu, Zhengxi and Lian, Niu and
+                   Tang, Fei and Yan, Yuchen and Hong, Yike and Du, Yong and
+                   Liu, Yizhou and Chen, Bofan and Shen, Yongliang},
+  year          = {2026},
+  eprint        = {2609.38008},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.CV},
+  url           = {https://arxiv.org/abs/2609.38008}
 }</code></pre>
                 </div>
             </div>
@@ -533,9 +540,9 @@ RAY_HEAD_ADDR=<span class="v">&lt;head-ip&gt;</span> WORKER_NUM_GPUS=8 \
     <footer class="footer">
         <div class="wrap">
             <p class="footer-links">
-                <a href="https://arxiv.org/abs/2604.00000" rel="noopener">arXiv</a>
+                <a href="https://arxiv.org/pdf/2609.38008" rel="noopener">arXiv</a>
                 <a href="https://github.com/ZJU-REAL/HybridCUA" rel="noopener">Code</a>
-                <a href="https://huggingface.co/collections/077lukamagic/hybridcua" rel="noopener">Data &amp; Models</a>
+                <a href="https://huggingface.co/collections/077lukamagic/hybridcua" rel="noopener">Dataset</a>
                 <a href="https://github.com/ZJU-REAL/HybridCUA/issues" rel="noopener">Issues</a>
             </p>
             <p class="footer-note">
