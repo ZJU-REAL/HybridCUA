@@ -35,8 +35,7 @@
                 <a href="#method">Method</a>
                 <a href="#results">Results</a>
                 <a href="#analysis">Analysis</a>
-                <a href="#rollouts">Rollouts</a>
-                <a href="#code">Code</a>
+                <a href="#case-studies">Case Studies</a>
                 <a href="#citation">BibTeX</a>
             </div>
             <button class="theme-toggle" id="theme-toggle" aria-label="Switch colour theme" title="Switch theme">
@@ -468,12 +467,12 @@ PY"""</span>)</code></pre>
             </div>
         </section>
 
-        <!-- ==================== STEP-BY-STEP CASES ==================== -->
-        <section class="section" id="rollouts">
+        <!-- ==================== CASE STUDIES ==================== -->
+        <section class="section" id="case-studies">
             <div class="wrap">
-                <h2>Successful rollouts, step by step</h2>
+                <h2>Case Studies</h2>
                 <p class="lede wrap-narrow-inner">
-                    Three complete OSWorld rollouts from the appendix, each pairing the pre-action screenshot with the
+                    Three complete, successful OSWorld rollouts from the appendix, each pairing the pre-action screenshot with the
                     action the model issued at that step. Use the step buttons to walk through a trajectory; every one
                     of these scored 1.0 with the task evaluator.
                 </p>
@@ -481,42 +480,8 @@ PY"""</span>)</code></pre>
             </div>
         </section>
 
-        <!-- ==================== CODE ==================== -->
-        <section class="section section-alt" id="code">
-            <div class="wrap wrap-narrow">
-                <h2>Code</h2>
-                <p class="lede">
-                    Two halves: <code>env_infra</code> serves desktop environments over an HTTP session protocol, and
-                    <code>online-rl</code> runs GRPO against them (slime + Megatron-LM for the actor, SGLang for
-                    rollout). The trainer never launches VMs itself.
-                </p>
-                <div class="prose">
-                    <pre class="code"><code><span class="c"># build the training venv — needs a GPU node with nvcc</span>
-git clone https://github.com/ZJU-REAL/HybridCUA.git &amp;&amp; cd HybridCUA
-bash online-rl/install_env.sh
-
-<span class="c"># start an env server from env_infra, then launch on the head node</span>
-WANDB_API_KEY=<span class="v">&lt;key&gt;</span> HF_CKPT=<span class="v">/path/to/sft/ckpt</span> \
-GUI_ENV_SERVER_URL=<span class="v">http://127.0.0.1:19000</span> \
-  bash online-rl/gui-rl/scripts/HybridCUA-9B_16gpu_fully_async.sh
-
-<span class="c"># each additional worker node joins the same Ray cluster</span>
-RAY_HEAD_ADDR=<span class="v">&lt;head-ip&gt;</span> WORKER_NUM_GPUS=8 \
-  bash online-rl/gui-rl/scripts/gpu_worker_join_ray.sh</code></pre>
-                    <p>
-                        Keep the three concurrency knobs aligned — the ceiling is their minimum:
-                        <code>SGLANG_SERVER_CONCURRENCY × num_engines</code> (in-flight pool),
-                        <code>GUI_FAST_ROLLOUT_PROCS</code> (worker pool), and
-                        <code>GUI_TRAJECTORY_CONCURRENCY</code> (env sessions), all defaulting to 64.
-                        <code>online-rl/gui-rl/config.py</code> is the single source of truth for every
-                        <code>GUI_*</code> variable.
-                    </p>
-                </div>
-            </div>
-        </section>
-
         <!-- ==================== CITATION ==================== -->
-        <section class="section" id="citation">
+        <section class="section section-alt" id="citation">
             <div class="wrap wrap-narrow">
                 <h2>BibTeX</h2>
                 <div class="bibtex">
