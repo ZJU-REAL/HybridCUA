@@ -124,6 +124,12 @@ Trajectories, RLVR tasks, and the data-generation and training pipelines. See th
 [Hugging Face collection](https://huggingface.co/collections/077lukamagic/hybridcua).
 The HybridCUA-9B model is coming soon.
 
+## Acknowledgements
+
+Our work is motivated by [CUA-Gym](https://arxiv.org/abs/2605.25624), [ToolCUA](https://arxiv.org/abs/2605.12481),
+and [UI-MOPD](https://arxiv.org/abs/2607.04425), and built on [slime](https://github.com/THUDM/slime).
+Thanks for their wonderful work.
+
 ## Citation
 
 ```bibtex
