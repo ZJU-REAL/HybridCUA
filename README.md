@@ -99,12 +99,15 @@ The HybridCUA-9B model is coming soon.
 ## Citation
 
 ```bibtex
-@article{chen2026hybridcua,
-  title   = {HybridCUA: Learning to Orchestrate GUI and CLI for Computer-Use Agents},
-  author  = {Chen, Tongbo and Niu, Junbo and Lu, Zhengxi and Lian, Niu and
-             Tang, Fei and Yan, Yuchen and Hong, Yike and Du, Yong and
-             Liu, Yizhou and Chen, Bofan and Shen, Yongliang},
-  journal = {arXiv preprint arXiv:2609.38008},
-  year    = {2026}
+@misc{chen2026hybridcua,
+  title         = {HybridCUA: Learning to Orchestrate GUI and CLI for Computer-Use Agents},
+  author        = {Chen, Tongbo and Niu, Junbo and Lu, Zhengxi and Lian, Niu and
+                   Tang, Fei and Yan, Yuchen and Hong, Yike and Du, Yong and
+                   Liu, Yizhou and Chen, Bofan and Shen, Yongliang},
+  year          = {2026},
+  eprint        = {2609.38008},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.CV},
+  url           = {https://arxiv.org/abs/2609.38008}
 }
 ```
