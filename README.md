@@ -96,14 +96,6 @@ Trajectories, RLVR tasks, and the data-generation and training pipelines. See th
 [Hugging Face collection](https://huggingface.co/collections/077lukamagic/hybridcua).
 The HybridCUA-9B model is coming soon.
 
-## Safety
-
-Shell access amplifies what an agent can do in a single action. All trajectory
-collection, training and evaluation run in sandboxed VMs that are reset between
-episodes, with no access to real user accounts or credentials. Real-world
-deployment is out of scope for this work and would need further evaluation,
-safeguards, and human oversight.
-
 ## Citation
 
 ```bibtex
